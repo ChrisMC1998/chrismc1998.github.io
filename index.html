@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinanceOS - Chris Mcguinness</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --glass-border: rgba(255,255,255,0.07);
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.15);
+  --text-main: #f1f5f9;
+  --text-muted: #64748b;
+  --text-mid: #94a3b8;
+  --c-loan: #60a5fa;
+  --c-inv: #fbbf24;
+  --c-exp: #f472b6;
+  --c-inc: #34d399;
+  --c-net: #a78bfa;
+  --c-gold: #f59e0b;
+  --c-silver: #cbd5e1;
+  --c-land: #86efac;
+  --c-mf: #818cf8;
+  --c-bonds: #ec4899;
+  --sidebar-w: 220px;
+  --port-sidebar-w: 200px;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
+body { background: #07091a; color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+.sidebar {
+  width: var(--sidebar-w); background: rgba(8,11,26,0.98);
+  border-right: 1px solid var(--glass-border);
+  padding: 1.4rem 1rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
+}
+.brand-section { margin-bottom: 1.8rem; padding: 0 6px; }
+.brand-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 9px; letter-spacing: -0.5px; }
+.brand-title span { color: var(--accent); }
+.welcome-msg { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
+.nav-section-label { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; padding: 10px 8px 5px; font-weight: 600; }
+.nav-item {
+  padding: 9px 10px; border-radius: 9px; cursor: pointer; color: var(--text-mid);
+  font-weight: 500; font-size: 0.84rem; display: flex; align-items: center; gap: 9px;
+  transition: all 0.16s; position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: white; }
+.nav-item.active { background: rgba(99,102,241,0.12); color: white; }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:55%; background:var(--accent); border-radius:2px; }
+.nav-icon { width: 16px; text-align: center; font-size: 0.82rem; opacity: 0.8; }
+.sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
+.autosave-indicator { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
+.autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--c-inc); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.autosave-dot.saving { background:var(--warning); animation:none; }
+.export-btn { padding:9px 10px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-mid); cursor:pointer; display:flex; align-items:center; gap:9px; font-size:0.84rem; font-weight:500; font-family:'DM Sans',sans-serif; transition:0.16s; }
+.export-btn:hover { background:white; color:#07091a; border-color:white; }
+
+.port-sidebar {
+  width: var(--port-sidebar-w);
+  background: rgba(12,10,30,0.98);
+  border-right: 1px solid rgba(167,139,250,0.12);
+  padding: 1.4rem 0.9rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
+  position: relative;
+}
+.port-sidebar::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, #a78bfa, transparent);
+}
+.port-brand { margin-bottom: 1.8rem; padding: 0 6px; }
+.port-brand-title { font-size: 1rem; font-weight: 700; display:flex; align-items:center; gap:8px; letter-spacing:-0.3px; color: #c4b5fd; }
+.port-brand-sub { font-size: 0.7rem; color: var(--text-muted); margin-top:3px; }
+.port-nav-item {
+  padding: 8px 10px; border-radius: 9px; cursor: pointer; color: var(--text-mid);
+  font-weight: 500; font-size: 0.82rem; display: flex; align-items: center; gap: 9px;
+  transition: all 0.16s; position: relative;
+}
+.port-nav-item:hover { background: rgba(167,139,250,0.08); color: #e2d9f3; }
+.port-nav-item.active { background: rgba(167,139,250,0.14); color: #e2d9f3; }
+.port-nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:55%; background:#a78bfa; border-radius:2px; }
+.port-filter-box {
+  margin-top: auto; padding: 10px; background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.12); border-radius: 10px; display: flex; flex-direction: column; gap: 6px;
+}
+.port-filter-label { font-size: 0.65rem; color: #a78bfa; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 2px; }
+.port-filter-select {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(167,139,250,0.2);
+  color: var(--text-main); padding: 6px 24px 6px 9px; border-radius: 7px;
+  font-size: 0.75rem; font-family:'DM Sans',sans-serif; cursor:pointer; outline:none;
+  appearance:none; -webkit-appearance:none; width:100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.port-filter-select option { background: #1a1535; }
+.port-mode-toggle { display:flex; background:rgba(255,255,255,0.04); border-radius:6px; border:1px solid rgba(167,139,250,0.15); overflow:hidden; }
+.port-mode-btn { flex:1; padding:5px 6px; font-size:0.68rem; font-weight:600; font-family:'DM Sans',sans-serif; border:none; background:transparent; color:var(--text-muted); cursor:pointer; transition:0.16s; }
+.port-mode-btn.active { background:#a78bfa; color:#07091a; }
+.btn-port-add { padding:8px 10px; border-radius:9px; border:none; background:rgba(167,139,250,0.18); color:#c4b5fd; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600; font-family:'DM Sans',sans-serif; transition:0.16s; margin-top:4px; width:100%; }
+.btn-port-add:hover { background:rgba(167,139,250,0.3); color:white; }
+
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+
+.topbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.8rem; border-bottom:1px solid var(--glass-border); gap:1rem; flex-shrink:0; background:rgba(7,9,26,0.7); backdrop-filter:blur(12px); }
+.page-title { font-size:1.3rem; font-weight:700; letter-spacing:-0.5px; white-space:nowrap; }
+.page-title b { color:white; }
+.page-title span { color:var(--text-muted); font-weight:300; }
+.topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.filter-mode-toggle { display:flex; background:rgba(255,255,255,0.05); border-radius:7px; border:1px solid var(--glass-border); overflow:hidden; }
+.filter-mode-btn { padding:6px 10px; font-size:0.72rem; font-weight:600; font-family:'DM Sans',sans-serif; border:none; background:transparent; color:var(--text-muted); cursor:pointer; transition:0.16s; }
+.filter-mode-btn.active { background:var(--accent); color:white; }
+.filter-select {
+  background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main);
+  padding:6px 26px 6px 10px; border-radius:7px; font-size:0.79rem; font-family:'DM Sans',sans-serif;
+  cursor:pointer; outline:none; appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 8px center; min-width:85px; transition:border-color 0.16s;
+}
+.filter-select:hover { border-color:var(--accent); }
+.filter-select option { background:#1e293b; }
+.btn-add { background:var(--accent); color:white; border:none; padding:7px 14px; border-radius:9px; font-weight:600; font-size:0.82rem; cursor:pointer; font-family:'DM Sans',sans-serif; box-shadow:0 0 18px rgba(99,102,241,0.35); transition:0.18s; display:flex; gap:6px; align-items:center; white-space:nowrap; }
+.btn-add:hover { transform:translateY(-1px); box-shadow:0 0 28px rgba(99,102,241,0.55); }
+
+.scroll-area { flex:1; overflow-y:auto; padding:1.4rem 1.8rem; }
+.scroll-area::-webkit-scrollbar { width:3px; }
+.scroll-area::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
+
+.view-section { display:none; animation:fadeIn 0.28s ease; }
+.view-section.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+
+.glass-panel { background:rgba(14,19,38,0.65); backdrop-filter:blur(16px); border:1px solid var(--glass-border); border-radius:15px; padding:1.2rem 1.4rem; margin-bottom:1.4rem; }
+.panel-title { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:.9rem; }
+
+.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:.9rem; margin-bottom:1.4rem; }
+.kpi-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:13px; padding:1rem 1.1rem; transition:border-color 0.18s; }
+.kpi-card:hover { border-color:rgba(255,255,255,0.13); }
+.kpi-label { font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.2px; font-weight:600; margin-bottom:6px; }
+.kpi-value { font-size:1.45rem; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:-1px; }
+.kpi-sub { font-size:0.68rem; color:var(--text-muted); margin-top:3px; }
+
+.budget-alert-item { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:9px 12px; }
+.budget-alert-item.over { border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.05); }
+.budget-alert-item.warn { border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.05); }
+.budget-progress-bar { flex:1; height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+.budget-progress-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+.budget-label { font-size:0.75rem; min-width:95px; font-weight:500; }
+.budget-pct { font-size:0.72rem; font-family:'DM Mono',monospace; min-width:40px; text-align:right; }
+
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:9px 10px; color:var(--text-muted); font-weight:600; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--glass-border); cursor:pointer; user-select:none; white-space:nowrap; }
+th:hover { color:var(--text-mid); }
+th .sort-arrow { margin-left:3px; opacity:0.4; font-style:normal; }
+th.sorted .sort-arrow { opacity:1; color:var(--accent); }
+td { padding:9px 10px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.82rem; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+tr:last-child td { border-bottom:none; }
+.badge { padding:3px 8px; border-radius:20px; font-size:0.65rem; font-weight:700; display:inline-block; letter-spacing:0.5px; }
+.bg-loan { background:rgba(96,165,250,0.15); color:#93c5fd; }
+.bg-inv  { background:rgba(251,191,36,0.15);  color:#fcd34d; }
+.bg-exp  { background:rgba(244,114,182,0.15); color:#f9a8d4; }
+.bg-inc  { background:rgba(52,211,153,0.15);  color:#6ee7b7; }
+.recur-icon { color:var(--accent); font-size:0.68rem; margin-left:3px; }
+.edit-icon { color:#a78bfa60; cursor:pointer; font-size:0.75rem; transition:0.16s; margin-right:4px; }
+.edit-icon:hover { color:#a78bfa; }
+
+.port-table-wrap { overflow-x:auto; }
+.port-table th { font-size:0.65rem; padding:8px 9px; }
+.port-table td { font-size:0.78rem; padding:8px 9px; }
+.roi-chip { padding:2px 7px; border-radius:4px; font-size:0.7rem; font-weight:700; font-family:'DM Mono',monospace; }
+.roi-chip.good { background:rgba(52,211,153,0.15); color:#34d399; }
+.roi-chip.ok   { background:rgba(251,191,36,0.15); color:#fbbf24; }
+.roi-chip.bad  { background:rgba(239,68,68,0.15);  color:#ef4444; }
+.port-summary-row td { background:rgba(167,139,250,0.07); font-weight:600; border-top:1px solid rgba(167,139,250,0.2); border-bottom:none; font-family:'DM Mono',monospace; font-size:0.75rem; }
+
+.port-kpi-strip { display:grid; grid-template-columns:repeat(6,1fr); gap:.8rem; margin-bottom:1.2rem; }
+.port-kpi-card { background:rgba(167,139,250,0.05); border:1px solid rgba(167,139,250,0.12); border-radius:12px; padding:.9rem 1rem; }
+.port-kpi-val { font-size:1.2rem; font-weight:700; font-family:'DM Mono',monospace; margin-top:5px; }
+
+.charts-row   { display:grid; grid-template-columns:2fr 1fr; gap:1.3rem; margin-bottom:1.3rem; }
+.charts-3col  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.3rem; margin-bottom:1.3rem; }
+.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
+.span-full { grid-column:1/-1; }
+
+.nw-row { display:flex; gap:1.3rem; margin-bottom:1.3rem; }
+.nw-card { flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:13px; padding:.9rem 1.1rem; }
+.nw-val { font-size:1.3rem; font-weight:700; font-family:'DM Mono',monospace; margin-top:5px; }
+
+.modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.78); backdrop-filter:blur(12px); display:none; justify-content:center; align-items:center; z-index:200; }
+.modal-box { background:#0c1020; width:460px; padding:1.8rem; border-radius:18px; border:1px solid rgba(99,102,241,0.28); box-shadow:0 0 60px rgba(99,102,241,0.12); max-height:92vh; overflow-y:auto; }
+.modal-box.port-modal { border-color:rgba(167,139,250,0.28); box-shadow:0 0 60px rgba(167,139,250,0.1); }
+.modal-box.budget-modal { width: 500px; max-width: calc(100vw - 24px); border-color: rgba(99,102,241,0.28); box-shadow: 0 0 60px rgba(99,102,241,0.12); }
+.modal-title { font-size:1.05rem; font-weight:700; margin-bottom:1.3rem; }
+.budget-modal .modal-title { font-size:1.15rem; margin-bottom:0.35rem; }
+.budget-modal .modal-subtitle { font-size:0.78rem; color:var(--text-muted); margin-bottom:1rem; }
+.budget-modal-list { display:flex; flex-direction:column; gap:10px; margin: 0.9rem 0 1.15rem; max-height: 52vh; overflow:auto; padding-right: 2px; }
+.budget-row { display:grid; grid-template-columns: 120px minmax(0, 1fr); align-items:center; gap:10px; }
+.budget-row label { font-size:0.78rem; color:var(--text-mid); min-width:0; }
+.budget-row .budget-input { margin-top:0; padding:9px 12px; font-size:0.84rem; border-radius:10px; }
+.input-group { margin-bottom:12px; }
+.input-group label { font-size:0.7rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; }
+.input-field { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:white; padding:9px 12px; border-radius:9px; margin-top:5px; font-size:0.84rem; font-family:'DM Sans',sans-serif; transition:border-color 0.16s; outline:none; }
+.input-field:focus { border-color:var(--accent); }
+.input-field.port-focus:focus { border-color:#a78bfa; }
+.input-field option { background:#1e293b; }
+.modal-row { display:flex; gap:9px; }
+.modal-row .input-group { flex:1; }
+.calc-preview { background:rgba(167,139,250,0.07); border:1px solid rgba(167,139,250,0.15); border-radius:9px; padding:10px 14px; margin-bottom:12px; font-size:0.8rem; color:#c4b5fd; display:flex; flex-wrap:wrap; gap:12px; }
+.calc-item { display:flex; flex-direction:column; gap:2px; }
+.calc-item-label { font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; }
+.calc-item-val { font-family:'DM Mono',monospace; font-weight:700; font-size:0.92rem; }
+.toggle-row { display:flex; align-items:center; gap:10px; padding:9px 12px; background:rgba(255,255,255,0.03); border-radius:9px; border:1px solid var(--glass-border); margin-bottom:12px; }
+.toggle-label { font-size:0.8rem; color:var(--text-mid); flex:1; }
+.toggle-switch { position:relative; width:34px; height:19px; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:19px; cursor:pointer; transition:0.18s; }
+.toggle-slider:before { content:''; position:absolute; width:13px; height:13px; left:3px; top:3px; background:white; border-radius:50%; transition:0.18s; }
+.toggle-switch input:checked + .toggle-slider { background:var(--accent); }
+.toggle-switch input:checked + .toggle-slider:before { transform:translateX(15px); }
+.btn-secondary { background:rgba(255,255,255,0.06); border:1px solid var(--glass-border); color:var(--text-mid); padding:7px 14px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600; transition:0.16s; }
+.btn-secondary:hover { background:rgba(255,255,255,0.11); color:white; }
+.btn-delete { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:7px 14px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600; transition:0.16s; }
+.btn-delete:hover { background:rgba(239,68,68,0.2); }
+
+.asset-gold   { color:var(--c-gold); }
+.asset-silver { color:var(--c-silver); }
+.asset-land   { color:var(--c-land); }
+.asset-mf     { color:var(--c-mf); }
+.asset-bonds  { color:var(--c-bonds); }
+.asset-other  { color:var(--text-mid); }
+
+.empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
+.empty-state i { font-size:2.2rem; opacity:0.25; display:block; margin-bottom:.8rem; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR 1 — FINANCE -->
+<div class="sidebar">
+  <div class="brand-section">
+    <div class="brand-title"><i class="fas fa-cube" style="color:var(--accent)"></i>Finance<span>OS</span></div>
+    <div class="welcome-msg">Welcome Chris Mcguinness</div>
+  </div>
+
+  <div class="nav-section-label">Main</div>
+  <div class="nav-item active" id="fin-nav-dashboard" onclick="switchView('dashboard',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>Dashboard
+  </div>
+  <div class="nav-item" id="fin-nav-transactions" onclick="switchView('transactions',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-list"></i></div>Transactions
+  </div>
+
+  <div class="nav-section-label">Finance</div>
+  <div class="nav-item" id="fin-nav-loans" onclick="switchView('loans',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-landmark"></i></div>Loans & EMI
+  </div>
+  <div class="nav-item" id="fin-nav-investments" onclick="switchView('investments',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-coins"></i></div>Investments
+  </div>
+
+  <div class="nav-section-label">Insights</div>
+  <div class="nav-item" id="fin-nav-analytics" onclick="switchView('analytics',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>Analytics
+  </div>
+  <div class="nav-item" id="fin-nav-networth" onclick="switchView('networth',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-chart-area"></i></div>Net Worth
+  </div>
+  <div class="nav-item" onclick="openBudgetModal()">
+    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>Budgets
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="autosave-indicator">
+      <div class="autosave-dot" id="autosave-dot"></div>
+      <span id="autosave-label">Auto-saved</span>
+    </div>
+    <button class="export-btn" onclick="exportCSV()">
+      <i class="fas fa-file-csv"></i> Export CSV
+    </button>
+  </div>
+</div>
+
+<!-- SIDEBAR 2 — PORTFOLIO -->
+<div class="port-sidebar">
+  <div class="port-brand">
+    <div class="port-brand-title"><i class="fas fa-gem"></i> Portfolio OS</div>
+    <div class="port-brand-sub">Physical &amp; Digital Assets of Chris Mcguinness</div>
+  </div>
+
+  <div class="nav-section-label" style="color:#7c6eb3">Overview</div>
+  <div class="port-nav-item active" id="port-nav-overview" onclick="switchView('port-overview',this,'portfolio')">
+    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div>Summary
+  </div>
+  <div class="port-nav-item" id="port-nav-table" onclick="switchView('port-table',this,'portfolio')">
+    <div class="nav-icon"><i class="fas fa-table" style="color:#a78bfa"></i></div>Holdings Table
+  </div>
+  <div class="port-nav-item" id="port-nav-analytics" onclick="switchView('port-analytics',this,'portfolio')">
+    <div class="nav-icon"><i class="fas fa-chart-bar" style="color:#a78bfa"></i></div>Port. Analytics
+  </div>
+
+  <div class="nav-section-label" style="color:#7c6eb3;margin-top:4px">By Asset</div>
+  <div class="port-nav-item" id="port-nav-gold" onclick="filterPortAsset('Gold')">
+    <div class="nav-icon"><i class="fas fa-circle asset-gold" style="font-size:0.55rem"></i></div>Gold
+  </div>
+  <div class="port-nav-item" id="port-nav-silver" onclick="filterPortAsset('Silver')">
+    <div class="nav-icon"><i class="fas fa-circle asset-silver" style="font-size:0.55rem"></i></div>Silver
+  </div>
+  <div class="port-nav-item" id="port-nav-land" onclick="filterPortAsset('Land')">
+    <div class="nav-icon"><i class="fas fa-circle asset-land" style="font-size:0.55rem"></i></div>Land
+  </div>
+  <div class="port-nav-item" id="port-nav-mf" onclick="filterPortAsset('MutualFund')">
+    <div class="nav-icon"><i class="fas fa-circle asset-mf" style="font-size:0.55rem"></i></div>Mutual Funds
+  </div>
+  <div class="port-nav-item" id="port-nav-bonds" onclick="filterPortAsset('Bonds')">
+    <div class="nav-icon"><i class="fas fa-circle asset-bonds" style="font-size:0.55rem"></i></div>Bonds
+  </div>
+  <div class="port-nav-item" id="port-nav-all" onclick="filterPortAsset('all')">
+    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem"></i></div>All Assets
+  </div>
+
+  <div class="port-filter-box">
+    <div class="port-filter-label">Filter</div>
+    <div class="port-mode-toggle">
+      <button class="port-mode-btn active" id="port-mode-only" onclick="setPortMode('only',this)">Only</button>
+      <button class="port-mode-btn" id="port-mode-cumul" onclick="setPortMode('cumul',this)">Cumul.</button>
+      <button class="port-mode-btn" id="port-mode-all" onclick="setPortMode('all',this)">All</button>
+    </div>
+    <select class="port-filter-select" id="port-month" onchange="applyPortFilters()">
+      <option value="all">All Months</option>
+    </select>
+    <select class="port-filter-select" id="port-year" onchange="applyPortFilters()">
+      <option value="all">All Years</option>
+    </select>
+    <button class="btn-port-add" onclick="openPortModal()">
+      <i class="fas fa-plus"></i> New Asset Entry
+    </button>
+    <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
+    <button class="btn-port-add" onclick="document.getElementById('excel-upload').click()">
+      <i class="fas fa-file-import"></i> Import Excel
+    </button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-header"><span>Dashboard</span> <b>Overview</b></div>
+    <div class="topbar-right">
+      <div class="filter-mode-toggle">
+        <button class="filter-mode-btn active" id="fin-mode-only" onclick="setFilterMode('only',this)">Only</button>
+        <button class="filter-mode-btn" id="fin-mode-cumul" onclick="setFilterMode('cumulative',this)">Cumul.</button>
+      </div>
+      <select class="filter-select" id="filter-month" onchange="applyFilters()">
+        <option value="all">All Months</option>
+      </select>
+      <select class="filter-select" id="filter-year" onchange="applyFilters()">
+        <option value="all">All Years</option>
+      </select>
+      <button class="btn-add" onclick="openModal()">
+        <i class="fas fa-plus"></i> New Entry
+      </button>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view-section active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Net Balance</div>
+          <div class="kpi-value" id="kpi-balance" style="color:var(--c-inc)">₹0</div>
+          <div class="kpi-sub">Income minus outflows</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Income</div>
+          <div class="kpi-value" id="kpi-income" style="color:var(--c-inc)">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Loan Outflow</div>
+          <div class="kpi-value" id="kpi-loans" style="color:var(--c-loan)">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Investments</div>
+          <div class="kpi-value" id="kpi-invest" style="color:var(--c-inv)">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Savings Rate</div>
+          <div class="kpi-value" id="kpi-savings-rate" style="color:var(--c-net)">0%</div>
+          <div class="kpi-sub" id="kpi-savings-sub">of income saved</div>
+        </div>
+      </div>
+
+      <div class="glass-panel" style="margin-bottom:1.3rem">
+        <div class="panel-title" style="color:#a78bfa">Portfolio Snapshot</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem">
+          <div>
+            <div class="kpi-label">Total Invested</div>
+            <div class="kpi-value" id="dash-port-invested" style="color:#a78bfa;font-size:1.2rem">₹0</div>
+          </div>
+          <div>
+            <div class="kpi-label">Current Value</div>
+            <div class="kpi-value" id="dash-port-value" style="color:var(--c-inc);font-size:1.2rem">₹0</div>
+          </div>
+          <div>
+            <div class="kpi-label">Total Gain/Loss</div>
+            <div class="kpi-value" id="dash-port-gain" style="font-size:1.2rem">₹0</div>
+          </div>
+          <div>
+            <div class="kpi-label">Avg ROI %</div>
+            <div class="kpi-value" id="dash-port-roi" style="font-size:1.2rem">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="budget-alerts-container"></div>
+
+      <div class="charts-row">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Cash Flow Snapshot</div>
+          <div style="height:240px"><canvas id="dashChart"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Spending Mix</div>
+          <div style="height:240px"><canvas id="dashDonut"></canvas></div>
+        </div>
+      </div>
+
+      <div class="charts-3col" style="margin-top:1.3rem">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title" style="color:#a78bfa">Portfolio by Asset Type</div>
+          <div style="height:200px"><canvas id="dash-port-donut"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title" style="color:#a78bfa">ROI % by Asset</div>
+          <div style="height:200px"><canvas id="dash-roi-bar"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title" style="color:#a78bfa">Top 3 Holdings</div>
+          <div id="dash-top3" style="padding-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST VIEW — used for Transactions, Loans, Investments -->
+    <div id="view-list" class="view-section">
+      <div class="glass-panel">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('name')" id="th-name">Name / Entity <span class="sort-arrow">↕</span></th>
+              <th>Type</th>
+              <th onclick="sortTable('sub')" id="th-sub">Category <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('date')" id="th-date">Date <span class="sort-arrow">↕</span></th>
+              <th onclick="sortTable('amount')" id="th-amount" style="text-align:right">Amount <span class="sort-arrow">↕</span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="view-analytics" class="view-section">
+      <div class="glass-panel span-full">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
+          <div class="panel-title" style="margin-bottom:0">Spending Trend</div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <select class="filter-select" id="trend-range" onchange="renderAnalytics()" style="font-size:0.72rem">
+              <option value="6">Last 6 Months</option>
+              <option value="12">Last 12 Months</option>
+              <option value="3">Last 3 Months</option>
+            </select>
+            <select class="filter-select" id="trend-month" onchange="renderAnalytics()" style="font-size:0.72rem">
+              <option value="all">All Months</option>
+            </select>
+            <select class="filter-select" id="trend-year" onchange="renderAnalytics()" style="font-size:0.72rem">
+              <option value="all">All Years</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:260px"><canvas id="chart-trend"></canvas></div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Spend Scatter (Day vs Amount)</div>
+          <div style="height:210px"><canvas id="chart-scatter"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Investment Portfolio</div>
+          <div style="height:210px"><canvas id="chart-invest"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Expense Bifurcation</div>
+          <div style="height:210px"><canvas id="chart-exp-bif"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Loan Bifurcation</div>
+          <div style="height:210px"><canvas id="chart-loan-bif"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Debt vs Assets</div>
+          <div style="height:210px"><canvas id="chart-debt"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Expense Composition</div>
+          <div style="height:210px"><canvas id="chart-cats"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NET WORTH -->
+    <div id="view-networth" class="view-section">
+      <div class="nw-row">
+        <div class="nw-card"><div class="kpi-label">Total Assets</div><div class="nw-val" id="nw-assets" style="color:var(--c-inc)">₹0</div></div>
+        <div class="nw-card"><div class="kpi-label">Total Liabilities</div><div class="nw-val" id="nw-liab" style="color:var(--c-exp)">₹0</div></div>
+        <div class="nw-card"><div class="kpi-label">Net Worth</div><div class="nw-val" id="nw-total" style="color:var(--c-net)">₹0</div></div>
+      </div>
+      <div class="glass-panel">
+        <div class="panel-title">Net Worth Over Time</div>
+        <div style="height:280px"><canvas id="chart-networth"></canvas></div>
+      </div>
+      <div class="glass-panel">
+        <div class="panel-title">Assets vs Liabilities (Monthly)</div>
+        <div style="height:230px"><canvas id="chart-nw-breakdown"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO: SUMMARY -->
+    <div id="view-port-overview" class="view-section">
+      <div class="port-kpi-strip">
+        <div class="port-kpi-card">
+          <div class="kpi-label">Total Invested</div>
+          <div class="port-kpi-val" id="pk-invested" style="color:#a78bfa">₹0</div>
+        </div>
+        <div class="port-kpi-card">
+          <div class="kpi-label">Current Value</div>
+          <div class="port-kpi-val" id="pk-value" style="color:var(--c-inc)">₹0</div>
+        </div>
+        <div class="port-kpi-card">
+          <div class="kpi-label">Total Gain/Loss</div>
+          <div class="port-kpi-val" id="pk-gain">₹0</div>
+        </div>
+        <div class="port-kpi-card">
+          <div class="kpi-label">Avg ROI %</div>
+          <div class="port-kpi-val" id="pk-roi">0%</div>
+        </div>
+        <div class="port-kpi-card">
+          <div class="kpi-label">Avg Profit %</div>
+          <div class="port-kpi-val" id="pk-profit">0%</div>
+        </div>
+        <div class="port-kpi-card">
+          <div class="kpi-label">Total Qty/Units</div>
+          <div class="port-kpi-val" id="pk-qty" style="color:var(--text-mid)">0</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Asset Value Breakdown</div>
+          <div style="height:240px"><canvas id="port-value-bar"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Portfolio Composition</div>
+          <div style="height:240px"><canvas id="port-composition"></canvas></div>
+        </div>
+      </div>
+
+      <div class="charts-3col">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">ROI% by Asset Type</div>
+          <div style="height:200px"><canvas id="port-roi-chart"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Gain/Loss by Asset</div>
+          <div style="height:200px"><canvas id="port-gain-chart"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Best Performers</div>
+          <div id="port-top3" style="padding-top:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO: TABLE -->
+    <div id="view-port-table" class="view-section">
+      <div class="glass-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
+          <div class="panel-title" style="margin-bottom:0">Holdings Register</div>
+          <div id="port-asset-filter-badge" style="font-size:0.72rem;color:#a78bfa;font-weight:600"></div>
+        </div>
+        <div class="port-table-wrap">
+          <table class="port-table">
+            <thead>
+              <tr>
+                <th onclick="sortPortTable('assetType')">Asset <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('date')">Date <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('quantity')" style="text-align:right">Qty <span class="sort-arrow">↕</span></th>
+                <th>Unit</th>
+                <th onclick="sortPortTable('purchasePrice')" style="text-align:right">Buy Price/u <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('totalInvestment')" style="text-align:right">Total Inv. <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('currentPrice')" style="text-align:right">Curr. Price/u <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('currentValue')" style="text-align:right">Curr. Value <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('roi')" style="text-align:right">ROI % <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('profitPct')" style="text-align:right">Profit % <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('gainLoss')" style="text-align:right">Gain/Loss <span class="sort-arrow">↕</span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="port-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-panel" id="port-summary-panel">
+        <div class="panel-title">Summary by Asset Type</div>
+        <div class="port-table-wrap">
+          <table class="port-table" id="port-summary-table">
+            <thead>
+              <tr>
+                <th>Asset Type</th>
+                <th style="text-align:right">Avg ROI%</th>
+                <th style="text-align:right">Avg Profit%</th>
+                <th style="text-align:right">Total Gain/Loss</th>
+                <th style="text-align:right">Total Qty</th>
+                <th style="text-align:right">Current Value</th>
+                <th style="text-align:right">Avg Curr. Price</th>
+                <th style="text-align:right">Total Invested</th>
+                <th style="text-align:right">Avg Buy Price</th>
+              </tr>
+            </thead>
+            <tbody id="port-summary-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO: ANALYTICS -->
+    <div id="view-port-analytics" class="view-section">
+      <div class="analytics-grid">
+        <div class="glass-panel span-full" style="margin-bottom:1.3rem">
+          <div class="panel-title">Appreciation Timeline (by Purchase Date)</div>
+          <div style="height:250px"><canvas id="port-timeline"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">ROI% Distribution (Scatter)</div>
+          <div style="height:220px"><canvas id="port-roi-scatter"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Gain/Loss Waterfall</div>
+          <div style="height:220px"><canvas id="port-waterfall"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Investment vs Current Value</div>
+          <div style="height:220px"><canvas id="port-compare-bar"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Profit% Distribution</div>
+          <div style="height:220px"><canvas id="port-profit-donut"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Finance Entry -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Add Finance Record</div>
+    <div class="input-group">
+      <label>Entity Name</label>
+      <input type="text" id="inp-name" class="input-field" placeholder="e.g. HDFC Loan">
+    </div>
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Amount (₹)</label>
+        <input type="number" id="inp-amt" class="input-field" placeholder="0.00">
+      </div>
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="inp-date" class="input-field">
+      </div>
+    </div>
+    <div class="input-group">
+      <label>Category Type</label>
+      <select id="inp-cat" class="input-field">
+        <option value="Expense">General Expense</option>
+        <option value="Loan">Loan / EMI</option>
+        <option value="Investment">Investment / Asset</option>
+        <option value="Income">Income</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Sub-Category</label>
+        <input type="text" id="inp-sub" class="input-field" placeholder="e.g. Food, Stocks">
+      </div>
+      <div class="input-group">
+        <label>Notes (Optional)</label>
+        <input type="text" id="inp-notes" class="input-field" placeholder="Memo">
+      </div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-label"><i class="fas fa-redo" style="color:var(--accent);margin-right:6px"></i> Recurring monthly</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="inp-recurring">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1.3rem">
+      <button onclick="saveEntry()" class="btn-add" style="flex:1;justify-content:center" id="fin-save-btn">Save Entry</button>
+      <button onclick="closeModal()" class="btn-secondary">Cancel</button>
+      <button onclick="deleteCurrentEntry()" class="btn-delete" style="display:none" id="fin-delete-btn"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Portfolio Entry -->
+<div class="modal-overlay" id="port-modal">
+  <div class="modal-box port-modal">
+    <div class="modal-title" style="color:#c4b5fd" id="port-modal-title">Add Portfolio Asset</div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Asset Type</label>
+        <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Land / Bonds / MF…" oninput="updatePortUnit()">
+      </div>
+      <div class="input-group">
+        <label>Date of Purchase</label>
+        <input type="date" id="p-date" class="input-field port-focus">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Quantity</label>
+        <input type="number" id="p-qty" class="input-field port-focus" placeholder="0" oninput="calcPortPreview()">
+      </div>
+      <div class="input-group">
+        <label>Unit <span id="p-unit-hint" style="color:#a78bfa;font-size:0.7rem">(grams)</span></label>
+        <input type="text" id="p-unit" class="input-field port-focus" placeholder="grams / units / sq.ft">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Purchase Price / unit (₹)</label>
+        <input type="number" id="p-buyPrice" class="input-field port-focus" placeholder="0.00" oninput="calcPortPreview()">
+      </div>
+      <div class="input-group">
+        <label>Current Price / unit (₹)</label>
+        <input type="number" id="p-currPrice" class="input-field port-focus" placeholder="0.00" oninput="calcPortPreview()">
+      </div>
+    </div>
+
+    <div class="calc-preview" id="port-calc-preview">
+      <div class="calc-item"><div class="calc-item-label">Total Invested</div><div class="calc-item-val" id="calc-invested">₹0</div></div>
+      <div class="calc-item"><div class="calc-item-label">Current Value</div><div class="calc-item-val" id="calc-value">₹0</div></div>
+      <div class="calc-item"><div class="calc-item-label">Gain / Loss</div><div class="calc-item-val" id="calc-gain">₹0</div></div>
+      <div class="calc-item"><div class="calc-item-label">ROI %</div><div class="calc-item-val" id="calc-roi">0%</div></div>
+      <div class="calc-item"><div class="calc-item-label">Profit %</div><div class="calc-item-val" id="calc-profit">0%</div></div>
+    </div>
+
+    <div class="input-group">
+      <label>Notes (Optional)</label>
+      <input type="text" id="p-notes" class="input-field port-focus" placeholder="e.g. SGB 2023-24, Plot near highway…">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:1.3rem">
+      <button onclick="savePortEntry()" class="btn-add" style="flex:1;justify-content:center;background:rgba(167,139,250,0.8)" id="port-save-btn">Save Asset</button>
+      <button onclick="closePortModal()" class="btn-secondary">Cancel</button>
+      <button onclick="deleteCurrentPortEntry()" class="btn-delete" style="display:none" id="port-delete-btn"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Budget -->
+<div class="modal-overlay" id="budget-modal">
+  <div class="modal-box budget-modal">
+    <div class="modal-title">Budget Limits</div>
+    <div class="modal-subtitle">Set monthly limits. Alert at 80%.</div>
+    <div class="budget-modal-list" id="budget-modal-list"></div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <button onclick="saveBudgets()" class="btn-add" style="flex:1;justify-content:center">Save</button>
+      <button onclick="document.getElementById('budget-modal').style.display='none'" class="btn-secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ─── ASSET TYPE DETECTION ───────────────────────────────────────────────────
+// "Land", "MutualFund", and "Bonds" all use TOTAL price (not qty × price).
+// Gold, Silver, Stocks use qty × price.
+function isQtyBased(assetType) {
+  const t = normalizeAssetType(assetType);
+  // Land, MutualFund, and Bonds store totals directly — do NOT multiply by quantity
+  return t !== 'Land' && t !== 'MutualFund' && t !== 'Bonds';
+}
+
+let db = JSON.parse(localStorage.getItem('fos_db_v3')) || [
+  {id:1,  name:"Salary",       type:"Income",     amount:85000, date:"2026-04-01", sub:"Salary",       recurring:false, notes:""},
+  {id:2,  name:"HDFC Personal",type:"Loan",       amount:12500, date:"2026-04-03", sub:"Personal Loan",recurring:true,  notes:"Monthly EMI"},
+  {id:3,  name:"Nifty 50 SIP", type:"Investment", amount:15000, date:"2026-04-05", sub:"Stocks",       recurring:true,  notes:""},
+  {id:4,  name:"Sovereign Gold",type:"Investment",amount:5000,  date:"2026-04-05", sub:"Gold",         recurring:false, notes:""},
+  {id:5,  name:"Groceries",    type:"Expense",    amount:4300,  date:"2026-04-06", sub:"Food",         recurring:false, notes:""},
+  {id:6,  name:"Car EMI",      type:"Loan",       amount:8400,  date:"2026-04-10", sub:"Auto Loan",    recurring:true,  notes:""},
+  {id:7,  name:"Dining Out",   type:"Expense",    amount:2100,  date:"2026-04-12", sub:"Food",         recurring:false, notes:""},
+  {id:8,  name:"Salary",       type:"Income",     amount:85000, date:"2026-03-01", sub:"Salary",       recurring:false, notes:""},
+  {id:9,  name:"HDFC Personal",type:"Loan",       amount:12500, date:"2026-03-03", sub:"Personal Loan",recurring:true,  notes:""},
+  {id:10, name:"Nifty 50 SIP", type:"Investment", amount:15000, date:"2026-03-05", sub:"Stocks",       recurring:true,  notes:""},
+  {id:11, name:"Groceries",    type:"Expense",    amount:3900,  date:"2026-03-07", sub:"Food",         recurring:false, notes:""},
+  {id:12, name:"Netflix",      type:"Expense",    amount:649,   date:"2026-03-10", sub:"Subscriptions",recurring:true,  notes:""},
+  {id:13, name:"Salary",       type:"Income",     amount:85000, date:"2026-02-01", sub:"Salary",       recurring:false, notes:""},
+  {id:14, name:"Car EMI",      type:"Loan",       amount:8400,  date:"2026-02-10", sub:"Auto Loan",    recurring:true,  notes:""},
+  {id:15, name:"Fuel",         type:"Expense",    amount:3200,  date:"2026-02-15", sub:"Transport",    recurring:false, notes:""},
+  {id:16, name:"Salary",       type:"Income",     amount:85000, date:"2026-01-01", sub:"Salary",       recurring:false, notes:""},
+  {id:17, name:"Groceries",    type:"Expense",    amount:4100,  date:"2026-01-08", sub:"Food",         recurring:false, notes:""},
+];
+
+let portDb = (JSON.parse(localStorage.getItem('fos_port_v3')) || [
+  {id:101, assetType:"Silver",     date:"2025-10-28", quantity:20,  unit:"grams", purchasePrice:110,  currentPrice:275,   notes:""},
+  {id:102, assetType:"Silver",     date:"2025-11-15", quantity:20,  unit:"grams", purchasePrice:110,  currentPrice:275,   notes:""},
+  {id:103, assetType:"Silver",     date:"2025-11-18", quantity:20,  unit:"grams", purchasePrice:100,  currentPrice:275,   notes:""},
+  {id:104, assetType:"Silver",     date:"2025-11-23", quantity:20,  unit:"grams", purchasePrice:110,  currentPrice:275,   notes:""},
+  {id:105, assetType:"Gold",       date:"2025-12-17", quantity:2,   unit:"grams", purchasePrice:7490, currentPrice:14600, notes:""},
+  {id:106, assetType:"Silver",     date:"2025-12-18", quantity:60,  unit:"grams", purchasePrice:103,  currentPrice:275,   notes:""},
+  {id:107, assetType:"Gold",       date:"2025-12-20", quantity:2,   unit:"grams", purchasePrice:7340, currentPrice:14600, notes:""},
+  {id:108, assetType:"Silver",     date:"2025-12-25", quantity:30,  unit:"grams", purchasePrice:101,  currentPrice:275,   notes:""},
+  {id:109, assetType:"Silver",     date:"2026-01-15", quantity:20,  unit:"grams", purchasePrice:102,  currentPrice:275,   notes:""},
+  {id:110, assetType:"Silver",     date:"2026-02-18", quantity:20,  unit:"grams", purchasePrice:108,  currentPrice:275,   notes:""},
+  {id:111, assetType:"Silver",     date:"2026-03-02", quantity:20,  unit:"grams", purchasePrice:105,  currentPrice:275,   notes:""},
+  {id:112, assetType:"Silver",     date:"2025-07-06", quantity:30,  unit:"grams", purchasePrice:120,  currentPrice:275,   notes:""},
+  {id:113, assetType:"Gold",       date:"2025-09-05", quantity:1,   unit:"grams", purchasePrice:9865, currentPrice:14600, notes:""},
+  {id:114, assetType:"Silver",     date:"2025-11-22", quantity:10,  unit:"grams", purchasePrice:161,  currentPrice:275,   notes:""},
+  {id:115, assetType:"Silver",     date:"2025-12-12", quantity:200, unit:"grams", purchasePrice:197,  currentPrice:275,   notes:""},
+]).map(normalizePortRecord);
+
+let budgets = JSON.parse(localStorage.getItem('fos_budgets')) || {
+  "Food":8000, "Transport":5000, "Subscriptions":1500, "Personal Loan":15000, "Auto Loan":10000
+};
+
+let charts = {};
+let currentListFilter = 'all';
+let filterMode = 'only';
+let portFilterMode = 'only';
+let portAssetFilter = 'all';
+let sortCol = 'date', sortAsc = false;
+let portSortCol = 'date', portSortAsc = false;
+let pendingSave = false;
+let activeView = 'dashboard';
+let editingFinanceId = null;
+let editingPortId = null;
+
+// ── NORMALIZATION HELPERS ──────────────────────────────────────────────────
+function normalizeAssetType(type) {
+  const t = String(type ?? '').trim().toLowerCase().replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ');
+  if (!t) return '';
+  if (t.includes('gold')) return 'Gold';
+  if (t.includes('silver')) return 'Silver';
+  if (t.includes('land') || t.includes('property') || t.includes('plot')) return 'Land';
+  if (t.includes('bond')) return 'Bonds';
+  if (t.includes('mutual') || t === 'mf' || t.includes('mutual fund')) return 'MutualFund';
+  if (t.includes('stock') || t.includes('equity')) return 'Stocks';
+  return String(type).trim();
+}
+
+function assetTypeLabel(type) {
+  const k = normalizeAssetType(type);
+  const map = { Gold:'Gold', Silver:'Silver', Land:'Land', MutualFund:'Mutual Funds', Bonds:'Bonds', Stocks:'Stocks' };
+  return map[k] || (String(type ?? '').trim() || 'Other');
+}
+
+function normalizePortRecord(record) {
+  return { ...record, assetType: normalizeAssetType(record.assetType) };
+}
+
+// ── AUTO-SAVE ──────────────────────────────────────────────────────────────
+function scheduleSave() {
+  pendingSave = true;
+  document.getElementById('autosave-dot').classList.add('saving');
+  document.getElementById('autosave-label').textContent = 'Unsaved…';
+}
+function doAutoSave() {
+  if (!pendingSave) return;
+  localStorage.setItem('fos_db_v3', JSON.stringify(db));
+  localStorage.setItem('fos_port_v3', JSON.stringify(portDb));
+  pendingSave = false;
+  document.getElementById('autosave-dot').classList.remove('saving');
+  document.getElementById('autosave-label').textContent = 'Saved ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(doAutoSave, 5000);
+
+// ── PORTFOLIO CALC ─────────────────────────────────────────────────────────
+// BUG FIX: Land, MutualFund, and Bonds entries store total value directly
+// purchasePrice = total amount invested, currentPrice = current total value.
+// Do NOT multiply by quantity for Land, MutualFund, or Bonds.
+function portCalc(e) {
+  const qty = Number(e.quantity) || 0;
+  const buyP = Number(e.purchasePrice) || 0;
+  const curP = Number(e.currentPrice) || 0;
+
+  let totalInv, currVal;
+  if (isQtyBased(e.assetType)) {
+    // Gold, Silver, Stocks: price is per unit → multiply by qty
+    totalInv = qty * buyP;
+    currVal  = qty * curP;
+  } else {
+    // Land, MutualFund, Bonds: price fields hold the total value directly
+    totalInv = buyP;
+    currVal  = curP;
+  }
+
+  const gainLoss  = currVal - totalInv;
+  const roi       = totalInv > 0 ? ((currVal - totalInv) / totalInv) * 100 : 0;
+  const profitPct = totalInv > 0 ? (gainLoss / totalInv) * 100 : 0;
+  return { totalInvestment: totalInv, currentValue: currVal, gainLoss, roi, profitPct };
+}
+
+// ── PORTFOLIO FILTERS ──────────────────────────────────────────────────────
+function getPortFiltered() {
+  let data = [...portDb];
+  if (portAssetFilter !== 'all') {
+    data = data.filter(e => normalizeAssetType(e.assetType) === portAssetFilter);
+  }
+
+  // BUG FIX: when portFilterMode is 'all', skip date filtering entirely
+  if (portFilterMode === 'all') return data;
+
+  const fM = document.getElementById('port-month').value;
+  const fY = document.getElementById('port-year').value;
+  if (fM === 'all' && fY === 'all') return data;
+
+  return data.filter(item => {
+    const iY = item.date.slice(0,4), iM = item.date.slice(5,7);
+    if (portFilterMode === 'only') {
+      if (fY !== 'all' && iY !== fY) return false;
+      if (fM !== 'all' && iM !== fM) return false;
+      return true;
+    } else { // cumul
+      const d = new Date(item.date);
+      let cut;
+      if (fY !== 'all' && fM !== 'all') cut = new Date(`${fY}-${fM}-31`);
+      else if (fY !== 'all') cut = new Date(`${fY}-12-31`);
+      else cut = new Date(`${new Date().getFullYear()}-${fM}-31`);
+      return d <= cut;
+    }
+  });
+}
+
+function buildPortDropdowns() {
+  const years = [...new Set(portDb.map(d => d.date.slice(0,4)))].sort().reverse();
+
+  const portMonthSel = document.getElementById('port-month');
+  const portYearSel  = document.getElementById('port-year');
+  const curM = portMonthSel.value;
+  const curY = portYearSel.value;
+
+  // Rebuild month dropdown
+  portMonthSel.innerHTML = '<option value="all">All Months</option>';
+  MONTHS.forEach((m, i) => {
+    const v = String(i+1).padStart(2,'0');
+    const sel = curM === v ? ' selected' : '';
+    portMonthSel.innerHTML += `<option value="${v}"${sel}>${m}</option>`;
+  });
+
+  // Rebuild year dropdown
+  portYearSel.innerHTML = '<option value="all">All Years</option>';
+  years.forEach(y => {
+    const sel = curY === y ? ' selected' : '';
+    portYearSel.innerHTML += `<option value="${y}"${sel}>${y}</option>`;
+  });
+}
+
+function setPortMode(mode, btn) {
+  portFilterMode = mode;
+  document.querySelectorAll('.port-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyPortFilters();
+}
+
+function applyPortFilters() {
+  buildPortDropdowns();
+  if      (activeView === 'port-overview')  renderPortOverview();
+  else if (activeView === 'port-table')     renderPortTable();
+  else if (activeView === 'port-analytics') renderPortAnalytics();
+  else if (activeView === 'dashboard')      renderDashboard();
+}
+
+function filterPortAsset(type) {
+  portAssetFilter = type;
+  document.querySelectorAll('.port-nav-item').forEach(el => el.classList.remove('active'));
+  const idMap = { Gold:'port-nav-gold', Silver:'port-nav-silver', Land:'port-nav-land', MutualFund:'port-nav-mf', Bonds:'port-nav-bonds', all:'port-nav-all' };
+  const navEl = document.getElementById(idMap[type]);
+  if (navEl) navEl.classList.add('active');
+  switchView('port-table', null, 'portfolio');
+}
+
+// ── FINANCE FILTERS ────────────────────────────────────────────────────────
+function buildFilterDropdowns() {
+  const years = [...new Set(db.map(d => d.date.slice(0,4)))].sort().reverse();
+
+  // Finance main dropdowns
+  ['filter-month', 'trend-month'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="all">All Months</option>';
+    MONTHS.forEach((m, i) => {
+      const v = String(i+1).padStart(2,'0');
+      sel.innerHTML += `<option value="${v}"${cur===v?' selected':''}>${m}</option>`;
+    });
+  });
+
+  ['filter-year', 'trend-year'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="all">All Years</option>';
+    years.forEach(y => {
+      sel.innerHTML += `<option value="${y}"${cur===y?' selected':''}>${y}</option>`;
+    });
+  });
+}
+
+function setFilterMode(mode, btn) {
+  filterMode = mode;
+  document.querySelectorAll('.filter-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function getFilteredData() {
+  const fM = document.getElementById('filter-month').value;
+  const fY = document.getElementById('filter-year').value;
+  if (fM === 'all' && fY === 'all') return [...db];
+
+  return db.filter(item => {
+    const iY = item.date.slice(0,4), iM = item.date.slice(5,7);
+    if (filterMode === 'only') {
+      if (fY !== 'all' && iY !== fY) return false;
+      if (fM !== 'all' && iM !== fM) return false;
+      return true;
+    } else {
+      const d = new Date(item.date);
+      let cut;
+      if (fY !== 'all' && fM !== 'all') cut = new Date(`${fY}-${fM}-31`);
+      else if (fY !== 'all') cut = new Date(`${fY}-12-31`);
+      else cut = new Date(`${new Date().getFullYear()}-${fM}-31`);
+      return d <= cut;
+    }
+  });
+}
+
+function applyFilters() {
+  buildFilterDropdowns();
+  if      (activeView === 'dashboard')    renderDashboard();
+  else if (activeView === 'transactions' || activeView === 'loans' || activeView === 'investments') renderTable();
+  else if (activeView === 'analytics')   renderAnalytics();
+  else if (activeView === 'networth')    renderNetWorth();
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function switchView(viewName, btn, group) {
+  activeView = viewName;
+
+  if (group === 'finance') {
+    document.querySelectorAll('.sidebar .nav-item').forEach(el => el.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  } else if (group === 'portfolio') {
+    document.querySelectorAll('.port-sidebar .port-nav-item').forEach(el => el.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+
+  const headerMap = {
+    'dashboard':      '<span>Dashboard</span> <b>Overview</b>',
+    'transactions':   '<span>All</span> <b>Transactions</b>',
+    'loans':          '<span>Loans &</span> <b>EMI</b>',
+    'investments':    '<span>My</span> <b>Investments</b>',
+    'analytics':      '<span>Advanced</span> <b>Analytics</b>',
+    'networth':       '<span>Net Worth</span> <b>Tracker</b>',
+    'port-overview':  '<span>Portfolio</span> <b>Summary</b>',
+    'port-table':     '<span>Holdings</span> <b>Register</b>',
+    'port-analytics': '<span>Portfolio</span> <b>Analytics</b>',
+  };
+  document.getElementById('page-header').innerHTML = headerMap[viewName] || '';
+
+  const viewIdMap = {
+    'dashboard':      'view-dashboard',
+    'transactions':   'view-list',
+    'loans':          'view-list',
+    'investments':    'view-list',
+    'analytics':      'view-analytics',
+    'networth':       'view-networth',
+    'port-overview':  'view-port-overview',
+    'port-table':     'view-port-table',
+    'port-analytics': 'view-port-analytics',
+  };
+
+  const domId = viewIdMap[viewName];
+  const el = document.getElementById(domId);
+  if (el) el.classList.add('active');
+
+  if      (viewName === 'transactions') currentListFilter = 'all';
+  else if (viewName === 'loans')        currentListFilter = 'Loan';
+  else if (viewName === 'investments')  currentListFilter = 'Investment';
+
+  if      (viewName === 'dashboard')    { buildFilterDropdowns(); buildPortDropdowns(); renderDashboard(); }
+  else if (viewName === 'transactions' || viewName === 'loans' || viewName === 'investments') { buildFilterDropdowns(); renderTable(); }
+  else if (viewName === 'analytics')   { buildFilterDropdowns(); renderAnalytics(); }
+  else if (viewName === 'networth')    { renderNetWorth(); }
+  else if (viewName === 'port-overview')  { buildPortDropdowns(); renderPortOverview(); }
+  else if (viewName === 'port-table')     { buildPortDropdowns(); renderPortTable(); }
+  else if (viewName === 'port-analytics') { buildPortDropdowns(); renderPortAnalytics(); }
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const data = getFilteredData();
+  const totalInc  = sumType('Income', data);
+  const totalExp  = sumType('Expense', data);
+  const totalLoan = sumType('Loan', data);
+  const totalInv  = sumType('Investment', data);
+  const balance   = totalInc - totalExp - totalLoan - totalInv;
+  const savingsRate = totalInc > 0 ? Math.round((balance / totalInc) * 100) : 0;
+
+  document.getElementById('kpi-balance').textContent      = fmt(balance);
+  document.getElementById('kpi-income').textContent       = fmt(totalInc);
+  document.getElementById('kpi-loans').textContent        = fmt(totalLoan);
+  document.getElementById('kpi-invest').textContent       = fmt(totalInv);
+  document.getElementById('kpi-savings-rate').textContent = savingsRate + '%';
+  document.getElementById('kpi-savings-sub').textContent  = savingsRate >= 0 ? 'of income saved' : 'overspent';
+
+  // Portfolio snapshot
+  const pd = getPortFiltered();
+  const pStats = portAggStats(pd);
+  document.getElementById('dash-port-invested').textContent = fmt(pStats.totalInv);
+  document.getElementById('dash-port-value').textContent    = fmt(pStats.totalVal);
+  const gainEl = document.getElementById('dash-port-gain');
+  gainEl.textContent = fmt(pStats.totalGain);
+  gainEl.style.color = pStats.totalGain >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+  const roiEl = document.getElementById('dash-port-roi');
+  roiEl.textContent = pStats.avgRoi.toFixed(1) + '%';
+  roiEl.style.color = pStats.avgRoi >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+
+  renderBudgetAlerts(data);
+
+  // Cash flow bar
+  destroyChart('dash');
+  charts['dash'] = new Chart(document.getElementById('dashChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Income','Investments','Expenses','Loans'],
+      datasets: [{
+        data: [totalInc, totalInv, totalExp, totalLoan],
+        backgroundColor: ['rgba(52,211,153,0.7)','rgba(251,191,36,0.7)','rgba(244,114,182,0.7)','rgba(96,165,250,0.7)'],
+        borderColor: ['#34d399','#fbbf24','#f472b6','#60a5fa'],
+        borderWidth: 1, borderRadius: 7, barThickness: 40
+      }]
+    },
+    options: cOpts(false)
+  });
+
+  // Spending donut
+  const expData = groupData('Expense', data);
+  destroyChart('dashDonut');
+  if (Object.keys(expData).length > 0) {
+    charts['dashDonut'] = makeDonut('dashDonut', Object.keys(expData), Object.values(expData),
+      ['#f472b6','#ec4899','#db2777','#be185d','#9d174d']);
+  }
+
+  // Portfolio by asset type donut — aggregate by display label
+  const byType = {};
+  pd.forEach(e => {
+    const c = portCalc(e);
+    const label = assetTypeLabel(e.assetType);
+    byType[label] = (byType[label] || 0) + c.currentValue;
+  });
+  destroyChart('dash-port-donut');
+  if (Object.keys(byType).length > 0) {
+    charts['dash-port-donut'] = makeDonut('dash-port-donut',
+      Object.keys(byType), Object.values(byType),
+      ['#f59e0b','#cbd5e1','#86efac','#818cf8','#ec4899','#a78bfa']);
+  }
+
+  // ROI by asset bar
+  const roiByType = {}, cntByType = {};
+  pd.forEach(e => {
+    const c = portCalc(e);
+    const label = assetTypeLabel(e.assetType);
+    roiByType[label] = (roiByType[label] || 0) + c.roi;
+    cntByType[label] = (cntByType[label] || 0) + 1;
+  });
+  const avgRoiLabels = Object.keys(roiByType);
+  const avgRoiVals   = avgRoiLabels.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
+  destroyChart('dash-roi-bar');
+  if (avgRoiLabels.length > 0) {
+    charts['dash-roi-bar'] = new Chart(document.getElementById('dash-roi-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: avgRoiLabels,
+        datasets: [{
+          data: avgRoiVals,
+          backgroundColor: ['rgba(245,158,11,0.7)','rgba(203,213,225,0.7)','rgba(134,239,172,0.7)','rgba(129,140,248,0.7)','rgba(236,72,153,0.7)','rgba(167,139,250,0.7)'],
+          borderRadius: 6
+        }]
+      },
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
+    });
+  }
+
+  // Top 3
+  const sorted = pd.map(e => ({...e, ...portCalc(e)})).sort((a,b) => b.roi - a.roi).slice(0,3);
+  document.getElementById('dash-top3').innerHTML = sorted.length ? sorted.map(e => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div><div style="font-weight:600;font-size:0.82rem">${assetTypeLabel(e.assetType)}</div><div style="font-size:0.7rem;color:var(--text-muted)">${e.date} · ${e.quantity} ${e.unit}</div></div>
+      <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-weight:700;font-size:0.9rem;color:var(--c-inc)">${e.roi.toFixed(0)}% ROI</div><div style="font-size:0.7rem;color:var(--text-muted)">${fmt(e.gainLoss)} gain</div></div>
+    </div>`).join('') : '<div class="empty-state"><i class="fas fa-inbox"></i>No portfolio data</div>';
+}
+
+// ── BUDGET ALERTS ──────────────────────────────────────────────────────────
+function renderBudgetAlerts(data) {
+  const container = document.getElementById('budget-alerts-container');
+  const cats = Object.keys(budgets);
+  if (!cats.length) { container.innerHTML = ''; return; }
+  let html = '<div style="margin-bottom:1.3rem"><div class="panel-title">Budget Status</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:7px">';
+  cats.forEach(cat => {
+    const limit = budgets[cat];
+    const spent = (data || getFilteredData()).filter(x => x.sub === cat || x.name === cat).reduce((a,b) => a+b.amount, 0);
+    const pct = Math.min(Math.round((spent/limit)*100), 100);
+    const over = spent > limit, warn = pct >= 80 && !over;
+    const color = over ? '#ef4444' : warn ? '#f59e0b' : '#34d399';
+    html += `<div class="budget-alert-item ${over?'over':warn?'warn':''}">
+      <div class="budget-label">${cat}</div>
+      <div class="budget-progress-bar"><div class="budget-progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="budget-pct" style="color:${color}">${pct}%</div>
+      <div style="font-size:0.68rem;color:var(--text-muted);min-width:85px;text-align:right">${fmt(spent)} / ${fmt(limit)}</div>
+    </div>`;
+  });
+  container.innerHTML = html + '</div></div>';
+}
+
+// ── TABLE (Finance list view) ──────────────────────────────────────────────
+function updateSortArrows(col, asc) {
+  ['name','sub','date','amount'].forEach(c => {
+    const th = document.getElementById('th-'+c);
+    if (!th) return;
+    th.classList.remove('sorted');
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = '↕';
+  });
+  const activeTh = document.getElementById('th-'+col);
+  if (activeTh) {
+    activeTh.classList.add('sorted');
+    const arrow = activeTh.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = asc ? '↑' : '↓';
+  }
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+  renderTable();
+}
+
+function renderTable() {
+  buildFilterDropdowns();
+  const allData = getFilteredData();
+  const data = allData.filter(item => {
+    if (currentListFilter === 'all') return true;
+    return item.type === currentListFilter;
+  });
+
+  updateSortArrows(sortCol, sortAsc);
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  if (!data.length) {
+    const labels = {all:'entries', Loan:'loans or EMI', Investment:'investments', Income:'income', Expense:'expenses'};
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No ${labels[currentListFilter]||'entries'} found for the selected filter</p></div></td></tr>`;
+    return;
+  }
+
+  data.sort((a,b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (sortCol === 'amount') { av = Number(av); bv = Number(bv); }
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    return sortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  }).forEach(item => {
+    const bc = item.type==='Loan'?'bg-loan':item.type==='Investment'?'bg-inv':item.type==='Income'?'bg-inc':'bg-exp';
+    const sign = item.type === 'Income' ? '+' : '-';
+    const color = item.type==='Income'?'var(--c-inc)':item.type==='Investment'?'var(--c-inv)':item.type==='Loan'?'var(--c-loan)':'var(--c-exp)';
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:500">${item.name} ${item.recurring?'<i class="fas fa-redo recur-icon" title="Recurring"></i>':''} ${item.notes?`<span style="font-size:0.7rem;color:var(--text-muted)">(${item.notes})</span>`:''}</td>
+      <td><span class="badge ${bc}">${item.type}</span></td>
+      <td style="color:var(--text-muted)">${item.sub||'-'}</td>
+      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.75rem">${item.date}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:${color};font-weight:600">${sign}${fmt(item.amount)}</td>
+      <td style="text-align:right"><i class="fas fa-edit edit-icon" onclick="editFinanceEntry(${item.id})" title="Edit"></i><i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.75rem" onclick="deleteItem(${item.id})"></i></td>
+    </tr>`;
+  });
+}
+
+// ── EDIT FINANCE ENTRY ─────────────────────────────────────────────────────
+function editFinanceEntry(id) {
+  const entry = db.find(x => x.id === id);
+  if (!entry) return;
+  editingFinanceId = id;
+  document.getElementById('modal-title').textContent = 'Edit Finance Record';
+  document.getElementById('inp-name').value = entry.name;
+  document.getElementById('inp-amt').value = entry.amount;
+  document.getElementById('inp-date').value = entry.date;
+  document.getElementById('inp-cat').value = entry.type;
+  document.getElementById('inp-sub').value = entry.sub || '';
+  document.getElementById('inp-notes').value = entry.notes || '';
+  document.getElementById('inp-recurring').checked = entry.recurring;
+  document.getElementById('fin-save-btn').textContent = 'Update Entry';
+  document.getElementById('fin-delete-btn').style.display = 'block';
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function deleteCurrentEntry() {
+  if (editingFinanceId && confirm('Delete this entry?')) {
+    deleteItem(editingFinanceId);
+    closeModal();
+  }
+}
+
+// ── PORTFOLIO TABLE ────────────────────────────────────────────────────────
+function sortPortTable(col) {
+  if (portSortCol === col) portSortAsc = !portSortAsc; else { portSortCol = col; portSortAsc = true; }
+  renderPortTable();
+}
+
+function renderPortTable() {
+  buildPortDropdowns();
+  let data = getPortFiltered();
+  const badge = document.getElementById('port-asset-filter-badge');
+  if (badge) badge.textContent = portAssetFilter !== 'all' ? `Showing: ${assetTypeLabel(portAssetFilter)}` : '';
+
+  const tbody = document.getElementById('port-table-body');
+  tbody.innerHTML = '';
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state"><i class="fas fa-gem"></i><p>No portfolio entries for the selected filter</p></div></td></tr>`;
+    document.getElementById('port-summary-panel').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('port-summary-panel').style.display = 'block';
+  data = data.map(e => ({...e, ...portCalc(e)}));
+
+  data.sort((a,b) => {
+    let av = a[portSortCol], bv = b[portSortCol];
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    return portSortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+  });
+
+  data.forEach(e => {
+    const roiClass = e.roi >= 100 ? 'good' : e.roi >= 50 ? 'ok' : 'bad';
+    const gainColor = e.gainLoss >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:600">${assetTypeLabel(e.assetType)}</td>
+      <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.72rem">${e.date}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${e.quantity}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${e.unit}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${fmt(e.purchasePrice)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${fmt(e.totalInvestment)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${fmt(e.currentPrice)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:var(--c-inv)">${fmt(e.currentValue)}</td>
+      <td style="text-align:right"><span class="roi-chip ${roiClass}">${e.roi.toFixed(0)}%</span></td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:var(--c-inc)">${e.profitPct.toFixed(1)}%</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:${gainColor};font-weight:600">${fmt(e.gainLoss)}</td>
+      <td style="text-align:right"><i class="fas fa-edit edit-icon" onclick="editPortEntry(${e.id})" title="Edit"></i><i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.72rem" onclick="deletePortItem(${e.id})"></i></td>
+    </tr>`;
+  });
+
+  renderPortSummary(data);
+}
+
+function renderPortSummary(data) {
+  const sb = document.getElementById('port-summary-body');
+  if (!data || !data.length) { sb.innerHTML = ''; return; }
+
+  const byType = {};
+  data.forEach(e => {
+    const key = normalizeAssetType(e.assetType);
+    if (!byType[key]) byType[key] = { roi:[], profit:[], gain:0, qty:0, val:0, price:[], inv:0, buyP:[] };
+    byType[key].roi.push(e.roi);
+    byType[key].profit.push(e.profitPct);
+    byType[key].gain += e.gainLoss;
+    byType[key].qty  += e.quantity;
+    byType[key].val  += e.currentValue;
+    byType[key].price.push(e.currentPrice);
+    byType[key].inv  += e.totalInvestment;
+    byType[key].buyP.push(e.purchasePrice);
+  });
+
+  sb.innerHTML = '';
+  Object.entries(byType).forEach(([type, s]) => {
+    const avgRoi = avg(s.roi), avgPro = avg(s.profit);
+    const avgCurr = avg(s.price), avgBuy = avg(s.buyP);
+    const gc = s.gain >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+    sb.innerHTML += `<tr class="port-summary-row">
+      <td>${assetTypeLabel(type)}</td>
+      <td style="text-align:right;color:var(--c-inc)">${avgRoi.toFixed(2)}%</td>
+      <td style="text-align:right;color:var(--c-inv)">${avgPro.toFixed(2)}%</td>
+      <td style="text-align:right;color:${gc}">${fmt(s.gain)}</td>
+      <td style="text-align:right">${s.qty}</td>
+      <td style="text-align:right">${fmt(s.val)}</td>
+      <td style="text-align:right">${fmt(avgCurr)}</td>
+      <td style="text-align:right">${fmt(s.inv)}</td>
+      <td style="text-align:right">${fmt(avgBuy)}</td>
+    </tr>`;
+  });
+
+  const totInv  = data.reduce((a,e) => a+e.totalInvestment, 0);
+  const totVal  = data.reduce((a,e) => a+e.currentValue, 0);
+  const totGain = data.reduce((a,e) => a+e.gainLoss, 0);
+  const totQty  = data.reduce((a,e) => a+e.quantity, 0);
+  const gAvgRoi = avg(data.map(e => e.roi));
+  const gAvgPro = avg(data.map(e => e.profitPct));
+  const gc = totGain >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+  sb.innerHTML += `<tr class="port-summary-row" style="border-top:2px solid rgba(167,139,250,0.3)">
+    <td>Grand Total</td>
+    <td style="text-align:right;color:var(--c-inc)">${gAvgRoi.toFixed(2)}%</td>
+    <td style="text-align:right;color:var(--c-inv)">${gAvgPro.toFixed(2)}%</td>
+    <td style="text-align:right;color:${gc}">${fmt(totGain)}</td>
+    <td style="text-align:right">${totQty}</td>
+    <td style="text-align:right">${fmt(totVal)}</td>
+    <td style="text-align:right">-</td>
+    <td style="text-align:right">${fmt(totInv)}</td>
+    <td style="text-align:right">-</td>
+  </tr>`;
+}
+
+// ── PORTFOLIO OVERVIEW CHARTS ──────────────────────────────────────────────
+function portAggStats(data) {
+  if (!data.length) return { totalInv:0, totalVal:0, totalGain:0, avgRoi:0, avgProfit:0, totalQty:0 };
+  const calcs = data.map(e => portCalc(e));
+  return {
+    totalInv:  calcs.reduce((a,c) => a+c.totalInvestment, 0),
+    totalVal:  calcs.reduce((a,c) => a+c.currentValue, 0),
+    totalGain: calcs.reduce((a,c) => a+c.gainLoss, 0),
+    avgRoi:    avg(calcs.map(c => c.roi)),
+    avgProfit: avg(calcs.map(c => c.profitPct)),
+    totalQty:  data.reduce((a,e) => a+e.quantity, 0),
+  };
+}
+
+function renderPortOverview() {
+  buildPortDropdowns();
+  const data = getPortFiltered();
+  const s = portAggStats(data);
+
+  document.getElementById('pk-invested').textContent = fmt(s.totalInv);
+  document.getElementById('pk-value').textContent    = fmt(s.totalVal);
+  const gEl = document.getElementById('pk-gain');
+  gEl.textContent = fmt(s.totalGain);
+  gEl.style.color = s.totalGain >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+  const rEl = document.getElementById('pk-roi');
+  rEl.textContent = s.avgRoi.toFixed(1) + '%';
+  rEl.style.color = s.avgRoi >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+  document.getElementById('pk-profit').textContent = s.avgProfit.toFixed(1) + '%';
+  document.getElementById('pk-qty').textContent    = s.totalQty;
+
+  // Aggregate by display label to avoid duplicates
+  const byTypeVal = {}, byTypeInv = {}, roiMap = {}, cntMap = {}, gainMap = {};
+  data.forEach(e => {
+    const c = portCalc(e);
+    const lbl = assetTypeLabel(e.assetType);
+    byTypeVal[lbl] = (byTypeVal[lbl] || 0) + c.currentValue;
+    byTypeInv[lbl] = (byTypeInv[lbl] || 0) + c.totalInvestment;
+    roiMap[lbl]    = (roiMap[lbl] || 0) + c.roi;
+    cntMap[lbl]    = (cntMap[lbl] || 0) + 1;
+    gainMap[lbl]   = (gainMap[lbl] || 0) + c.gainLoss;
+  });
+
+  const typeLabels  = Object.keys(byTypeVal);
+  const typeColors  = ['#f59e0b','#cbd5e1','#86efac','#818cf8','#ec4899','#a78bfa'];
+  const typeColorsA = ['rgba(245,158,11,0.7)','rgba(203,213,225,0.7)','rgba(134,239,172,0.7)','rgba(129,140,248,0.7)','rgba(236,72,153,0.7)','rgba(167,139,250,0.7)'];
+
+  // Value breakdown bar
+  destroyChart('port-value-bar');
+  if (typeLabels.length > 0) {
+    charts['port-value-bar'] = new Chart(document.getElementById('port-value-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          label: 'Current Value',
+          data: typeLabels.map(k => byTypeVal[k]),
+          backgroundColor: typeColorsA,
+          borderRadius: 7
+        }]
+      },
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
+    });
+  }
+
+  // Composition donut
+  destroyChart('port-composition');
+  if (typeLabels.length > 0) {
+    charts['port-composition'] = makeDonut('port-composition', typeLabels, typeLabels.map(k => byTypeVal[k]), typeColors);
+  }
+
+  // ROI% bar
+  const avgRoiVals = typeLabels.map(k => +(roiMap[k] / cntMap[k]).toFixed(1));
+  destroyChart('port-roi-chart');
+  if (typeLabels.length > 0) {
+    charts['port-roi-chart'] = new Chart(document.getElementById('port-roi-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: typeLabels,
+        datasets: [{ data: avgRoiVals, backgroundColor: 'rgba(167,139,250,0.7)', borderRadius: 6 }]
+      },
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
+    });
+  }
+
+  // Gain/Loss bar
+  destroyChart('port-gain-chart');
+  if (typeLabels.length > 0) {
+    charts['port-gain-chart'] = new Chart(document.getElementById('port-gain-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          data: typeLabels.map(k => gainMap[k]),
+          backgroundColor: typeLabels.map(k => gainMap[k] >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(239,68,68,0.7)'),
+          borderRadius: 6
+        }]
+      },
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
+    });
+  }
+
+  // Top 3
+  const top3 = data.map(e => ({...e, ...portCalc(e)})).sort((a,b) => b.roi - a.roi).slice(0,3);
+  document.getElementById('port-top3').innerHTML = top3.length ? top3.map((e,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <div style="font-size:0.7rem;color:#a78bfa;font-weight:700;min-width:16px">#${i+1}</div>
+      <div style="flex:1"><div style="font-weight:600;font-size:0.82rem">${assetTypeLabel(e.assetType)}</div><div style="font-size:0.68rem;color:var(--text-muted)">${e.date} · ${e.quantity}${e.unit}</div></div>
+      <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-weight:700;color:var(--c-inc);font-size:0.88rem">${e.roi.toFixed(0)}%</div><div style="font-size:0.68rem;color:var(--text-muted)">${fmt(e.gainLoss)}</div></div>
+    </div>`).join('')
+    : '<div class="empty-state" style="padding:1rem"><i class="fas fa-gem"></i><p>No data</p></div>';
+}
+
+// ── PORTFOLIO ANALYTICS CHARTS ─────────────────────────────────────────────
+function renderPortAnalytics() {
+  buildPortDropdowns();
+  const rawData = getPortFiltered();
+  if (!rawData.length) {
+    ['port-timeline','port-roi-scatter','port-waterfall','port-compare-bar','port-profit-donut'].forEach(id => destroyChart(id));
+    return;
+  }
+
+  const data = rawData.map(e => ({...e, ...portCalc(e)}));
+
+  // 1. Timeline
+  const sorted = [...data].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const tlLabels = sorted.map(e => e.date.slice(5) + ' ' + assetTypeLabel(e.assetType).slice(0,3));
+  destroyChart('port-timeline');
+  charts['port-timeline'] = new Chart(document.getElementById('port-timeline').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: tlLabels,
+      datasets: [
+        { label:'Current Value',  data:sorted.map(e=>e.currentValue),   borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.08)', fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#34d399' },
+        { label:'Total Invested', data:sorted.map(e=>e.totalInvestment), borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.05)', fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#a78bfa' }
+      ]
+    },
+    options: { ...cOpts(true), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b', maxTicksLimit:8 } } } }
+  });
+
+  // 2. ROI Scatter
+  const scatterSets = {};
+  data.forEach(e => {
+    const lbl = assetTypeLabel(e.assetType);
+    if (!scatterSets[lbl]) scatterSets[lbl] = [];
+    scatterSets[lbl].push({ x: e.totalInvestment, y: +e.roi.toFixed(1) });
+  });
+  const scColors = { 'Gold':'#f59e0b', 'Silver':'#cbd5e1', 'Land':'#86efac', 'Bonds':'#ec4899', 'Mutual Funds':'#818cf8', 'Stocks':'#a78bfa' };
+  destroyChart('port-roi-scatter');
+  charts['port-roi-scatter'] = new Chart(document.getElementById('port-roi-scatter').getContext('2d'), {
+    type: 'scatter',
+    data: { datasets: Object.entries(scatterSets).map(([type,pts]) => ({ label:type, data:pts, pointBackgroundColor:scColors[type]||'#a78bfa', pointRadius:6, pointHoverRadius:8 })) },
+    options: { ...cOpts(true), scales: {
+      x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+      y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
+    }}
+  });
+
+  // 3. Waterfall
+  const wfSorted = [...data].sort((a,b) => b.gainLoss - a.gainLoss);
+  destroyChart('port-waterfall');
+  charts['port-waterfall'] = new Chart(document.getElementById('port-waterfall').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: wfSorted.map(e => assetTypeLabel(e.assetType) + ' ' + e.date.slice(5)),
+      datasets: [{ data: wfSorted.map(e => +e.gainLoss.toFixed(0)), backgroundColor: wfSorted.map(e => e.gainLoss >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(239,68,68,0.7)'), borderRadius: 5 }]
+    },
+    options: { ...cOpts(false), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b',maxTicksLimit:8,maxRotation:45} } } }
+  });
+
+  // 4. Invested vs Value grouped bar
+  const cvByType = {};
+  data.forEach(e => {
+    const lbl = assetTypeLabel(e.assetType);
+    if (!cvByType[lbl]) cvByType[lbl] = { inv:0, val:0 };
+    cvByType[lbl].inv += e.totalInvestment;
+    cvByType[lbl].val += e.currentValue;
+  });
+  const cvLabels = Object.keys(cvByType);
+  destroyChart('port-compare-bar');
+  charts['port-compare-bar'] = new Chart(document.getElementById('port-compare-bar').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: cvLabels,
+      datasets: [
+        { label:'Total Invested', data:cvLabels.map(k=>cvByType[k].inv), backgroundColor:'rgba(167,139,250,0.6)', borderRadius:5 },
+        { label:'Current Value',  data:cvLabels.map(k=>cvByType[k].val), backgroundColor:'rgba(52,211,153,0.6)',  borderRadius:5 }
+      ]
+    },
+    options: { ...cOpts(true), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
+  });
+
+  // 5. Profit% donut
+  const profitBuckets = { '<25%':0, '25–50%':0, '50–100%':0, '100–200%':0, '>200%':0 };
+  data.forEach(e => {
+    const p = e.profitPct;
+    if (p < 25)       profitBuckets['<25%']++;
+    else if (p < 50)  profitBuckets['25–50%']++;
+    else if (p < 100) profitBuckets['50–100%']++;
+    else if (p < 200) profitBuckets['100–200%']++;
+    else              profitBuckets['>200%']++;
+  });
+  const profitVals = Object.values(profitBuckets);
+  destroyChart('port-profit-donut');
+  if (profitVals.some(v => v > 0)) {
+    charts['port-profit-donut'] = makeDonut('port-profit-donut', Object.keys(profitBuckets), profitVals, ['#64748b','#a78bfa','#818cf8','#34d399','#fbbf24']);
+  }
+}
+
+// ── ANALYTICS (Finance) ────────────────────────────────────────────────────
+function renderAnalytics() {
+  buildFilterDropdowns();
+  const fM = document.getElementById('trend-month').value;
+  const fY = document.getElementById('trend-year').value;
+  const range = parseInt(document.getElementById('trend-range').value);
+  const today = new Date();
+  let months = [];
+  for (let i = range-1; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
+    months.push({ label:MONTHS[d.getMonth()]+' '+d.getFullYear().toString().slice(2), year:d.getFullYear(), month:d.getMonth()+1 });
+  }
+  let trendData = months;
+  if (fM !== 'all' || fY !== 'all') {
+    const mm = [...new Set(db.map(d => d.date.slice(0,7)))].sort();
+    const filtered = mm.map(ym => {
+      const [y,m] = ym.split('-').map(Number);
+      if (fY !== 'all' && y !== parseInt(fY)) return null;
+      if (fM !== 'all' && m !== parseInt(fM)) return null;
+      return { label:MONTHS[m-1]+' '+String(y).slice(2), year:y, month:m };
+    }).filter(Boolean);
+    if (filtered.length) trendData = filtered;
+  }
+
+  const tI = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
+  const tE = trendData.map(m => db.filter(d => (d.type==='Expense'||d.type==='Loan') && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
+  const tS = tI.map((v,i) => v - tE[i]);
+
+  destroyChart('trend');
+  charts['trend'] = new Chart(document.getElementById('chart-trend').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: trendData.map(m => m.label),
+      datasets: [
+        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.08)', borderWidth:2, tension:0.4, fill:true, pointRadius:3, pointBackgroundColor:'#34d399' },
+        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:'rgba(99,102,241,0.5)', borderColor:'#6366f1', borderWidth:1, borderRadius:4 },
+        { type:'bar',  label:'Income',        data:tI, backgroundColor:'rgba(52,211,153,0.2)', borderColor:'#34d399', borderWidth:1, borderRadius:4 }
+      ]
+    },
+    options: { ...cOpts(true), scales: { y: { stacked:false, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
+  });
+
+  const data = getFilteredData();
+  const sp = data.filter(d => d.type==='Expense'||d.type==='Loan').map(d => ({ x:new Date(d.date).getDate(), y:d.amount, t:d.type }));
+  destroyChart('scatter');
+  charts['scatter'] = new Chart(document.getElementById('chart-scatter').getContext('2d'), {
+    type: 'scatter',
+    data: { datasets: [
+      { label:'Expense',  pointBackgroundColor:'#f472b6', pointRadius:5, data:sp.filter(p=>p.t==='Expense').map(p=>({x:p.x,y:p.y})) },
+      { label:'Loan/EMI', pointBackgroundColor:'#60a5fa', pointRadius:5, data:sp.filter(p=>p.t==='Loan').map(p=>({x:p.x,y:p.y})) }
+    ]},
+    options: { ...cOpts(true), scales: {
+      x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+      y: { ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} }
+    }}
+  });
+
+  const hBar = (canvasId, type, colors, chartKey) => {
+    const g = groupData(type, data);
+    destroyChart(chartKey);
+    if (Object.keys(g).length > 0) {
+      charts[chartKey] = new Chart(document.getElementById(canvasId).getContext('2d'), {
+        type: 'bar',
+        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:colors, borderRadius:5, borderSkipped:false }] },
+        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#94a3b8'}} } }
+      });
+    }
+  };
+
+  hBar('chart-invest',  'Investment', ['rgba(251,191,36,0.7)','rgba(245,158,11,0.7)','rgba(217,119,6,0.7)'], 'invest');
+  hBar('chart-exp-bif', 'Expense',    ['rgba(244,114,182,0.7)','rgba(236,72,153,0.7)','rgba(219,39,119,0.7)'], 'expbif');
+  hBar('chart-loan-bif','Loan',       ['rgba(96,165,250,0.7)','rgba(59,130,246,0.7)','rgba(37,99,235,0.7)'], 'loanbif');
+
+  renderDonut('chart-debt', ['Debt','Assets'], [sumType('Loan',data), sumType('Investment',data)], ['#60a5fa','#34d399'], 'debt');
+  const ed = groupData('Expense', data);
+  if (Object.keys(ed).length > 0) renderDonut('chart-cats', Object.keys(ed), Object.values(ed), ['#f472b6','#ec4899','#db2777','#be185d','#9d174d'], 'cats');
+}
+
+function matchMonth(item, m) {
+  const d = new Date(item.date);
+  return d.getFullYear() === m.year && (d.getMonth()+1) === m.month;
+}
+
+// ── NET WORTH ──────────────────────────────────────────────────────────────
+function renderNetWorth() {
+  buildFilterDropdowns();
+  const totalInv  = sumType('Investment', db);
+  const totalInc  = sumType('Income', db);
+  const totalLoan = sumType('Loan', db);
+  document.getElementById('nw-assets').textContent = fmt(totalInv + totalInc);
+  document.getElementById('nw-liab').textContent   = fmt(totalLoan);
+  document.getElementById('nw-total').textContent  = fmt(totalInv + totalInc - totalLoan);
+
+  const sortedM = [...new Set(db.map(d => d.date.slice(0,7)))].sort();
+  if (!sortedM.length) return;
+
+  let cumA = 0, cumL = 0;
+  const nwL = [], nwD = [], aD = [], lD = [];
+  sortedM.forEach(ym => {
+    const [y,m] = ym.split('-').map(Number);
+    const items = db.filter(d => d.date.slice(0,7) === ym);
+    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b) => a+b.amount, 0);
+    cumL += items.filter(d => d.type==='Loan').reduce((a,b) => a+b.amount, 0);
+    nwL.push(MONTHS[m-1]+' '+String(y).slice(2));
+    nwD.push(cumA - cumL); aD.push(cumA); lD.push(cumL);
+  });
+
+  destroyChart('networth');
+  charts['networth'] = new Chart(document.getElementById('chart-networth').getContext('2d'), {
+    type: 'line',
+    data: { labels:nwL, datasets:[{ label:'Net Worth', data:nwD, borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.08)', fill:true, tension:0.4, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#a78bfa' }] },
+    options: { ...cOpts(false), scales: { y:{ grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'} }, x:{ ticks:{color:'#64748b'} } } }
+  });
+  destroyChart('nwbreak');
+  charts['nwbreak'] = new Chart(document.getElementById('chart-nw-breakdown').getContext('2d'), {
+    type: 'bar',
+    data: { labels:nwL, datasets:[
+      { label:'Assets',      data:aD, backgroundColor:'rgba(52,211,153,0.5)', borderColor:'#34d399', borderWidth:1, borderRadius:4 },
+      { label:'Liabilities', data:lD, backgroundColor:'rgba(96,165,250,0.5)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4 }
+    ]},
+    options: { ...cOpts(true), scales: { y:{ grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'} }, x:{ ticks:{color:'#64748b'} } } }
+  });
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function fmt(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function avg(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0; }
+function sumType(type, data) { return (data||db).filter(x => x.type===type).reduce((a,b) => a+Number(b.amount), 0); }
+function groupData(type, data) {
+  const g = {};
+  (data||db).filter(x => x.type===type).forEach(i => { const k = i.sub||'General'; g[k] = (g[k]||0) + Number(i.amount); });
+  return g;
+}
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function cOpts(legend) {
+  return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:!!legend, labels:{ color:'#94a3b8', boxWidth:11, font:{ family:'DM Sans', size:11 } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } };
+}
+function makeDonut(id, labels, data, colors) {
+  return new Chart(document.getElementById(id).getContext('2d'), {
+    type: 'doughnut',
+    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:5 }] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'right', labels:{ color:'#94a3b8', boxWidth:9, font:{ size:10, family:'DM Sans' } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } }
+  });
+}
+function renderDonut(id, labels, data, colors, key) {
+  destroyChart(key);
+  charts[key] = makeDonut(id, labels, data, colors);
+}
+
+// ── FINANCE ENTRY MODAL ────────────────────────────────────────────────────
+function openModal() {
+  editingFinanceId = null;
+  document.getElementById('modal-title').textContent = 'Add Finance Record';
+  document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('inp-cat').value = 'Expense';
+  document.getElementById('inp-recurring').checked = false;
+  document.getElementById('fin-save-btn').textContent = 'Save Entry';
+  document.getElementById('fin-delete-btn').style.display = 'none';
+  ['inp-name','inp-amt','inp-sub','inp-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function saveEntry() {
+  const name = document.getElementById('inp-name').value.trim();
+  const amt  = document.getElementById('inp-amt').value;
+  const type = document.getElementById('inp-cat').value;
+  const sub  = document.getElementById('inp-sub').value.trim();
+  const date = document.getElementById('inp-date').value;
+  const notes     = document.getElementById('inp-notes').value.trim();
+  const recurring = document.getElementById('inp-recurring').checked;
+  if (!name || !amt || !date) { alert('Please fill in Name, Amount and Date'); return; }
+
+  if (editingFinanceId) {
+    const idx = db.findIndex(x => x.id === editingFinanceId);
+    if (idx >= 0) {
+      db[idx] = { ...db[idx], name, amount:Number(amt), type, sub, date, notes, recurring };
+    }
+  } else {
+    db.push({ id:Date.now(), name, amount:Number(amt), type, sub, date, notes, recurring });
+  }
+
+  scheduleSave();
+  buildFilterDropdowns();
+  closeModal();
+
+  if      (activeView === 'dashboard')   renderDashboard();
+  else if (activeView === 'analytics')   renderAnalytics();
+  else if (activeView === 'networth')    renderNetWorth();
+  else if (activeView === 'transactions' || activeView === 'loans' || activeView === 'investments') renderTable();
+}
+
+function deleteItem(id) {
+  if (confirm('Delete this entry?')) {
+    db = db.filter(x => x.id !== id);
+    scheduleSave();
+    renderTable();
+  }
+}
+
+// ── PORTFOLIO ENTRY MODAL ──────────────────────────────────────────────────
+const unitMap = { 'gold':'grams', 'silver':'grams', 'land':'sq.ft', 'bonds':'units', 'mutualfund':'units', 'mf':'units', 'stock':'units', 'stocks':'units' };
+
+function updatePortUnit() {
+  const raw = document.getElementById('p-assetType').value;
+  const t   = raw.toLowerCase().trim();
+  const unit = unitMap[t] || (t.includes('gold')||t.includes('silver') ? 'grams' : t.includes('land')||t.includes('bond') ? 'units' : 'units');
+  document.getElementById('p-unit').value = unit;
+  document.getElementById('p-unit-hint').textContent = '('+unit+')';
+  calcPortPreview();
+}
+
+function calcPortPreview() {
+  const assetType = document.getElementById('p-assetType').value.trim();
+  const qty  = parseFloat(document.getElementById('p-qty').value) || 0;
+  const buy  = parseFloat(document.getElementById('p-buyPrice').value) || 0;
+  const cur  = parseFloat(document.getElementById('p-currPrice').value) || 0;
+
+  let totalInv, currVal;
+  if (isQtyBased(assetType)) {
+    totalInv = qty * buy;
+    currVal  = qty * cur;
+  } else {
+    totalInv = buy;
+    currVal  = cur;
+  }
+
+  const gain = currVal - totalInv;
+  const roi  = totalInv > 0 ? ((currVal - totalInv) / totalInv) * 100 : 0;
+  const prof = totalInv > 0 ? (gain / totalInv) * 100 : 0;
+
+  document.getElementById('calc-invested').textContent = fmt(totalInv);
+  document.getElementById('calc-value').textContent    = fmt(currVal);
+  const gEl = document.getElementById('calc-gain');
+  gEl.textContent = fmt(gain); gEl.style.color = gain >= 0 ? '#34d399' : '#ef4444';
+  const rEl = document.getElementById('calc-roi');
+  rEl.textContent = roi.toFixed(1)+'%'; rEl.style.color = roi >= 0 ? '#34d399' : '#ef4444';
+  document.getElementById('calc-profit').textContent = prof.toFixed(1)+'%';
+}
+
+function openPortModal() {
+  editingPortId = null;
+  document.getElementById('port-modal-title').textContent = 'Add Portfolio Asset';
+  document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('p-unit-hint').textContent = '(grams)';
+  document.getElementById('port-save-btn').textContent = 'Save Asset';
+  document.getElementById('port-delete-btn').style.display = 'none';
+  ['p-assetType','p-qty','p-unit','p-buyPrice','p-currPrice','p-notes'].forEach(id => document.getElementById(id).value = '');
+  calcPortPreview();
+  document.getElementById('port-modal').style.display = 'flex';
+}
+function closePortModal() { document.getElementById('port-modal').style.display = 'none'; }
+
+function editPortEntry(id) {
+  const entry = portDb.find(x => x.id === id);
+  if (!entry) return;
+  editingPortId = id;
+  document.getElementById('port-modal-title').textContent = 'Edit Portfolio Asset';
+  document.getElementById('p-assetType').value = entry.assetType;
+  document.getElementById('p-date').value = entry.date;
+  document.getElementById('p-qty').value = entry.quantity;
+  document.getElementById('p-unit').value = entry.unit;
+  document.getElementById('p-buyPrice').value = entry.purchasePrice;
+  document.getElementById('p-currPrice').value = entry.currentPrice;
+  document.getElementById('p-notes').value = entry.notes || '';
+  document.getElementById('port-save-btn').textContent = 'Update Asset';
+  document.getElementById('port-delete-btn').style.display = 'block';
+  updatePortUnit();
+  calcPortPreview();
+  document.getElementById('port-modal').style.display = 'flex';
+}
+
+function deleteCurrentPortEntry() {
+  if (editingPortId && confirm('Delete this asset entry?')) {
+    deletePortItem(editingPortId);
+    closePortModal();
+  }
+}
+
+function savePortEntry() {
+  const assetType    = normalizeAssetType(document.getElementById('p-assetType').value.trim());
+  const date         = document.getElementById('p-date').value;
+  const quantity     = parseFloat(document.getElementById('p-qty').value);
+  const unit         = document.getElementById('p-unit').value.trim() || 'units';
+  const purchasePrice = parseFloat(document.getElementById('p-buyPrice').value);
+  const currentPrice  = parseFloat(document.getElementById('p-currPrice').value);
+  const notes        = document.getElementById('p-notes').value.trim();
+  if (!assetType || !date || !quantity || !purchasePrice || !currentPrice) {
+    alert('Please fill all required fields'); return;
+  }
+
+  if (editingPortId) {
+    const idx = portDb.findIndex(x => x.id === editingPortId);
+    if (idx >= 0) {
+      portDb[idx] = { ...portDb[idx], assetType, date, quantity, unit, purchasePrice, currentPrice, notes };
+    }
+  } else {
+    portDb.push({ id:Date.now(), assetType, date, quantity, unit, purchasePrice, currentPrice, notes });
+  }
+
+  scheduleSave();
+  buildPortDropdowns();
+  closePortModal();
+
+  if      (activeView === 'port-overview')  renderPortOverview();
+  else if (activeView === 'port-table')     renderPortTable();
+  else if (activeView === 'port-analytics') renderPortAnalytics();
+  else if (activeView === 'dashboard')      renderDashboard();
+}
+
+function deletePortItem(id) {
+  if (confirm('Delete this asset entry?')) {
+    portDb = portDb.filter(x => x.id !== id);
+    scheduleSave();
+    if (activeView === 'port-table') renderPortTable();
+    else if (activeView === 'dashboard') renderDashboard();
+  }
+}
+
+// ── BUDGET MODAL ───────────────────────────────────────────────────────────
+function sanitizeId(str) { return str.replace(/[^a-zA-Z0-9]/g, '_'); }
+
+function openBudgetModal() {
+  const allSubs = [...new Set(db.map(d => d.sub).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  document.getElementById('budget-modal-list').innerHTML = allSubs.map(sub => `
+    <div class="budget-row">
+      <label>${sub}</label>
+      <input type="number" class="input-field budget-input" id="bgt-${sanitizeId(sub)}" value="${budgets[sub]||''}" placeholder="No limit">
+    </div>`).join('');
+  document.getElementById('budget-modal').style.display = 'flex';
+}
+
+function saveBudgets() {
+  const allSubs = [...new Set(db.map(d => d.sub).filter(Boolean))];
+  allSubs.forEach(sub => {
+    const el  = document.getElementById('bgt-'+sanitizeId(sub));
+    const val = el?.value;
+    if (val && Number(val) > 0) budgets[sub] = Number(val); else delete budgets[sub];
+  });
+  localStorage.setItem('fos_budgets', JSON.stringify(budgets));
+  document.getElementById('budget-modal').style.display = 'none';
+  if (activeView === 'dashboard') renderDashboard();
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportCSV() {
+  let csv = 'Name,SubCategory,Type,Amount,Date,Recurring,Notes\n';
+  db.forEach(r => csv += `"${r.name}","${r.sub||''}","${r.type}",${r.amount},"${r.date}",${r.recurring||false},"${r.notes||''}"\n`);
+  csv += '\n\nPORTFOLIO\nAssetType,Date,Quantity,Unit,BuyPrice,CurrentPrice,TotalInvested,CurrentValue,GainLoss,ROI%,Notes\n';
+  portDb.forEach(e => {
+    const c = portCalc(e);
+    csv += `"${e.assetType}","${e.date}",${e.quantity},"${e.unit}",${e.purchasePrice},${e.currentPrice},${c.totalInvestment.toFixed(0)},${c.currentValue.toFixed(0)},${c.gainLoss.toFixed(0)},${c.roi.toFixed(1)},"${e.notes||''}"\n`;
+  });
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url  = window.URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'financeos_export.csv'; a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+// ── EXCEL IMPORT ───────────────────────────────────────────────────────────
+function importExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type:'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json  = XLSX.utils.sheet_to_json(sheet);
+    const newEntries = json.map(row => ({
+      id: Date.now() + Math.random(),
+      assetType: normalizeAssetType(row["Investment Type"] || ''),
+      date: formatExcelDate(row["Date"]),
+      quantity: Number(row["Quantity gms"] || 0),
+      unit: "grams",
+      purchasePrice: Number(row["Purchase Price per/g"] || 0),
+      currentPrice:  Number(row["Current Price per/g"]  || 0),
+      notes: row["Buyer"] || ""
+    }));
+    portDb = [...portDb, ...newEntries];
+    scheduleSave();
+    buildPortDropdowns();
+    applyPortFilters();
+    alert("✅ Excel Imported Successfully");
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function formatExcelDate(value) {
+  if (!value) return new Date().toISOString().split('T')[0];
+  if (typeof value === "string") return convertTextDate(value);
+  const date = new Date((value - 25569) * 86400 * 1000);
+  return date.toISOString().split('T')[0];
+}
+
+function convertTextDate(text) {
+  const months = { Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12" };
+  const parts = text.split("-");
+  if (parts.length !== 2) return new Date().toISOString().split('T')[0];
+  const day   = parts[0].padStart(2,"0");
+  const month = months[parts[1]] || "01";
+  const year  = new Date().getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+window.onload = () => {
+  portFilterMode = 'only';
+
+  buildFilterDropdowns();
+  buildPortDropdowns();
+  renderDashboard();
+
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
+  });
+};
+</script>
+</body>
+</html>
