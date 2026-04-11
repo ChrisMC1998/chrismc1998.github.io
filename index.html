@@ -20,11 +20,14 @@
   --c-exp: #f472b6;
   --c-inc: #34d399;
   --c-net: #a78bfa;
-  --c-gold: #f59e0b;
-  --c-silver: #cbd5e1;
-  --c-land: #86efac;
-  --c-mf: #818cf8;
-  --c-bonds: #ec4899;
+  /* ── ASSET COLOURS — single source of truth ── */
+  --c-gold:   #f59e0b;
+  --c-silver: #94a3b8;
+  --c-land:   #34d399;
+  --c-mf:     #6366f1;
+  --c-bonds:  #f472b6;
+  --c-stocks: #38bdf8;
+  --c-other:  #a78bfa;
   --sidebar-w: 220px;
   --port-sidebar-w: 200px;
   --warning: #f59e0b;
@@ -225,12 +228,13 @@ tr:last-child td { border-bottom:none; }
 .btn-delete { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:7px 14px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:600; transition:0.16s; }
 .btn-delete:hover { background:rgba(239,68,68,0.2); }
 
-.asset-gold   { color:var(--c-gold); }
-.asset-silver { color:var(--c-silver); }
-.asset-land   { color:var(--c-land); }
-.asset-mf     { color:var(--c-mf); }
-.asset-bonds  { color:var(--c-bonds); }
-.asset-other  { color:var(--text-mid); }
+/* Sidebar asset dot colours */
+.asset-gold   { color: var(--c-gold); }
+.asset-silver { color: var(--c-silver); }
+.asset-land   { color: var(--c-land); }
+.asset-mf     { color: var(--c-mf); }
+.asset-bonds  { color: var(--c-bonds); }
+.asset-other  { color: var(--text-mid); }
 
 .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
 .empty-state i { font-size:2.2rem; opacity:0.25; display:block; margin-bottom:.8rem; }
@@ -302,6 +306,7 @@ tr:last-child td { border-bottom:none; }
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3;margin-top:4px">By Asset</div>
+  <!-- Sidebar dots now use the correct per-asset CSS var -->
   <div class="port-nav-item" id="port-nav-gold" onclick="filterPortAsset('Gold')">
     <div class="nav-icon"><i class="fas fa-circle asset-gold" style="font-size:0.55rem"></i></div>Gold
   </div>
@@ -445,7 +450,7 @@ tr:last-child td { border-bottom:none; }
       </div>
     </div>
 
-    <!-- LIST VIEW — used for Transactions, Loans, Investments -->
+    <!-- LIST VIEW -->
     <div id="view-list" class="view-section">
       <div class="glass-panel">
         <table>
@@ -797,12 +802,35 @@ tr:last-child td { border-bottom:none; }
 <script>
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+// ══════════════════════════════════════════════════════════════════════════════
+// ASSET COLOUR MAP — single source of truth for ALL charts
+// Key = normalised asset type string returned by normalizeAssetType()
+// ══════════════════════════════════════════════════════════════════════════════
+const ASSET_COLOR = {
+  'Gold':       '#f59e0b',   // amber
+  'Silver':     '#94a3b8',   // slate-400  (previously clashed with land)
+  'Land':       '#34d399',   // emerald
+  'MutualFund': '#6366f1',   // indigo
+  'Bonds':      '#f472b6',   // pink
+  'Stocks':     '#38bdf8',   // sky
+  'Other':      '#a78bfa',   // violet fallback
+};
+// Alpha version for bar/area fills
+function assetColorA(type, alpha = 0.7) {
+  const hex = ASSET_COLOR[type] || ASSET_COLOR['Other'];
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+// Returns solid colour for a given asset type key
+function assetColor(type) {
+  return ASSET_COLOR[normalizeAssetType(type)] || ASSET_COLOR['Other'];
+}
+
 // ─── ASSET TYPE DETECTION ───────────────────────────────────────────────────
-// "Land", "MutualFund", and "Bonds" all use TOTAL price (not qty × price).
-// Gold, Silver, Stocks use qty × price.
 function isQtyBased(assetType) {
   const t = normalizeAssetType(assetType);
-  // Land, MutualFund, and Bonds store totals directly — do NOT multiply by quantity
   return t !== 'Land' && t !== 'MutualFund' && t !== 'Bonds';
 }
 
@@ -879,6 +907,12 @@ function assetTypeLabel(type) {
   return map[k] || (String(type ?? '').trim() || 'Other');
 }
 
+// Key used to look up colours — same as normalizeAssetType but "Other" fallback
+function assetTypeKey(type) {
+  const k = normalizeAssetType(type);
+  return ASSET_COLOR[k] ? k : 'Other';
+}
+
 function normalizePortRecord(record) {
   return { ...record, assetType: normalizeAssetType(record.assetType) };
 }
@@ -900,9 +934,6 @@ function doAutoSave() {
 setInterval(doAutoSave, 5000);
 
 // ── PORTFOLIO CALC ─────────────────────────────────────────────────────────
-// BUG FIX: Land, MutualFund, and Bonds entries store total value directly
-// purchasePrice = total amount invested, currentPrice = current total value.
-// Do NOT multiply by quantity for Land, MutualFund, or Bonds.
 function portCalc(e) {
   const qty = Number(e.quantity) || 0;
   const buyP = Number(e.purchasePrice) || 0;
@@ -910,11 +941,9 @@ function portCalc(e) {
 
   let totalInv, currVal;
   if (isQtyBased(e.assetType)) {
-    // Gold, Silver, Stocks: price is per unit → multiply by qty
     totalInv = qty * buyP;
     currVal  = qty * curP;
   } else {
-    // Land, MutualFund, Bonds: price fields hold the total value directly
     totalInv = buyP;
     currVal  = curP;
   }
@@ -931,8 +960,6 @@ function getPortFiltered() {
   if (portAssetFilter !== 'all') {
     data = data.filter(e => normalizeAssetType(e.assetType) === portAssetFilter);
   }
-
-  // BUG FIX: when portFilterMode is 'all', skip date filtering entirely
   if (portFilterMode === 'all') return data;
 
   const fM = document.getElementById('port-month').value;
@@ -945,7 +972,7 @@ function getPortFiltered() {
       if (fY !== 'all' && iY !== fY) return false;
       if (fM !== 'all' && iM !== fM) return false;
       return true;
-    } else { // cumul
+    } else {
       const d = new Date(item.date);
       let cut;
       if (fY !== 'all' && fM !== 'all') cut = new Date(`${fY}-${fM}-31`);
@@ -958,25 +985,20 @@ function getPortFiltered() {
 
 function buildPortDropdowns() {
   const years = [...new Set(portDb.map(d => d.date.slice(0,4)))].sort().reverse();
-
   const portMonthSel = document.getElementById('port-month');
   const portYearSel  = document.getElementById('port-year');
   const curM = portMonthSel.value;
   const curY = portYearSel.value;
 
-  // Rebuild month dropdown
   portMonthSel.innerHTML = '<option value="all">All Months</option>';
   MONTHS.forEach((m, i) => {
     const v = String(i+1).padStart(2,'0');
-    const sel = curM === v ? ' selected' : '';
-    portMonthSel.innerHTML += `<option value="${v}"${sel}>${m}</option>`;
+    portMonthSel.innerHTML += `<option value="${v}"${curM===v?' selected':''}>${m}</option>`;
   });
 
-  // Rebuild year dropdown
   portYearSel.innerHTML = '<option value="all">All Years</option>';
   years.forEach(y => {
-    const sel = curY === y ? ' selected' : '';
-    portYearSel.innerHTML += `<option value="${y}"${sel}>${y}</option>`;
+    portYearSel.innerHTML += `<option value="${y}"${curY===y?' selected':''}>${y}</option>`;
   });
 }
 
@@ -1007,8 +1029,6 @@ function filterPortAsset(type) {
 // ── FINANCE FILTERS ────────────────────────────────────────────────────────
 function buildFilterDropdowns() {
   const years = [...new Set(db.map(d => d.date.slice(0,4)))].sort().reverse();
-
-  // Finance main dropdowns
   ['filter-month', 'trend-month'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
@@ -1019,7 +1039,6 @@ function buildFilterDropdowns() {
       sel.innerHTML += `<option value="${v}"${cur===v?' selected':''}>${m}</option>`;
     });
   });
-
   ['filter-year', 'trend-year'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
@@ -1071,7 +1090,6 @@ function applyFilters() {
 // ── NAVIGATION ─────────────────────────────────────────────────────────────
 function switchView(viewName, btn, group) {
   activeView = viewName;
-
   if (group === 'finance') {
     document.querySelectorAll('.sidebar .nav-item').forEach(el => el.classList.remove('active'));
     if (btn) btn.classList.add('active');
@@ -1179,39 +1197,47 @@ function renderDashboard() {
       ['#f472b6','#ec4899','#db2777','#be185d','#9d174d']);
   }
 
-  // Portfolio by asset type donut — aggregate by display label
+  // Portfolio by asset type donut — colours keyed by asset type
   const byType = {};
   pd.forEach(e => {
     const c = portCalc(e);
-    const label = assetTypeLabel(e.assetType);
-    byType[label] = (byType[label] || 0) + c.currentValue;
+    const key = normalizeAssetType(e.assetType);
+    byType[key] = (byType[key] || 0) + c.currentValue;
   });
+  const typeKeys   = Object.keys(byType);
+  const typeLabels = typeKeys.map(k => assetTypeLabel(k));
   destroyChart('dash-port-donut');
-  if (Object.keys(byType).length > 0) {
-    charts['dash-port-donut'] = makeDonut('dash-port-donut',
-      Object.keys(byType), Object.values(byType),
-      ['#f59e0b','#cbd5e1','#86efac','#818cf8','#ec4899','#a78bfa']);
+  if (typeKeys.length > 0) {
+    charts['dash-port-donut'] = makeDonut(
+      'dash-port-donut',
+      typeLabels,
+      typeKeys.map(k => byType[k]),
+      typeKeys.map(k => assetColor(k))
+    );
   }
 
-  // ROI by asset bar
+  // ROI by asset bar — colours keyed by asset type
   const roiByType = {}, cntByType = {};
   pd.forEach(e => {
     const c = portCalc(e);
-    const label = assetTypeLabel(e.assetType);
-    roiByType[label] = (roiByType[label] || 0) + c.roi;
-    cntByType[label] = (cntByType[label] || 0) + 1;
+    const key = normalizeAssetType(e.assetType);
+    roiByType[key] = (roiByType[key] || 0) + c.roi;
+    cntByType[key] = (cntByType[key] || 0) + 1;
   });
-  const avgRoiLabels = Object.keys(roiByType);
-  const avgRoiVals   = avgRoiLabels.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
+  const avgRoiKeys   = Object.keys(roiByType);
+  const avgRoiLabels = avgRoiKeys.map(k => assetTypeLabel(k));
+  const avgRoiVals   = avgRoiKeys.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
   destroyChart('dash-roi-bar');
-  if (avgRoiLabels.length > 0) {
+  if (avgRoiKeys.length > 0) {
     charts['dash-roi-bar'] = new Chart(document.getElementById('dash-roi-bar').getContext('2d'), {
       type: 'bar',
       data: {
         labels: avgRoiLabels,
         datasets: [{
           data: avgRoiVals,
-          backgroundColor: ['rgba(245,158,11,0.7)','rgba(203,213,225,0.7)','rgba(134,239,172,0.7)','rgba(129,140,248,0.7)','rgba(236,72,153,0.7)','rgba(167,139,250,0.7)'],
+          backgroundColor: avgRoiKeys.map(k => assetColorA(k, 0.75)),
+          borderColor:     avgRoiKeys.map(k => assetColor(k)),
+          borderWidth: 1,
           borderRadius: 6
         }]
       },
@@ -1223,7 +1249,10 @@ function renderDashboard() {
   const sorted = pd.map(e => ({...e, ...portCalc(e)})).sort((a,b) => b.roi - a.roi).slice(0,3);
   document.getElementById('dash-top3').innerHTML = sorted.length ? sorted.map(e => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-      <div><div style="font-weight:600;font-size:0.82rem">${assetTypeLabel(e.assetType)}</div><div style="font-size:0.7rem;color:var(--text-muted)">${e.date} · ${e.quantity} ${e.unit}</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${assetColor(e.assetType)};flex-shrink:0"></div>
+        <div><div style="font-weight:600;font-size:0.82rem">${assetTypeLabel(e.assetType)}</div><div style="font-size:0.7rem;color:var(--text-muted)">${e.date} · ${e.quantity} ${e.unit}</div></div>
+      </div>
       <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-weight:700;font-size:0.9rem;color:var(--c-inc)">${e.roi.toFixed(0)}% ROI</div><div style="font-size:0.7rem;color:var(--text-muted)">${fmt(e.gainLoss)} gain</div></div>
     </div>`).join('') : '<div class="empty-state"><i class="fas fa-inbox"></i>No portfolio data</div>';
 }
@@ -1250,7 +1279,7 @@ function renderBudgetAlerts(data) {
   container.innerHTML = html + '</div></div>';
 }
 
-// ── TABLE (Finance list view) ──────────────────────────────────────────────
+// ── TABLE ──────────────────────────────────────────────────────────────────
 function updateSortArrows(col, asc) {
   ['name','sub','date','amount'].forEach(c => {
     const th = document.getElementById('th-'+c);
@@ -1275,11 +1304,7 @@ function sortTable(col) {
 function renderTable() {
   buildFilterDropdowns();
   const allData = getFilteredData();
-  const data = allData.filter(item => {
-    if (currentListFilter === 'all') return true;
-    return item.type === currentListFilter;
-  });
-
+  const data = allData.filter(item => currentListFilter === 'all' ? true : item.type === currentListFilter);
   updateSortArrows(sortCol, sortAsc);
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = '';
@@ -1368,8 +1393,14 @@ function renderPortTable() {
   data.forEach(e => {
     const roiClass = e.roi >= 100 ? 'good' : e.roi >= 50 ? 'ok' : 'bad';
     const gainColor = e.gainLoss >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+    const dotColor = assetColor(e.assetType);
     tbody.innerHTML += `<tr>
-      <td style="font-weight:600">${assetTypeLabel(e.assetType)}</td>
+      <td style="font-weight:600">
+        <span style="display:inline-flex;align-items:center;gap:6px">
+          <span style="width:7px;height:7px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block"></span>
+          ${assetTypeLabel(e.assetType)}
+        </span>
+      </td>
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.72rem">${e.date}</td>
       <td style="text-align:right;font-family:'DM Mono',monospace">${e.quantity}</td>
       <td style="color:var(--text-muted);font-size:0.75rem">${e.unit}</td>
@@ -1410,8 +1441,9 @@ function renderPortSummary(data) {
     const avgRoi = avg(s.roi), avgPro = avg(s.profit);
     const avgCurr = avg(s.price), avgBuy = avg(s.buyP);
     const gc = s.gain >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+    const dot = assetColor(type);
     sb.innerHTML += `<tr class="port-summary-row">
-      <td>${assetTypeLabel(type)}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;display:inline-block"></span>${assetTypeLabel(type)}</span></td>
       <td style="text-align:right;color:var(--c-inc)">${avgRoi.toFixed(2)}%</td>
       <td style="text-align:right;color:var(--c-inv)">${avgPro.toFixed(2)}%</td>
       <td style="text-align:right;color:${gc}">${fmt(s.gain)}</td>
@@ -1473,33 +1505,36 @@ function renderPortOverview() {
   document.getElementById('pk-profit').textContent = s.avgProfit.toFixed(1) + '%';
   document.getElementById('pk-qty').textContent    = s.totalQty;
 
-  // Aggregate by display label to avoid duplicates
+  // Aggregate by normalised key (not display label) to keep colour mapping consistent
   const byTypeVal = {}, byTypeInv = {}, roiMap = {}, cntMap = {}, gainMap = {};
   data.forEach(e => {
+    const key = normalizeAssetType(e.assetType);
     const c = portCalc(e);
-    const lbl = assetTypeLabel(e.assetType);
-    byTypeVal[lbl] = (byTypeVal[lbl] || 0) + c.currentValue;
-    byTypeInv[lbl] = (byTypeInv[lbl] || 0) + c.totalInvestment;
-    roiMap[lbl]    = (roiMap[lbl] || 0) + c.roi;
-    cntMap[lbl]    = (cntMap[lbl] || 0) + 1;
-    gainMap[lbl]   = (gainMap[lbl] || 0) + c.gainLoss;
+    byTypeVal[key] = (byTypeVal[key] || 0) + c.currentValue;
+    byTypeInv[key] = (byTypeInv[key] || 0) + c.totalInvestment;
+    roiMap[key]    = (roiMap[key] || 0) + c.roi;
+    cntMap[key]    = (cntMap[key] || 0) + 1;
+    gainMap[key]   = (gainMap[key] || 0) + c.gainLoss;
   });
 
-  const typeLabels  = Object.keys(byTypeVal);
-  const typeColors  = ['#f59e0b','#cbd5e1','#86efac','#818cf8','#ec4899','#a78bfa'];
-  const typeColorsA = ['rgba(245,158,11,0.7)','rgba(203,213,225,0.7)','rgba(134,239,172,0.7)','rgba(129,140,248,0.7)','rgba(236,72,153,0.7)','rgba(167,139,250,0.7)'];
+  const typeKeys   = Object.keys(byTypeVal);
+  const typeLabels = typeKeys.map(k => assetTypeLabel(k));
+  const typeColors = typeKeys.map(k => assetColor(k));
+  const typeColorsA = typeKeys.map(k => assetColorA(k, 0.75));
 
   // Value breakdown bar
   destroyChart('port-value-bar');
-  if (typeLabels.length > 0) {
+  if (typeKeys.length > 0) {
     charts['port-value-bar'] = new Chart(document.getElementById('port-value-bar').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           label: 'Current Value',
-          data: typeLabels.map(k => byTypeVal[k]),
+          data: typeKeys.map(k => byTypeVal[k]),
           backgroundColor: typeColorsA,
+          borderColor: typeColors,
+          borderWidth: 1,
           borderRadius: 7
         }]
       },
@@ -1509,19 +1544,25 @@ function renderPortOverview() {
 
   // Composition donut
   destroyChart('port-composition');
-  if (typeLabels.length > 0) {
-    charts['port-composition'] = makeDonut('port-composition', typeLabels, typeLabels.map(k => byTypeVal[k]), typeColors);
+  if (typeKeys.length > 0) {
+    charts['port-composition'] = makeDonut('port-composition', typeLabels, typeKeys.map(k => byTypeVal[k]), typeColors);
   }
 
   // ROI% bar
-  const avgRoiVals = typeLabels.map(k => +(roiMap[k] / cntMap[k]).toFixed(1));
+  const avgRoiVals = typeKeys.map(k => +(roiMap[k] / cntMap[k]).toFixed(1));
   destroyChart('port-roi-chart');
-  if (typeLabels.length > 0) {
+  if (typeKeys.length > 0) {
     charts['port-roi-chart'] = new Chart(document.getElementById('port-roi-chart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
-        datasets: [{ data: avgRoiVals, backgroundColor: 'rgba(167,139,250,0.7)', borderRadius: 6 }]
+        datasets: [{
+          data: avgRoiVals,
+          backgroundColor: typeColorsA,
+          borderColor: typeColors,
+          borderWidth: 1,
+          borderRadius: 6
+        }]
       },
       options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
     });
@@ -1529,14 +1570,16 @@ function renderPortOverview() {
 
   // Gain/Loss bar
   destroyChart('port-gain-chart');
-  if (typeLabels.length > 0) {
+  if (typeKeys.length > 0) {
     charts['port-gain-chart'] = new Chart(document.getElementById('port-gain-chart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
-          data: typeLabels.map(k => gainMap[k]),
-          backgroundColor: typeLabels.map(k => gainMap[k] >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(239,68,68,0.7)'),
+          data: typeKeys.map(k => gainMap[k]),
+          backgroundColor: typeKeys.map(k => gainMap[k] >= 0 ? assetColorA(k, 0.7) : 'rgba(239,68,68,0.7)'),
+          borderColor:     typeKeys.map(k => gainMap[k] >= 0 ? assetColor(k) : '#ef4444'),
+          borderWidth: 1,
           borderRadius: 6
         }]
       },
@@ -1549,6 +1592,7 @@ function renderPortOverview() {
   document.getElementById('port-top3').innerHTML = top3.length ? top3.map((e,i) => `
     <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
       <div style="font-size:0.7rem;color:#a78bfa;font-weight:700;min-width:16px">#${i+1}</div>
+      <div style="width:8px;height:8px;border-radius:50%;background:${assetColor(e.assetType)};flex-shrink:0"></div>
       <div style="flex:1"><div style="font-weight:600;font-size:0.82rem">${assetTypeLabel(e.assetType)}</div><div style="font-size:0.68rem;color:var(--text-muted)">${e.date} · ${e.quantity}${e.unit}</div></div>
       <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-weight:700;color:var(--c-inc);font-size:0.88rem">${e.roi.toFixed(0)}%</div><div style="font-size:0.68rem;color:var(--text-muted)">${fmt(e.gainLoss)}</div></div>
     </div>`).join('')
@@ -1582,53 +1626,66 @@ function renderPortAnalytics() {
     options: { ...cOpts(true), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b', maxTicksLimit:8 } } } }
   });
 
-  // 2. ROI Scatter
+  // 2. ROI Scatter — each asset type gets its own colour
   const scatterSets = {};
   data.forEach(e => {
-    const lbl = assetTypeLabel(e.assetType);
-    if (!scatterSets[lbl]) scatterSets[lbl] = [];
-    scatterSets[lbl].push({ x: e.totalInvestment, y: +e.roi.toFixed(1) });
+    const key = normalizeAssetType(e.assetType);
+    if (!scatterSets[key]) scatterSets[key] = [];
+    scatterSets[key].push({ x: e.totalInvestment, y: +e.roi.toFixed(1) });
   });
-  const scColors = { 'Gold':'#FACC15', 'Silver':'#9CA3AF', 'Land':'#4ADE80', 'Bonds':'#A78BFA', 'Mutual Funds':'#DB2777', 'Stocks':'#a78bfa' };
   destroyChart('port-roi-scatter');
   charts['port-roi-scatter'] = new Chart(document.getElementById('port-roi-scatter').getContext('2d'), {
     type: 'scatter',
-    data: { datasets: Object.entries(scatterSets).map(([type,pts]) => ({ label:type, data:pts, pointBackgroundColor:scColors[type]||'#a78bfa', pointRadius:6, pointHoverRadius:8 })) },
+    data: { datasets: Object.entries(scatterSets).map(([type, pts]) => ({
+      label: assetTypeLabel(type),
+      data: pts,
+      pointBackgroundColor: assetColor(type),
+      pointBorderColor: assetColor(type),
+      pointRadius: 6,
+      pointHoverRadius: 8
+    }))},
     options: { ...cOpts(true), scales: {
       x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
       y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
     }}
   });
 
-  // 3. Waterfall
+  // 3. Waterfall — positive bars use asset colour, negative use red
   const wfSorted = [...data].sort((a,b) => b.gainLoss - a.gainLoss);
   destroyChart('port-waterfall');
   charts['port-waterfall'] = new Chart(document.getElementById('port-waterfall').getContext('2d'), {
     type: 'bar',
     data: {
       labels: wfSorted.map(e => assetTypeLabel(e.assetType) + ' ' + e.date.slice(5)),
-      datasets: [{ data: wfSorted.map(e => +e.gainLoss.toFixed(0)), backgroundColor: wfSorted.map(e => e.gainLoss >= 0 ? 'rgba(52,211,153,0.7)' : 'rgba(239,68,68,0.7)'), borderRadius: 5 }]
+      datasets: [{
+        data: wfSorted.map(e => +e.gainLoss.toFixed(0)),
+        backgroundColor: wfSorted.map(e => e.gainLoss >= 0 ? assetColorA(e.assetType, 0.75) : 'rgba(239,68,68,0.7)'),
+        borderColor:     wfSorted.map(e => e.gainLoss >= 0 ? assetColor(e.assetType) : '#ef4444'),
+        borderWidth: 1,
+        borderRadius: 5
+      }]
     },
     options: { ...cOpts(false), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b',maxTicksLimit:8,maxRotation:45} } } }
   });
 
-  // 4. Invested vs Value grouped bar
+  // 4. Invested vs Value grouped bar — asset colour for invested, lighter tint for current value
   const cvByType = {};
   data.forEach(e => {
-    const lbl = assetTypeLabel(e.assetType);
-    if (!cvByType[lbl]) cvByType[lbl] = { inv:0, val:0 };
-    cvByType[lbl].inv += e.totalInvestment;
-    cvByType[lbl].val += e.currentValue;
+    const key = normalizeAssetType(e.assetType);
+    if (!cvByType[key]) cvByType[key] = { inv:0, val:0 };
+    cvByType[key].inv += e.totalInvestment;
+    cvByType[key].val += e.currentValue;
   });
-  const cvLabels = Object.keys(cvByType);
+  const cvKeys   = Object.keys(cvByType);
+  const cvLabels = cvKeys.map(k => assetTypeLabel(k));
   destroyChart('port-compare-bar');
   charts['port-compare-bar'] = new Chart(document.getElementById('port-compare-bar').getContext('2d'), {
     type: 'bar',
     data: {
       labels: cvLabels,
       datasets: [
-        { label:'Total Invested', data:cvLabels.map(k=>cvByType[k].inv), backgroundColor:'rgba(167,139,250,0.6)', borderRadius:5 },
-        { label:'Current Value',  data:cvLabels.map(k=>cvByType[k].val), backgroundColor:'rgba(52,211,153,0.6)',  borderRadius:5 }
+        { label:'Total Invested', data:cvKeys.map(k=>cvByType[k].inv), backgroundColor: cvKeys.map(k=>assetColorA(k,0.45)), borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 },
+        { label:'Current Value',  data:cvKeys.map(k=>cvByType[k].val), backgroundColor: cvKeys.map(k=>assetColorA(k,0.8)),  borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 }
       ]
     },
     options: { ...cOpts(true), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
@@ -1647,7 +1704,8 @@ function renderPortAnalytics() {
   const profitVals = Object.values(profitBuckets);
   destroyChart('port-profit-donut');
   if (profitVals.some(v => v > 0)) {
-    charts['port-profit-donut'] = makeDonut('port-profit-donut', Object.keys(profitBuckets), profitVals, ['#64748b','#a78bfa','#818cf8','#34d399','#fbbf24']);
+    charts['port-profit-donut'] = makeDonut('port-profit-donut', Object.keys(profitBuckets), profitVals,
+      ['#64748b','#a78bfa','#818cf8','#34d399','#fbbf24']);
   }
 }
 
@@ -1826,9 +1884,7 @@ function saveEntry() {
 
   if (editingFinanceId) {
     const idx = db.findIndex(x => x.id === editingFinanceId);
-    if (idx >= 0) {
-      db[idx] = { ...db[idx], name, amount:Number(amt), type, sub, date, notes, recurring };
-    }
+    if (idx >= 0) db[idx] = { ...db[idx], name, amount:Number(amt), type, sub, date, notes, recurring };
   } else {
     db.push({ id:Date.now(), name, amount:Number(amt), type, sub, date, notes, recurring });
   }
@@ -1857,7 +1913,7 @@ const unitMap = { 'gold':'grams', 'silver':'grams', 'land':'sq.ft', 'bonds':'uni
 function updatePortUnit() {
   const raw = document.getElementById('p-assetType').value;
   const t   = raw.toLowerCase().trim();
-  const unit = unitMap[t] || (t.includes('gold')||t.includes('silver') ? 'grams' : t.includes('land')||t.includes('bond') ? 'units' : 'units');
+  const unit = unitMap[t] || (t.includes('gold')||t.includes('silver') ? 'grams' : 'units');
   document.getElementById('p-unit').value = unit;
   document.getElementById('p-unit-hint').textContent = '('+unit+')';
   calcPortPreview();
@@ -1944,9 +2000,7 @@ function savePortEntry() {
 
   if (editingPortId) {
     const idx = portDb.findIndex(x => x.id === editingPortId);
-    if (idx >= 0) {
-      portDb[idx] = { ...portDb[idx], assetType, date, quantity, unit, purchasePrice, currentPrice, notes };
-    }
+    if (idx >= 0) portDb[idx] = { ...portDb[idx], assetType, date, quantity, unit, purchasePrice, currentPrice, notes };
   } else {
     portDb.push({ id:Date.now(), assetType, date, quantity, unit, purchasePrice, currentPrice, notes });
   }
@@ -2060,7 +2114,6 @@ function convertTextDate(text) {
 // ── INIT ───────────────────────────────────────────────────────────────────
 window.onload = () => {
   portFilterMode = 'only';
-
   buildFilterDropdowns();
   buildPortDropdowns();
   renderDashboard();
