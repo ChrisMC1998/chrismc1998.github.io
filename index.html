@@ -1589,14 +1589,7 @@ function renderPortAnalytics() {
     if (!scatterSets[lbl]) scatterSets[lbl] = [];
     scatterSets[lbl].push({ x: e.totalInvestment, y: +e.roi.toFixed(1) });
   });
-  const scColors = {
-  Gold: '#FACC15',        // real gold yellow (premium)
-  Silver: '#9CA3AF',      // proper metallic grey
-  Land: '#4ADE80',        // clean green
-  Bonds: '#FB7185',       // softer red/pink
-  'Mutual Funds': '#818CF8',
-  Stocks: '#A78BFA'
-};
+  const scColors = { 'Gold':'#FACC15', 'Silver':'#9CA3AF', 'Land':'#4ADE80', 'Bonds':'#A78BFA', 'Mutual Funds':'#DB2777', 'Stocks':'#a78bfa' };
   destroyChart('port-roi-scatter');
   charts['port-roi-scatter'] = new Chart(document.getElementById('port-roi-scatter').getContext('2d'), {
     type: 'scatter',
