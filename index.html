@@ -238,6 +238,33 @@ tr:last-child td { border-bottom:none; }
 
 .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
 .empty-state i { font-size:2.2rem; opacity:0.25; display:block; margin-bottom:.8rem; }
+
+/* ── CREDIT TRACKER ── */
+--c-credit: #f97316;
+.credit-kpi-strip { display:grid; grid-template-columns:repeat(5,1fr); gap:.8rem; margin-bottom:1.2rem; }
+.credit-kpi-card { background:rgba(249,115,22,0.05); border:1px solid rgba(249,115,22,0.15); border-radius:12px; padding:.9rem 1rem; }
+.credit-kpi-val { font-size:1.2rem; font-weight:700; font-family:'DM Mono',monospace; margin-top:5px; }
+.credit-badge-pl { background:rgba(96,165,250,0.15); color:#93c5fd; }
+.credit-badge-exp { background:rgba(244,114,182,0.15); color:#f9a8d4; }
+.credit-badge-inv { background:rgba(52,211,153,0.15); color:#6ee7b7; }
+.credit-status-active { background:rgba(52,211,153,0.12); color:#34d399; }
+.credit-status-closed { background:rgba(100,116,139,0.15); color:#64748b; }
+
+/* ── EXPORT MODAL ── */
+.export-modal-box { background:#0c1020; width:520px; padding:1.8rem; border-radius:18px; border:1px solid rgba(99,102,241,0.28); box-shadow:0 0 60px rgba(99,102,241,0.12); max-height:92vh; overflow-y:auto; }
+.export-check-row { display:flex; align-items:center; gap:10px; padding:9px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:10px; cursor:pointer; transition:0.16s; }
+.export-check-row:hover { background:rgba(255,255,255,0.06); }
+.export-check-row input[type=checkbox] { accent-color:var(--accent); width:15px; height:15px; }
+.export-check-label { font-size:0.82rem; font-weight:500; }
+.export-date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+
+/* ── GOOGLE DRIVE STATUS ── */
+.gdrive-status { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
+.gdrive-dot { width:6px; height:6px; border-radius:50%; background:#64748b; }
+.gdrive-dot.connected { background:#34d399; animation:pulse 2s infinite; }
+.gdrive-dot.error { background:#ef4444; }
+.gdrive-btn { padding:7px 10px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-mid); cursor:pointer; display:flex; align-items:center; gap:9px; font-size:0.78rem; font-weight:500; font-family:'DM Sans',sans-serif; transition:0.16s; }
+.gdrive-btn:hover { background:rgba(52,211,153,0.1); color:#34d399; border-color:rgba(52,211,153,0.3); }
 </style>
 </head>
 <body>
@@ -264,6 +291,9 @@ tr:last-child td { border-bottom:none; }
   <div class="nav-item" id="fin-nav-investments" onclick="switchView('investments',this,'finance')">
     <div class="nav-icon"><i class="fas fa-coins"></i></div>Investments
   </div>
+  <div class="nav-item" id="fin-nav-credit" onclick="switchView('credit',this,'finance')">
+    <div class="nav-icon"><i class="fas fa-credit-card" style="color:#f97316"></i></div>Credit Tracker
+  </div>
 
   <div class="nav-section-label">Insights</div>
   <div class="nav-item" id="fin-nav-analytics" onclick="switchView('analytics',this,'finance')">
@@ -277,11 +307,18 @@ tr:last-child td { border-bottom:none; }
   </div>
 
   <div class="sidebar-footer">
+    <div class="gdrive-status">
+      <div class="gdrive-dot" id="gdrive-dot"></div>
+      <span id="gdrive-label">Google Drive</span>
+    </div>
+    <button class="gdrive-btn" onclick="connectGoogleDrive()" id="gdrive-btn">
+      <i class="fab fa-google-drive"></i> Connect Drive
+    </button>
     <div class="autosave-indicator">
       <div class="autosave-dot" id="autosave-dot"></div>
       <span id="autosave-label">Auto-saved</span>
     </div>
-    <button class="export-btn" onclick="exportCSV()">
+    <button class="export-btn" onclick="openExportModal()">
       <i class="fas fa-file-csv"></i> Export CSV
     </button>
   </div>
@@ -374,7 +411,7 @@ tr:last-child td { border-bottom:none; }
 
     <!-- DASHBOARD -->
     <div id="view-dashboard" class="view-section active">
-      <div class="kpi-grid">
+      <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr)">
         <div class="kpi-card">
           <div class="kpi-label">Net Balance</div>
           <div class="kpi-value" id="kpi-balance" style="color:var(--c-inc)">₹0</div>
@@ -396,6 +433,11 @@ tr:last-child td { border-bottom:none; }
           <div class="kpi-label">Savings Rate</div>
           <div class="kpi-value" id="kpi-savings-rate" style="color:var(--c-net)">0%</div>
           <div class="kpi-sub" id="kpi-savings-sub">of income saved</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(249,115,22,0.2);background:rgba(249,115,22,0.04)">
+          <div class="kpi-label" style="color:#f97316">Credit Outstanding</div>
+          <div class="kpi-value" id="kpi-credit-outstanding" style="color:#f97316">₹0</div>
+          <div class="kpi-sub" id="kpi-credit-sub">total balance due</div>
         </div>
       </div>
 
@@ -446,6 +488,25 @@ tr:last-child td { border-bottom:none; }
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title" style="color:#a78bfa">Top 3 Holdings</div>
           <div id="dash-top3" style="padding-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- Credit Tracker Dashboard Charts -->
+      <div style="margin-top:0.5rem;margin-bottom:0.5rem">
+        <div class="panel-title" style="color:#f97316;font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;padding:0.2rem 0">Credit Overview</div>
+      </div>
+      <div class="charts-3col">
+        <div class="glass-panel" style="margin-bottom:0;border-color:rgba(249,115,22,0.15)">
+          <div class="panel-title" style="color:#f97316">Outstanding by Lender</div>
+          <div style="height:200px"><canvas id="dash-credit-bar"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0;border-color:rgba(249,115,22,0.15)">
+          <div class="panel-title" style="color:#f97316">EMI vs Outstanding</div>
+          <div style="height:200px"><canvas id="dash-credit-emi"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0;border-color:rgba(249,115,22,0.15)">
+          <div class="panel-title" style="color:#f97316">Credit Summary</div>
+          <div id="dash-credit-summary" style="padding-top:4px"></div>
         </div>
       </div>
     </div>
@@ -671,10 +732,78 @@ tr:last-child td { border-bottom:none; }
       </div>
     </div>
 
+    <!-- CREDIT TRACKER -->
+    <div id="view-credit" class="view-section">
+      <div class="credit-kpi-strip">
+        <div class="credit-kpi-card">
+          <div class="kpi-label">Total Principal</div>
+          <div class="credit-kpi-val" id="ck-principal" style="color:#f97316">₹0</div>
+        </div>
+        <div class="credit-kpi-card">
+          <div class="kpi-label">Outstanding Balance</div>
+          <div class="credit-kpi-val" id="ck-outstanding" style="color:#ef4444">₹0</div>
+        </div>
+        <div class="credit-kpi-card">
+          <div class="kpi-label">Monthly EMI Total</div>
+          <div class="credit-kpi-val" id="ck-emi" style="color:#fbbf24">₹0</div>
+        </div>
+        <div class="credit-kpi-card">
+          <div class="kpi-label">Active Accounts</div>
+          <div class="credit-kpi-val" id="ck-active" style="color:#34d399">0</div>
+        </div>
+        <div class="credit-kpi-card">
+          <div class="kpi-label">Avg Interest Rate</div>
+          <div class="credit-kpi-val" id="ck-avgrate" style="color:#a78bfa">0%</div>
+        </div>
+      </div>
+
+      <div class="glass-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
+          <div class="panel-title" style="margin-bottom:0;color:#f97316">Credit Register</div>
+          <button class="btn-add" style="background:rgba(249,115,22,0.8);box-shadow:0 0 18px rgba(249,115,22,0.3)" onclick="openCreditModal()">
+            <i class="fas fa-plus"></i> New Credit Entry
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="port-table">
+            <thead>
+              <tr>
+                <th onclick="sortCreditTable('lenderName')">Lender / Card Name <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('type')">Type <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('principalAmount')" style="text-align:right">Principal Amt <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('outstandingBalance')" style="text-align:right">Outstanding Bal. <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('interestRate')" style="text-align:right">Interest Rate % <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('monthlyEmi')" style="text-align:right">Monthly EMI <span class="sort-arrow">↕</span></th>
+                <th>Due Date</th>
+                <th onclick="sortCreditTable('tenureMonths')" style="text-align:right">Tenure/M <span class="sort-arrow">↕</span></th>
+                <th onclick="sortCreditTable('balanceTenure')" style="text-align:right">Balance Tenure <span class="sort-arrow">↕</span></th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Remarks</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="credit-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Credit Charts Row -->
+      <div class="charts-row">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title" style="color:#f97316">Outstanding Balance by Lender</div>
+          <div style="height:230px"><canvas id="credit-bar-chart"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title" style="color:#f97316">Loan Type Mix</div>
+          <div style="height:230px"><canvas id="credit-type-donut"></canvas></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-
-<!-- MODAL: Finance Entry -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-title" id="modal-title">Add Finance Record</div>
@@ -798,7 +927,156 @@ tr:last-child td { border-bottom:none; }
   </div>
 </div>
 
+<!-- MODAL: Credit Entry -->
+<div class="modal-overlay" id="credit-modal">
+  <div class="modal-box" style="width:580px;border-color:rgba(249,115,22,0.28);box-shadow:0 0 60px rgba(249,115,22,0.1)">
+    <div class="modal-title" style="color:#fb923c" id="credit-modal-title">Add Credit Entry</div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Lender / Card Name</label>
+        <input type="text" id="cr-lender" class="input-field" placeholder="e.g. Kotak Mahindra, HDFC">
+      </div>
+      <div class="input-group">
+        <label>Type</label>
+        <select id="cr-type" class="input-field">
+          <option value="CC Loan">CC Loan</option>
+          <option value="CC EMI">CC EMI</option>
+          <option value="Laon">Loan</option>
+          <option value="Assets">Assets</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Principal Amount (₹)</label>
+        <input type="number" id="cr-principal" class="input-field" placeholder="0">
+      </div>
+      <div class="input-group">
+        <label>Outstanding Balance (₹)</label>
+        <input type="number" id="cr-outstanding" class="input-field" placeholder="0">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Interest Rate (%)</label>
+        <input type="number" id="cr-interest" class="input-field" placeholder="0" step="0.1">
+      </div>
+      <div class="input-group">
+        <label>Monthly EMI (₹)</label>
+        <input type="number" id="cr-emi" class="input-field" placeholder="0">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Due Date (Day of month / Note)</label>
+        <input type="text" id="cr-duedate" class="input-field" placeholder="e.g. 3rd, 9th, 30th">
+      </div>
+      <div class="input-group">
+        <label>Tenure (Months)</label>
+        <input type="number" id="cr-tenure" class="input-field" placeholder="0">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Balance Tenure (Months)</label>
+        <input type="number" id="cr-bal-tenure" class="input-field" placeholder="0">
+      </div>
+      <div class="input-group">
+        <label>Status</label>
+        <select id="cr-status" class="input-field">
+          <option value="Active">Active</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
+        <label>Start Date</label>
+        <input type="date" id="cr-startdate" class="input-field">
+      </div>
+      <div class="input-group">
+        <label>End Date</label>
+        <input type="date" id="cr-enddate" class="input-field">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Remarks</label>
+      <input type="text" id="cr-remarks" class="input-field" placeholder="e.g. PL, Expense, Investment">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:1.3rem">
+      <button onclick="saveCreditEntry()" class="btn-add" style="flex:1;justify-content:center;background:rgba(249,115,22,0.8)" id="credit-save-btn">Save Entry</button>
+      <button onclick="closeCreditModal()" class="btn-secondary">Cancel</button>
+      <button onclick="deleteCurrentCreditEntry()" class="btn-delete" style="display:none" id="credit-delete-btn"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Export CSV -->
+<div class="modal-overlay" id="export-modal">
+  <div class="modal-box export-modal-box">
+    <div class="modal-title">Export CSV</div>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Select what you want to export and optionally filter by date range.</p>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.2rem">
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-transactions" checked>
+        <div class="export-check-label"><i class="fas fa-list" style="color:#6366f1;margin-right:7px"></i>Transactions</div>
+      </label>
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-loans" checked>
+        <div class="export-check-label"><i class="fas fa-landmark" style="color:#60a5fa;margin-right:7px"></i>Loans & EMI</div>
+      </label>
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-credit" checked>
+        <div class="export-check-label"><i class="fas fa-credit-card" style="color:#f97316;margin-right:7px"></i>Credit Tracker</div>
+      </label>
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-investments" checked>
+        <div class="export-check-label"><i class="fas fa-coins" style="color:#fbbf24;margin-right:7px"></i>Investments</div>
+      </label>
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-holdings" checked>
+        <div class="export-check-label"><i class="fas fa-gem" style="color:#a78bfa;margin-right:7px"></i>Holdings Table (Portfolio)</div>
+      </label>
+      <label class="export-check-row">
+        <input type="checkbox" id="exp-assets" checked>
+        <div class="export-check-label"><i class="fas fa-layer-group" style="color:#34d399;margin-right:7px"></i>All Assets</div>
+      </label>
+    </div>
+
+    <div class="panel-title" style="margin-bottom:8px">Date Range (optional)</div>
+    <div class="export-date-row">
+      <div class="input-group" style="margin-bottom:0">
+        <label>From Date</label>
+        <input type="date" id="exp-date-from" class="input-field">
+      </div>
+      <div class="input-group" style="margin-bottom:0">
+        <label>To Date</label>
+        <input type="date" id="exp-date-to" class="input-field">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:1.4rem">
+      <button onclick="runExport()" class="btn-add" style="flex:1;justify-content:center">
+        <i class="fas fa-download"></i> Download CSV
+      </button>
+      <button onclick="document.getElementById('export-modal').style.display='none'" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -872,9 +1150,36 @@ let portDb = (JSON.parse(localStorage.getItem('fos_port_v3')) || [
   {id:115, assetType:"Silver",     date:"2025-12-12", quantity:200, unit:"grams", purchasePrice:197,  currentPrice:275,   notes:""},
 ]).map(normalizePortRecord);
 
+let creditDb = JSON.parse(localStorage.getItem('fos_credit_v1')) || [
+  {id:201, lenderName:"Kotak Mahindra", type:"CC Loan", principalAmount:158062, outstandingBalance:68993,  interestRate:17, monthlyEmi:2634.20, dueDate:"3rd",  tenureMonths:60, balanceTenure:32, startDate:"2023-12-14", endDate:"2027-05-14", status:"Active", remarks:"PL"},
+  {id:202, lenderName:"HDFC",           type:"CC Loan", principalAmount:18442,  outstandingBalance:22239,  interestRate:17, monthlyEmi:1059.00, dueDate:"9th",  tenureMonths:36, balanceTenure:20, startDate:"2024-11-20", endDate:"2027-04-20", status:"Active", remarks:"PL"},
+  {id:203, lenderName:"SBI",            type:"CC EMI",  principalAmount:4945,   outstandingBalance:0,      interestRate:14, monthlyEmi:69.00,   dueDate:"30th", tenureMonths:6,  balanceTenure:0,  startDate:"2025-05-01", endDate:"2025-10-01", status:"Active", remarks:"Expense"},
+  {id:204, lenderName:"YES BANK",       type:"CC EMI",  principalAmount:37504,  outstandingBalance:28811,  interestRate:16, monthlyEmi:1394.00, dueDate:"6th",  tenureMonths:36, balanceTenure:0,  startDate:"2025-05-31", endDate:"2028-04-30", status:"Active", remarks:"Expense"},
+  {id:205, lenderName:"Money View",     type:"Laon",    principalAmount:102480, outstandingBalance:38699,  interestRate:48, monthlyEmi:4270.00, dueDate:"7th",  tenureMonths:24, balanceTenure:10, startDate:"2025-02-07", endDate:"2027-01-07", status:"Active", remarks:"Expense"},
+  {id:206, lenderName:"IDFC Bank",      type:"Laon",    principalAmount:1,      outstandingBalance:104478, interestRate:15, monthlyEmi:4613.00, dueDate:"3rd",  tenureMonths:48, balanceTenure:28, startDate:"2024-08-03", endDate:"2028-07-03", status:"Active", remarks:"Expense"},
+  {id:207, lenderName:"ICICI",          type:"Laon",    principalAmount:500000, outstandingBalance:152914, interestRate:14, monthlyEmi:13732.00,dueDate:"5th",  tenureMonths:60, balanceTenure:13, startDate:"2023-05-05", endDate:"2027-04-05", status:"Active", remarks:"Expense"},
+  {id:208, lenderName:"Incred",         type:"Loan",    principalAmount:244224, outstandingBalance:217088, interestRate:18, monthlyEmi:6784.00, dueDate:"5th",  tenureMonths:36, balanceTenure:33, startDate:"2026-01-05", endDate:"2028-12-05", status:"Active", remarks:"PL"},
+  {id:209, lenderName:"Acharapakkam land", type:"Assets", principalAmount:171750, outstandingBalance:51750, interestRate:0, monthlyEmi:3000.00,dueDate:"1st",  tenureMonths:60, balanceTenure:0,  startDate:"2022-04-01", endDate:"2027-04-01", status:"Active", remarks:"Investment"},
+  {id:210, lenderName:"Ponneri land",   type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-01-01", status:"Active", remarks:"Investment"},
+  {id:211, lenderName:"Poneeri land 2", type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-08-01", status:"Active", remarks:"Investment"},
+];
+
 let budgets = JSON.parse(localStorage.getItem('fos_budgets')) || {
   "Food":8000, "Transport":5000, "Subscriptions":1500, "Personal Loan":15000, "Auto Loan":10000
 };
+
+// ── GOOGLE DRIVE CONFIG ─────────────────────────────────────────────────────
+const GDRIVE_FOLDER_ID = '1r92Po_8aLUo3QQGtkYKQC1o5Ct5EhiyU';
+const GDRIVE_CLIENT_ID = '522409616559-te1m0dg72s3b0tuf7trqrnlfcrt1rf8p.apps.googleusercontent.com';
+const GDRIVE_SCOPES    = 'https://www.googleapis.com/auth/drive.file';
+let gdriveConnected = false;
+let gdriveTokenClient = null;
+let gdriveAccessToken = null;
+let gdriveFileIds = { db: null, portDb: null, creditDb: null };
+
+function connectDrive() {
+  connectGoogleDrive();
+}
 
 let charts = {};
 let currentListFilter = 'all';
@@ -883,10 +1188,12 @@ let portFilterMode = 'only';
 let portAssetFilter = 'all';
 let sortCol = 'date', sortAsc = false;
 let portSortCol = 'date', portSortAsc = false;
+let creditSortCol = 'lenderName', creditSortAsc = true;
 let pendingSave = false;
 let activeView = 'dashboard';
 let editingFinanceId = null;
 let editingPortId = null;
+let editingCreditId = null;
 
 // ── NORMALIZATION HELPERS ──────────────────────────────────────────────────
 function normalizeAssetType(type) {
@@ -917,7 +1224,7 @@ function normalizePortRecord(record) {
   return { ...record, assetType: normalizeAssetType(record.assetType) };
 }
 
-// ── AUTO-SAVE ──────────────────────────────────────────────────────────────
+// ── AUTO-SAVE (localStorage + optional Google Drive) ───────────────────────
 function scheduleSave() {
   pendingSave = true;
   document.getElementById('autosave-dot').classList.add('saving');
@@ -925,13 +1232,132 @@ function scheduleSave() {
 }
 function doAutoSave() {
   if (!pendingSave) return;
-  localStorage.setItem('fos_db_v3', JSON.stringify(db));
-  localStorage.setItem('fos_port_v3', JSON.stringify(portDb));
+  localStorage.setItem('fos_db_v3',     JSON.stringify(db));
+  localStorage.setItem('fos_port_v3',   JSON.stringify(portDb));
+  localStorage.setItem('fos_credit_v1', JSON.stringify(creditDb));
+  localStorage.setItem('fos_budgets',   JSON.stringify(budgets));
   pendingSave = false;
   document.getElementById('autosave-dot').classList.remove('saving');
-  document.getElementById('autosave-label').textContent = 'Saved ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('autosave-label').textContent = 'Saved ' + ts;
+  if (gdriveConnected) saveToGoogleDrive();
 }
 setInterval(doAutoSave, 5000);
+
+// ── GOOGLE DRIVE ────────────────────────────────────────────────────────────
+function connectGoogleDrive() {
+  if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+    alert('⚠️ Google Drive integration requires a Google OAuth Client ID.\n\nTo set this up:\n1. Go to console.cloud.google.com\n2. Create a project → Enable Drive API\n3. Create OAuth 2.0 credentials\n4. Replace YOUR_GOOGLE_CLIENT_ID in the code\n\nFor now, data is safely saved in your browser (localStorage).');
+    return;
+  }
+  try {
+    gdriveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: GDRIVE_SCOPES,
+      callback: (tokenResponse) => {
+        if (tokenResponse.error) { setDriveStatus('error', 'Auth failed'); return; }
+        gdriveAccessToken = tokenResponse.access_token;
+        gdriveConnected = true;
+        setDriveStatus('connected', 'Drive connected');
+        document.getElementById('gdrive-btn').innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
+        loadFromGoogleDrive();
+      }
+    });
+    gdriveTokenClient.requestAccessToken();
+  } catch(e) {
+    setDriveStatus('error', 'Drive unavailable');
+  }
+}
+
+function setDriveStatus(state, label) {
+  const dot = document.getElementById('gdrive-dot');
+  dot.className = 'gdrive-dot' + (state === 'connected' ? ' connected' : state === 'error' ? ' error' : '');
+  document.getElementById('gdrive-label').textContent = label;
+}
+
+async function gdriveRequest(method, url, body, token) {
+  const headers = { 'Authorization': 'Bearer ' + token };
+  if (body && typeof body === 'string') headers['Content-Type'] = 'application/json';
+  const resp = await fetch(url, { method, headers, body: body || undefined });
+  return resp.json();
+}
+
+async function saveToGoogleDrive() {
+  const token = gdriveAccessToken;
+  if (!token) return;
+  const payload = { db, portDb, creditDb, budgets };
+  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+  const meta = { name: 'financeos_data.json', parents: [GDRIVE_FOLDER_ID] };
+
+  try {
+    if (gdriveFileIds.main) {
+      // Update existing file
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify({name:'financeos_data.json'})], {type:'application/json'}));
+      form.append('file', blob);
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdriveFileIds.main}?uploadType=multipart`, {
+        method:'PATCH', headers:{'Authorization':'Bearer '+token}, body:form
+      });
+    } else {
+      // Search for existing file first
+      const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='financeos_data.json'+and+'${GDRIVE_FOLDER_ID}'+in+parents&fields=files(id)`, {
+        headers:{'Authorization':'Bearer '+token}
+      });
+      const searchData = await search.json();
+      if (searchData.files && searchData.files.length > 0) {
+        gdriveFileIds.main = searchData.files[0].id;
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify({name:'financeos_data.json'})], {type:'application/json'}));
+        form.append('file', blob);
+        await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdriveFileIds.main}?uploadType=multipart`, {
+          method:'PATCH', headers:{'Authorization':'Bearer '+token}, body:form
+        });
+      } else {
+        // Create new file
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+        form.append('file', blob);
+        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method:'POST', headers:{'Authorization':'Bearer '+token}, body:form
+        });
+        const data = await res.json();
+        gdriveFileIds.main = data.id;
+      }
+    }
+    setDriveStatus('connected', 'Drive synced ✓');
+  } catch(e) {
+    setDriveStatus('error', 'Sync failed');
+  }
+}
+
+async function loadFromGoogleDrive() {
+  const token = gdriveAccessToken;
+  if (!token) return;
+  try {
+    const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='financeos_data.json'+and+'${GDRIVE_FOLDER_ID}'+in+parents&fields=files(id)`, {
+      headers:{'Authorization':'Bearer '+token}
+    });
+    const searchData = await search.json();
+    if (!searchData.files || searchData.files.length === 0) {
+      setDriveStatus('connected', 'Drive ready (new)');
+      saveToGoogleDrive(); // push current local data up
+      return;
+    }
+    gdriveFileIds.main = searchData.files[0].id;
+    const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${gdriveFileIds.main}?alt=media`, {
+      headers:{'Authorization':'Bearer '+token}
+    });
+    const payload = await fileResp.json();
+    if (payload.db)       { db       = payload.db; localStorage.setItem('fos_db_v3', JSON.stringify(db)); }
+    if (payload.portDb)   { portDb   = payload.portDb.map(normalizePortRecord); localStorage.setItem('fos_port_v3', JSON.stringify(portDb)); }
+    if (payload.creditDb) { creditDb = payload.creditDb; localStorage.setItem('fos_credit_v1', JSON.stringify(creditDb)); }
+    if (payload.budgets)  { budgets  = payload.budgets; localStorage.setItem('fos_budgets', JSON.stringify(budgets)); }
+    setDriveStatus('connected', 'Drive loaded ✓');
+    buildFilterDropdowns(); buildPortDropdowns(); renderDashboard();
+  } catch(e) {
+    setDriveStatus('error', 'Load failed');
+  }
+}
 
 // ── PORTFOLIO CALC ─────────────────────────────────────────────────────────
 function portCalc(e) {
@@ -1105,6 +1531,7 @@ function switchView(viewName, btn, group) {
     'transactions':   '<span>All</span> <b>Transactions</b>',
     'loans':          '<span>Loans &</span> <b>EMI</b>',
     'investments':    '<span>My</span> <b>Investments</b>',
+    'credit':         '<span>Credit</span> <b>Tracker</b>',
     'analytics':      '<span>Advanced</span> <b>Analytics</b>',
     'networth':       '<span>Net Worth</span> <b>Tracker</b>',
     'port-overview':  '<span>Portfolio</span> <b>Summary</b>',
@@ -1118,6 +1545,7 @@ function switchView(viewName, btn, group) {
     'transactions':   'view-list',
     'loans':          'view-list',
     'investments':    'view-list',
+    'credit':         'view-credit',
     'analytics':      'view-analytics',
     'networth':       'view-networth',
     'port-overview':  'view-port-overview',
@@ -1135,6 +1563,7 @@ function switchView(viewName, btn, group) {
 
   if      (viewName === 'dashboard')    { buildFilterDropdowns(); buildPortDropdowns(); renderDashboard(); }
   else if (viewName === 'transactions' || viewName === 'loans' || viewName === 'investments') { buildFilterDropdowns(); renderTable(); }
+  else if (viewName === 'credit')       { renderCreditTracker(); }
   else if (viewName === 'analytics')   { buildFilterDropdowns(); renderAnalytics(); }
   else if (viewName === 'networth')    { renderNetWorth(); }
   else if (viewName === 'port-overview')  { buildPortDropdowns(); renderPortOverview(); }
@@ -1255,6 +1684,8 @@ function renderDashboard() {
       </div>
       <div style="text-align:right"><div style="font-family:'DM Mono',monospace;font-weight:700;font-size:0.9rem;color:var(--c-inc)">${e.roi.toFixed(0)}% ROI</div><div style="font-size:0.7rem;color:var(--text-muted)">${fmt(e.gainLoss)} gain</div></div>
     </div>`).join('') : '<div class="empty-state"><i class="fas fa-inbox"></i>No portfolio data</div>';
+
+  renderDashCreditCharts();
 }
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
@@ -2049,20 +2480,351 @@ function saveBudgets() {
   if (activeView === 'dashboard') renderDashboard();
 }
 
-// ── EXPORT ─────────────────────────────────────────────────────────────────
-function exportCSV() {
-  let csv = 'Name,SubCategory,Type,Amount,Date,Recurring,Notes\n';
-  db.forEach(r => csv += `"${r.name}","${r.sub||''}","${r.type}",${r.amount},"${r.date}",${r.recurring||false},"${r.notes||''}"\n`);
-  csv += '\n\nPORTFOLIO\nAssetType,Date,Quantity,Unit,BuyPrice,CurrentPrice,TotalInvested,CurrentValue,GainLoss,ROI%,Notes\n';
-  portDb.forEach(e => {
-    const c = portCalc(e);
-    csv += `"${e.assetType}","${e.date}",${e.quantity},"${e.unit}",${e.purchasePrice},${e.currentPrice},${c.totalInvestment.toFixed(0)},${c.currentValue.toFixed(0)},${c.gainLoss.toFixed(0)},${c.roi.toFixed(1)},"${e.notes||''}"\n`;
+// ── CREDIT TRACKER ─────────────────────────────────────────────────────────
+function renderCreditTracker() {
+  const active = creditDb.filter(c => c.status === 'Active');
+  const totalPrincipal    = creditDb.reduce((s,c) => s + Number(c.principalAmount), 0);
+  const totalOutstanding  = creditDb.reduce((s,c) => s + Number(c.outstandingBalance), 0);
+  const totalEmi          = creditDb.filter(c=>c.status==='Active').reduce((s,c) => s + Number(c.monthlyEmi), 0);
+  const avgRate           = creditDb.length ? (creditDb.reduce((s,c)=>s+Number(c.interestRate),0)/creditDb.length) : 0;
+
+  document.getElementById('ck-principal').textContent    = fmt(totalPrincipal);
+  document.getElementById('ck-outstanding').textContent  = fmt(totalOutstanding);
+  document.getElementById('ck-emi').textContent          = fmt(totalEmi);
+  document.getElementById('ck-active').textContent       = active.length;
+  document.getElementById('ck-avgrate').textContent      = avgRate.toFixed(1) + '%';
+
+  renderCreditTable();
+  renderCreditCharts();
+}
+
+function sortCreditTable(col) {
+  if (creditSortCol === col) creditSortAsc = !creditSortAsc;
+  else { creditSortCol = col; creditSortAsc = true; }
+  renderCreditTable();
+}
+
+function renderCreditTable() {
+  const tbody = document.getElementById('credit-table-body');
+  if (!tbody) return;
+  let data = [...creditDb];
+  data.sort((a,b) => {
+    let av = a[creditSortCol] ?? '', bv = b[creditSortCol] ?? '';
+    if (typeof av === 'string') { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    return creditSortAsc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
   });
-  const blob = new Blob([csv], { type:'text/csv' });
+
+  tbody.innerHTML = '';
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="14"><div class="empty-state"><i class="fas fa-credit-card"></i><p>No credit entries yet. Click "New Credit Entry" to add one.</p></div></td></tr>`;
+    return;
+  }
+
+  const typeColors = {
+    'CC Loan': 'credit-badge-pl', 'CC EMI': 'credit-badge-exp',
+    'Laon': 'credit-badge-pl', 'Loan': 'credit-badge-pl',
+    'Assets': 'credit-badge-inv', 'Other': 'credit-badge-exp'
+  };
+
+  data.forEach(c => {
+    const tc = typeColors[c.type] || 'credit-badge-exp';
+    const sc = c.status === 'Active' ? 'credit-status-active' : 'credit-status-closed';
+    const balPct = c.principalAmount > 0 ? ((c.outstandingBalance / c.principalAmount) * 100).toFixed(0) : 0;
+    const rateColor = c.interestRate === 0 ? 'var(--text-muted)' : c.interestRate >= 30 ? '#ef4444' : c.interestRate >= 18 ? '#f97316' : '#fbbf24';
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:600;white-space:nowrap">${c.lenderName}</td>
+      <td><span class="badge ${tc}">${c.type}</span></td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${fmt(c.principalAmount)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:#ef4444;font-weight:600">${fmt(c.outstandingBalance)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:${rateColor}">${c.interestRate}%</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;color:#fbbf24">${fmt(c.monthlyEmi)}</td>
+      <td style="text-align:center;color:var(--text-muted);font-size:0.78rem">${c.dueDate || '-'}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${c.tenureMonths}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace">${c.balanceTenure || '-'}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem;font-family:'DM Mono',monospace">${c.startDate || '-'}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem;font-family:'DM Mono',monospace">${c.endDate || '-'}</td>
+      <td><span class="badge ${sc}">${c.status}</span></td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${c.remarks || '-'}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <i class="fas fa-edit edit-icon" onclick="editCreditEntry(${c.id})" title="Edit"></i>
+        <i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.72rem" onclick="deleteCreditItem(${c.id})"></i>
+      </td>
+    </tr>`;
+  });
+}
+
+function renderCreditCharts() {
+  const data = creditDb;
+  const labels  = data.map(c => c.lenderName);
+  const outstanding = data.map(c => c.outstandingBalance);
+  const emis    = data.map(c => c.monthlyEmi);
+  const colors  = ['#f97316','#fb923c','#fdba74','#fbbf24','#f59e0b','#ef4444','#ec4899','#a78bfa','#6366f1','#38bdf8','#34d399'];
+
+  destroyChart('credit-bar');
+  charts['credit-bar'] = new Chart(document.getElementById('credit-bar-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Outstanding Balance',
+        data: outstanding,
+        backgroundColor: colors.map(c => c + '99'),
+        borderColor: colors,
+        borderWidth: 1, borderRadius: 6
+      }]
+    },
+    options: { ...cOpts(false), scales: { y:{ grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',callback:v=>'₹'+Number(v).toLocaleString('en-IN')} }, x:{ticks:{color:'#64748b',font:{size:9}}} } }
+  });
+
+  // Type mix donut
+  const typeMap = {};
+  data.forEach(c => { typeMap[c.type] = (typeMap[c.type]||0) + c.outstandingBalance; });
+  const typeLabels = Object.keys(typeMap);
+  const typeVals   = typeLabels.map(k => typeMap[k]);
+  const typeColors = ['#f97316','#fbbf24','#60a5fa','#34d399','#a78bfa'];
+  destroyChart('credit-type-d');
+  if (typeLabels.length) {
+    charts['credit-type-d'] = makeDonut('credit-type-donut', typeLabels, typeVals, typeColors);
+  }
+}
+
+// Credit CRUD
+function openCreditModal() {
+  editingCreditId = null;
+  document.getElementById('credit-modal-title').textContent = 'Add Credit Entry';
+  document.getElementById('credit-save-btn').textContent = 'Save Entry';
+  document.getElementById('credit-delete-btn').style.display = 'none';
+  document.getElementById('cr-startdate').value = new Date().toISOString().split('T')[0];
+  ['cr-lender','cr-principal','cr-outstanding','cr-interest','cr-emi','cr-duedate','cr-tenure','cr-bal-tenure','cr-enddate','cr-remarks'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('cr-type').value = 'CC Loan';
+  document.getElementById('cr-status').value = 'Active';
+  document.getElementById('credit-modal').style.display = 'flex';
+}
+
+function closeCreditModal() { document.getElementById('credit-modal').style.display = 'none'; }
+
+function editCreditEntry(id) {
+  const c = creditDb.find(x => x.id === id);
+  if (!c) return;
+  editingCreditId = id;
+  document.getElementById('credit-modal-title').textContent = 'Edit Credit Entry';
+  document.getElementById('credit-save-btn').textContent = 'Update Entry';
+  document.getElementById('credit-delete-btn').style.display = 'block';
+  document.getElementById('cr-lender').value       = c.lenderName;
+  document.getElementById('cr-type').value         = c.type;
+  document.getElementById('cr-principal').value    = c.principalAmount;
+  document.getElementById('cr-outstanding').value  = c.outstandingBalance;
+  document.getElementById('cr-interest').value     = c.interestRate;
+  document.getElementById('cr-emi').value          = c.monthlyEmi;
+  document.getElementById('cr-duedate').value      = c.dueDate || '';
+  document.getElementById('cr-tenure').value       = c.tenureMonths;
+  document.getElementById('cr-bal-tenure').value   = c.balanceTenure || '';
+  document.getElementById('cr-startdate').value    = c.startDate || '';
+  document.getElementById('cr-enddate').value      = c.endDate || '';
+  document.getElementById('cr-status').value       = c.status;
+  document.getElementById('cr-remarks').value      = c.remarks || '';
+  document.getElementById('credit-modal').style.display = 'flex';
+}
+
+function saveCreditEntry() {
+  const lenderName        = document.getElementById('cr-lender').value.trim();
+  const type              = document.getElementById('cr-type').value;
+  const principalAmount   = Number(document.getElementById('cr-principal').value) || 0;
+  const outstandingBalance= Number(document.getElementById('cr-outstanding').value) || 0;
+  const interestRate      = Number(document.getElementById('cr-interest').value) || 0;
+  const monthlyEmi        = Number(document.getElementById('cr-emi').value) || 0;
+  const dueDate           = document.getElementById('cr-duedate').value.trim();
+  const tenureMonths      = Number(document.getElementById('cr-tenure').value) || 0;
+  const balanceTenure     = Number(document.getElementById('cr-bal-tenure').value) || 0;
+  const startDate         = document.getElementById('cr-startdate').value;
+  const endDate           = document.getElementById('cr-enddate').value;
+  const status            = document.getElementById('cr-status').value;
+  const remarks           = document.getElementById('cr-remarks').value.trim();
+
+  if (!lenderName) { alert('Please enter a Lender / Card Name'); return; }
+
+  const entry = { lenderName, type, principalAmount, outstandingBalance, interestRate, monthlyEmi, dueDate, tenureMonths, balanceTenure, startDate, endDate, status, remarks };
+
+  if (editingCreditId) {
+    const idx = creditDb.findIndex(x => x.id === editingCreditId);
+    if (idx >= 0) creditDb[idx] = { ...creditDb[idx], ...entry };
+  } else {
+    creditDb.push({ id: Date.now(), ...entry });
+  }
+  scheduleSave();
+  closeCreditModal();
+  if (activeView === 'credit') renderCreditTracker();
+  else if (activeView === 'dashboard') renderDashboard();
+}
+
+function deleteCurrentCreditEntry() {
+  if (editingCreditId && confirm('Delete this credit entry?')) {
+    creditDb = creditDb.filter(x => x.id !== editingCreditId);
+    scheduleSave();
+    closeCreditModal();
+    if (activeView === 'credit') renderCreditTracker();
+  }
+}
+
+function deleteCreditItem(id) {
+  if (confirm('Delete this credit entry?')) {
+    creditDb = creditDb.filter(x => x.id !== id);
+    scheduleSave();
+    renderCreditTracker();
+  }
+}
+
+// ── DASHBOARD CREDIT CHARTS ─────────────────────────────────────────────────
+function renderDashCreditCharts() {
+  const activeCredit = creditDb.filter(c => c.status === 'Active');
+  const totalOutstanding = creditDb.reduce((s,c) => s + c.outstandingBalance, 0);
+  const totalEmi = activeCredit.reduce((s,c) => s + c.monthlyEmi, 0);
+
+  // Update credit KPI on dashboard
+  const el = document.getElementById('kpi-credit-outstanding');
+  if (el) {
+    el.textContent = fmt(totalOutstanding);
+    document.getElementById('kpi-credit-sub').textContent = `${activeCredit.length} active · ₹${Math.round(totalEmi).toLocaleString('en-IN')}/mo EMI`;
+  }
+
+  // Outstanding by lender bar (top 5)
+  const sorted = [...creditDb].sort((a,b) => b.outstandingBalance - a.outstandingBalance).slice(0, 6);
+  const barColors = ['#f97316','#fb923c','#fdba74','#fbbf24','#f59e0b','#ef4444'];
+  destroyChart('dash-credit-bar');
+  if (sorted.length) {
+    charts['dash-credit-bar'] = new Chart(document.getElementById('dash-credit-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: sorted.map(c => c.lenderName.length > 10 ? c.lenderName.slice(0,10)+'…' : c.lenderName),
+        datasets: [{
+          data: sorted.map(c => c.outstandingBalance),
+          backgroundColor: barColors.map(c => c + '99'),
+          borderColor: barColors, borderWidth: 1, borderRadius: 5
+        }]
+      },
+      options: { ...cOpts(false), scales: { y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}, x:{ticks:{color:'#64748b',font:{size:9}}} } }
+    });
+  }
+
+  // EMI vs Outstanding comparison
+  const top5 = [...creditDb].sort((a,b) => b.outstandingBalance - a.outstandingBalance).slice(0,5);
+  destroyChart('dash-credit-emi');
+  if (top5.length) {
+    charts['dash-credit-emi'] = new Chart(document.getElementById('dash-credit-emi').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: top5.map(c => c.lenderName.length > 9 ? c.lenderName.slice(0,9)+'…' : c.lenderName),
+        datasets: [
+          { label: 'Outstanding', data: top5.map(c => c.outstandingBalance), backgroundColor: 'rgba(239,68,68,0.5)', borderColor:'#ef4444', borderWidth:1, borderRadius:4 },
+          { label: 'Monthly EMI', data: top5.map(c => c.monthlyEmi * 12), backgroundColor: 'rgba(251,191,36,0.5)', borderColor:'#fbbf24', borderWidth:1, borderRadius:4 }
+        ]
+      },
+      options: { ...cOpts(true), scales: { y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}, x:{ticks:{color:'#64748b',font:{size:9}}} } }
+    });
+  }
+
+  // Credit summary card
+  const summaryEl = document.getElementById('dash-credit-summary');
+  if (summaryEl) {
+    const byType = {};
+    creditDb.forEach(c => { byType[c.type] = (byType[c.type]||{count:0,bal:0}); byType[c.type].count++; byType[c.type].bal += c.outstandingBalance; });
+    summaryEl.innerHTML = Object.entries(byType).map(([t,v]) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+        <div style="font-weight:600;font-size:0.8rem;color:var(--text-mid)">${t} <span style="font-size:0.68rem;color:var(--text-muted)">(${v.count})</span></div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#f97316;font-weight:700">${fmt(v.bal)}</div>
+      </div>`).join('') + `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;margin-top:2px">
+        <div style="font-weight:700;font-size:0.82rem">Total EMI/mo</div>
+        <div style="font-family:'DM Mono',monospace;font-weight:700;color:#fbbf24">${fmt(totalEmi)}</div>
+      </div>`;
+  }
+}
+
+
+
+function openExportModal() {
+  document.getElementById('export-modal').style.display = 'flex';
+}
+
+function runExport() {
+  const wantTransactions = document.getElementById('exp-transactions').checked;
+  const wantLoans        = document.getElementById('exp-loans').checked;
+  const wantCredit       = document.getElementById('exp-credit').checked;
+  const wantInvestments  = document.getElementById('exp-investments').checked;
+  const wantHoldings     = document.getElementById('exp-holdings').checked;
+  const wantAssets       = document.getElementById('exp-assets').checked;
+  const dateFrom         = document.getElementById('exp-date-from').value;
+  const dateTo           = document.getElementById('exp-date-to').value;
+
+  function inRange(dateStr) {
+    if (!dateFrom && !dateTo) return true;
+    const d = new Date(dateStr);
+    if (dateFrom && d < new Date(dateFrom)) return false;
+    if (dateTo   && d > new Date(dateTo))   return false;
+    return true;
+  }
+
+  let csv = '';
+  if (wantTransactions) {
+    csv += 'TRANSACTIONS\nName,SubCategory,Type,Amount,Date,Recurring,Notes\n';
+    db.filter(r => r.type!=='Loan'&&r.type!=='Investment').filter(r=>inRange(r.date)).forEach(r => {
+      csv += `"${r.name}","${r.sub||''}","${r.type}",${r.amount},"${r.date}",${r.recurring||false},"${r.notes||''}"\n`;
+    });
+    csv += '\n';
+  }
+  if (wantLoans) {
+    csv += 'LOANS & EMI\nName,SubCategory,Type,Amount,Date,Recurring,Notes\n';
+    db.filter(r=>r.type==='Loan').filter(r=>inRange(r.date)).forEach(r => {
+      csv += `"${r.name}","${r.sub||''}","${r.type}",${r.amount},"${r.date}",${r.recurring||false},"${r.notes||''}"\n`;
+    });
+    csv += '\n';
+  }
+  if (wantCredit) {
+    csv += 'CREDIT TRACKER\nLender,Type,Principal,Outstanding,InterestRate%,MonthlyEMI,DueDate,TenureMonths,BalanceTenure,StartDate,EndDate,Status,Remarks\n';
+    creditDb.forEach(c => {
+      csv += `"${c.lenderName}","${c.type}",${c.principalAmount},${c.outstandingBalance},${c.interestRate},${c.monthlyEmi},"${c.dueDate||''}",${c.tenureMonths},${c.balanceTenure||0},"${c.startDate||''}","${c.endDate||''}","${c.status}","${c.remarks||''}"\n`;
+    });
+    csv += '\n';
+  }
+  if (wantInvestments) {
+    csv += 'INVESTMENTS\nName,SubCategory,Type,Amount,Date,Recurring,Notes\n';
+    db.filter(r=>r.type==='Investment').filter(r=>inRange(r.date)).forEach(r => {
+      csv += `"${r.name}","${r.sub||''}","${r.type}",${r.amount},"${r.date}",${r.recurring||false},"${r.notes||''}"\n`;
+    });
+    csv += '\n';
+  }
+  if (wantHoldings) {
+    csv += 'HOLDINGS TABLE\nAssetType,Date,Quantity,Unit,BuyPrice,CurrentPrice,TotalInvested,CurrentValue,GainLoss,ROI%,Notes\n';
+    portDb.filter(e=>inRange(e.date)).forEach(e => {
+      const c = portCalc(e);
+      csv += `"${e.assetType}","${e.date}",${e.quantity},"${e.unit}",${e.purchasePrice},${e.currentPrice},${c.totalInvestment.toFixed(0)},${c.currentValue.toFixed(0)},${c.gainLoss.toFixed(0)},${c.roi.toFixed(1)},"${e.notes||''}"\n`;
+    });
+    csv += '\n';
+  }
+  if (wantAssets) {
+    csv += 'ALL ASSETS (Portfolio Summary)\nAssetType,TotalInvested,CurrentValue,GainLoss,ROI%,TotalQty\n';
+    const byType = {};
+    portDb.forEach(e => {
+      const c = portCalc(e); const k = normalizeAssetType(e.assetType);
+      if (!byType[k]) byType[k] = {inv:0,val:0,gain:0,qty:0,roi:[]};
+      byType[k].inv+=c.totalInvestment; byType[k].val+=c.currentValue; byType[k].gain+=c.gainLoss; byType[k].qty+=e.quantity; byType[k].roi.push(c.roi);
+    });
+    Object.entries(byType).forEach(([k,v]) => {
+      const avgRoi = v.roi.length?(v.roi.reduce((a,b)=>a+b,0)/v.roi.length):0;
+      csv += `"${assetTypeLabel(k)}",${v.inv.toFixed(0)},${v.val.toFixed(0)},${v.gain.toFixed(0)},${avgRoi.toFixed(1)},${v.qty}\n`;
+    });
+    csv += '\n';
+  }
+  if (!csv.trim()) { alert('Please select at least one export type.'); return; }
+  const blob = new Blob([csv], {type:'text/csv'});
   const url  = window.URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = 'financeos_export.csv'; a.click();
+  const date = new Date().toISOString().split('T')[0];
+  a.href=url; a.download=`financeos_export_${date}.csv`; a.click();
   window.URL.revokeObjectURL(url);
+  document.getElementById('export-modal').style.display='none';
 }
 
 // ── EXCEL IMPORT ───────────────────────────────────────────────────────────
