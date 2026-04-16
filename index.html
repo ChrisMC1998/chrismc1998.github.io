@@ -1288,6 +1288,10 @@ let gdriveTokenClient = null;
 let gdriveAccessToken = null;
 let gdriveFileIds = { db: null, portDb: null, creditDb: null };
 
+// Persist connection state across page reloads
+const GDRIVE_CONNECTED_KEY = 'fos_gdrive_connected';
+const GDRIVE_EMAIL_KEY     = 'fos_gdrive_email';
+
 function connectDrive() {
   connectGoogleDrive();
 }
@@ -1369,15 +1373,67 @@ function connectGoogleDrive() {
         if (tokenResponse.error) { setDriveStatus('error', 'Auth failed'); return; }
         gdriveAccessToken = tokenResponse.access_token;
         gdriveConnected = true;
+        // Persist connection flag so we auto-reconnect on next page load
+        localStorage.setItem(GDRIVE_CONNECTED_KEY, '1');
         setDriveStatus('connected', 'Drive connected');
-        document.getElementById('gdrive-btn').innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
+        const btn = document.getElementById('gdrive-btn');
+        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
         loadFromGoogleDrive();
+        // Schedule a silent token refresh before the 1-hour expiry
+        setTimeout(silentTokenRefresh, 55 * 60 * 1000);
       }
     });
     gdriveTokenClient.requestAccessToken();
   } catch(e) {
     setDriveStatus('error', 'Drive unavailable');
   }
+}
+
+// Silent re-auth: re-requests a fresh token without showing a popup.
+// Called automatically on page load (if the user previously connected)
+// and every 55 minutes to keep the session alive.
+function silentTokenRefresh() {
+  if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
+  try {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: GDRIVE_SCOPES,
+      prompt: '',   // empty string = no consent screen if already granted
+      callback: (tokenResponse) => {
+        if (tokenResponse.error) {
+          // Silent refresh failed — clear flag so user can manually reconnect
+          localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+          gdriveConnected = false;
+          gdriveAccessToken = null;
+          setDriveStatus('', 'Google Drive');
+          const btn = document.getElementById('gdrive-btn');
+          if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Connect Drive';
+          return;
+        }
+        gdriveAccessToken = tokenResponse.access_token;
+        gdriveConnected = true;
+        localStorage.setItem(GDRIVE_CONNECTED_KEY, '1');
+        setDriveStatus('connected', 'Drive connected');
+        const btn = document.getElementById('gdrive-btn');
+        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
+        // Schedule next refresh
+        setTimeout(silentTokenRefresh, 55 * 60 * 1000);
+      }
+    });
+    client.requestAccessToken({ prompt: '' });
+  } catch(e) {
+    // GIS library not ready yet — retry after 3 seconds
+    setTimeout(silentTokenRefresh, 3000);
+  }
+}
+
+function disconnectGoogleDrive() {
+  localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+  gdriveConnected = false;
+  gdriveAccessToken = null;
+  setDriveStatus('', 'Google Drive');
+  const btn = document.getElementById('gdrive-btn');
+  if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Connect Drive';
 }
 
 function setDriveStatus(state, label) {
@@ -3020,6 +3076,24 @@ window.onload = () => {
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
   });
+
+  // Auto-reconnect Google Drive if the user previously connected.
+  // We wait up to 3 seconds for the GIS (Google Identity Services) library
+  // to finish loading before attempting the silent refresh.
+  if (localStorage.getItem(GDRIVE_CONNECTED_KEY)) {
+    setDriveStatus('connected', 'Reconnecting…');
+    const tryReconnect = (attempts) => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        silentTokenRefresh();
+      } else if (attempts > 0) {
+        setTimeout(() => tryReconnect(attempts - 1), 500);
+      } else {
+        // GIS library failed to load — reset status so user can manually connect
+        setDriveStatus('', 'Google Drive');
+      }
+    };
+    setTimeout(() => tryReconnect(6), 300);
+  }
 };
 </script>
 </body>
