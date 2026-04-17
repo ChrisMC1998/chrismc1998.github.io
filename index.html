@@ -142,7 +142,7 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 
 .topbar { display:flex; justify-content:space-between; align-items:center; padding:1rem 1.8rem; border-bottom:1px solid var(--glass-border); gap:1rem; flex-shrink:0; background:rgba(7,9,26,0.7); backdrop-filter:blur(12px); }
 .page-title { font-size:1.3rem; font-weight:700; letter-spacing:-0.5px; white-space:nowrap; }
-.page-title b { color:white; }
+.page-title b { color:var(--text-main); }
 .page-title span { color:var(--text-muted); font-weight:300; }
 .topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 .filter-mode-toggle { display:flex; background:rgba(255,255,255,0.05); border-radius:7px; border:1px solid var(--glass-border); overflow:hidden; }
@@ -238,7 +238,7 @@ tr:last-child td { border-bottom:none; }
 .budget-row .budget-input { margin-top:0; padding:9px 12px; font-size:0.84rem; border-radius:10px; }
 .input-group { margin-bottom:12px; }
 .input-group label { font-size:0.7rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; }
-.input-field { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:white; padding:9px 12px; border-radius:9px; margin-top:5px; font-size:0.84rem; font-family:'DM Sans',sans-serif; transition:border-color 0.16s; outline:none; }
+.input-field { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); padding:9px 12px; border-radius:9px; margin-top:5px; font-size:0.84rem; font-family:'DM Sans',sans-serif; transition:border-color 0.16s; outline:none; }
 .input-field:focus { border-color:var(--accent); }
 .input-field.port-focus:focus { border-color:#a78bfa; }
 .input-field option { background:#1e293b; }
@@ -3063,8 +3063,8 @@ function renderNetWorth() {
       pointBackgroundColor:'#a78bfa', pointBorderColor:'rgba(167,139,250,0.3)', pointBorderWidth:3
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 
@@ -3077,8 +3077,8 @@ function renderNetWorth() {
       { label:'Liabilities', data:lD, backgroundColor:'rgba(96,165,250,0.5)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4 }
     ]},
     options: { ...cOpts(true), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 
@@ -3093,8 +3093,8 @@ function renderNetWorth() {
       borderWidth:1, borderRadius:5
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 }
@@ -3109,6 +3109,8 @@ function groupData(type, data) {
   return g;
 }
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#ffffff'; }
+function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.04)'; }
 function cOpts(legend) {
   return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:!!legend, labels:{ color:'#94a3b8', boxWidth:11, font:{ family:'DM Sans', size:11 } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } };
 }
@@ -3751,6 +3753,12 @@ function toggleTheme() {
     icon.className  = 'fas fa-sun';
     label.textContent = 'Light';
   }
+  // Re-render current view so chart tick colours update instantly
+  if      (activeView === 'dashboard')    renderDashboard();
+  else if (activeView === 'analytics')    renderAnalytics();
+  else if (activeView === 'networth')     renderNetWorth();
+  else if (activeView === 'port-overview')  renderPortOverview();
+  else if (activeView === 'port-analytics') renderPortAnalytics();
 }
 function applyStoredTheme() {
   const stored = localStorage.getItem('fos_theme');
