@@ -319,51 +319,7 @@ tr:last-child td { border-bottom:none; }
 .drawer-close { margin-bottom:1rem; display:flex; justify-content:flex-end; }
 .drawer-close button { background:transparent; border:1px solid var(--glass-border); color:var(--text-mid); border-radius:8px; padding:6px 12px; cursor:pointer; font-size:0.82rem; }
 
-/* ── RESPONSIVE BREAKPOINTS ── */
-@media (max-width: 900px) {
-  .sidebar, .port-sidebar { display:none; }
-  .mobile-header { display:flex; }
-  body { flex-direction:column; overflow:auto; height:auto; min-height:100vh; }
-  .main { flex:1; min-height:0; padding-top:58px; }
-  .topbar { padding:0.7rem 1rem; flex-wrap:wrap; gap:0.5rem; }
-  .page-title { font-size:1rem; }
-  .topbar-right { gap:5px; }
-  .filter-select { min-width:70px; font-size:0.74rem; padding:5px 20px 5px 8px; }
-  .filter-mode-btn { padding:5px 8px; font-size:0.68rem; }
-  .btn-add { padding:6px 10px; font-size:0.78rem; }
-  .scroll-area { padding:1rem; overflow-y:visible; }
-
-  /* KPI grid: 2 cols on tablet, 1 on phone */
-  .kpi-grid { grid-template-columns:repeat(2,1fr) !important; gap:0.7rem; }
-  .port-kpi-strip { grid-template-columns:repeat(2,1fr) !important; gap:0.7rem; }
-  .credit-kpi-strip { grid-template-columns:repeat(2,1fr) !important; gap:0.7rem; }
-
-  /* Chart grids: stack vertically */
-  .charts-row   { grid-template-columns:1fr !important; }
-  .charts-3col  { grid-template-columns:1fr !important; }
-  .analytics-grid { grid-template-columns:1fr !important; }
-  .nw-row { flex-direction:column; gap:0.7rem; }
-
-  /* Tables: scroll horizontally */
-  .glass-panel { padding:0.9rem 1rem; }
-  table { min-width:600px; }
-  .glass-panel > div > table,
-  .port-table-wrap { overflow-x:auto; display:block; }
-
-  /* Modals: full width */
-  .modal-box { width:calc(100vw - 24px) !important; margin:12px; padding:1.2rem; }
-  .export-modal-box { width:calc(100vw - 24px) !important; margin:12px; padding:1.2rem; }
-  .modal-row { flex-direction:column; gap:0; }
-}
-
-@media (max-width: 480px) {
-  .kpi-grid { grid-template-columns:1fr 1fr !important; }
-  .kpi-value { font-size:1.15rem; }
-  .topbar { padding:0.6rem 0.8rem; }
-  .filter-mode-toggle { display:none; }
-  .scroll-area { padding:0.75rem; }
-  .glass-panel { padding:0.8rem 0.85rem; border-radius:12px; }
-}
+/* responsive handled below in IMPROVED MOBILE section */
 
 /* ══════════════════════════════════════════════
    LIGHT MODE
@@ -480,6 +436,158 @@ body.light-mode .search-footer { border-top-color:rgba(0,0,0,0.06); }
 .nw-milestone-val { font-size:1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
 .nw-milestone-sub { font-size:0.65rem; color:var(--text-muted); margin-top:2px; }
 body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:rgba(167,139,250,0.2); }
+
+/* ══════════════════════════════════════════════
+   TRANSACTION TAGS
+══════════════════════════════════════════════ */
+.tag-input-wrap { position:relative; }
+.tag-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; min-height:0; }
+.tag-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3);
+  color:#a5b4fc; border-radius:20px; padding:3px 9px 3px 10px;
+  font-size:0.7rem; font-weight:600; cursor:default;
+}
+.tag-chip .tag-remove { cursor:pointer; opacity:0.6; font-size:0.65rem; line-height:1; transition:opacity 0.14s; }
+.tag-chip .tag-remove:hover { opacity:1; }
+.tag-suggestions {
+  position:absolute; top:100%; left:0; right:0; z-index:50;
+  background:#0c1020; border:1px solid rgba(99,102,241,0.3); border-radius:9px;
+  overflow:hidden; display:none; box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+body.light-mode .tag-suggestions { background:#fff; border-color:rgba(99,102,241,0.2); }
+.tag-suggestion-item {
+  padding:7px 12px; font-size:0.78rem; cursor:pointer; color:var(--text-main);
+  transition:background 0.12s;
+}
+body.light-mode .tag-suggestion-item { color:#0f172a; }
+.tag-suggestion-item:hover { background:rgba(99,102,241,0.1); }
+.tag-filter-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; align-items:center; }
+.tag-filter-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2);
+  color:var(--text-mid); border-radius:20px; padding:4px 10px;
+  font-size:0.7rem; font-weight:600; cursor:pointer; transition:all 0.14s;
+}
+.tag-filter-chip:hover, .tag-filter-chip.active {
+  background:rgba(99,102,241,0.2); border-color:rgba(99,102,241,0.5); color:#a5b4fc;
+}
+body.light-mode .tag-filter-chip { color:#475569; }
+body.light-mode .tag-filter-chip.active { color:#6366f1; }
+.inline-tags { display:inline-flex; flex-wrap:wrap; gap:3px; margin-left:4px; vertical-align:middle; }
+.inline-tag { background:rgba(99,102,241,0.12); color:#a5b4fc; border-radius:10px; padding:1px 7px; font-size:0.62rem; font-weight:700; border:1px solid rgba(99,102,241,0.22); }
+
+/* ══════════════════════════════════════════════
+   JSON BACKUP / RESTORE MODAL
+══════════════════════════════════════════════ */
+.backup-modal-box {
+  background:#0c1020; width:520px; max-width:calc(100vw - 24px);
+  padding:1.8rem; border-radius:18px;
+  border:1px solid rgba(52,211,153,0.25);
+  box-shadow:0 0 60px rgba(52,211,153,0.08);
+  max-height:92vh; overflow-y:auto;
+}
+body.light-mode .backup-modal-box { background:#fff; }
+.backup-option-card {
+  background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
+  border-radius:12px; padding:1rem 1.2rem; margin-bottom:10px;
+  display:flex; align-items:center; gap:14px; cursor:pointer;
+  transition:all 0.16s;
+}
+.backup-option-card:hover { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
+body.light-mode .backup-option-card { background:rgba(0,0,0,0.02); }
+body.light-mode .backup-option-card:hover { background:rgba(52,211,153,0.04); }
+.backup-option-icon { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.backup-option-title { font-size:0.88rem; font-weight:700; margin-bottom:2px; }
+.backup-option-desc  { font-size:0.72rem; color:var(--text-muted); }
+.backup-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:1rem 0; }
+.backup-stat { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:9px; padding:8px 10px; text-align:center; }
+body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
+.backup-stat-val { font-family:'DM Mono',monospace; font-weight:700; font-size:1rem; color:var(--c-inc); }
+.backup-stat-lbl { font-size:0.62rem; color:var(--text-muted); margin-top:2px; text-transform:uppercase; letter-spacing:0.8px; }
+.restore-drop-zone {
+  border:2px dashed rgba(52,211,153,0.3); border-radius:12px;
+  padding:2rem 1rem; text-align:center; color:var(--text-muted);
+  transition:all 0.2s; cursor:pointer; font-size:0.84rem;
+  margin-bottom:10px;
+}
+.restore-drop-zone:hover, .restore-drop-zone.drag-over {
+  border-color:rgba(52,211,153,0.7); background:rgba(52,211,153,0.05); color:var(--text-main);
+}
+.restore-preview { background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.2); border-radius:10px; padding:10px 14px; font-size:0.78rem; color:#6ee7b7; display:none; margin-bottom:10px; }
+
+/* ══════════════════════════════════════════════
+   IMPROVED MOBILE & TABLET LAYOUT
+══════════════════════════════════════════════ */
+/* Tablet landscape (900–1200px) — show one slim sidebar */
+@media (min-width:901px) and (max-width:1200px) {
+  :root { --sidebar-w:60px; --port-sidebar-w:60px; }
+  .sidebar, .port-sidebar { width:60px; padding:1rem 0.5rem; overflow:hidden; }
+  .brand-section, .port-brand, .nav-section-label, .welcome-msg,
+  .port-brand-sub, .port-filter-box, .port-filter-label,
+  .port-filter-select, .port-mode-toggle, .btn-port-add { display:none !important; }
+  .nav-item, .port-nav-item { justify-content:center; padding:10px 0; gap:0; }
+  .nav-item > *:not(.nav-icon), .port-nav-item > *:not(.nav-icon) { display:none; }
+  .nav-icon { width:100%; text-align:center; font-size:1rem; opacity:0.9; }
+  .sidebar-footer { align-items:center; gap:6px; }
+  .autosave-indicator span, .gdrive-status span, .export-btn span { display:none; }
+  .autosave-indicator, .gdrive-status { justify-content:center; padding:6px 0; }
+  .export-btn, .gdrive-btn { justify-content:center; padding:8px; width:100%; }
+  .kpi-grid { grid-template-columns:repeat(3,1fr) !important; }
+  .sparkline-row { grid-template-columns:repeat(2,1fr) !important; }
+}
+
+/* Tablet portrait (600–900px) */
+@media (max-width:900px) {
+  .sidebar, .port-sidebar { display:none; }
+  .mobile-header { display:flex; }
+  body { flex-direction:column; overflow:auto; height:auto; min-height:100vh; }
+  .main { flex:1; min-height:0; padding-top:58px; }
+  .topbar { padding:0.7rem 1rem; flex-wrap:wrap; gap:0.5rem; }
+  .page-title { font-size:1rem; }
+  .topbar-right { gap:5px; width:100%; justify-content:flex-start; }
+  .theme-toggle-btn span#theme-label { display:none; }
+  .filter-select { min-width:70px; font-size:0.74rem; padding:5px 20px 5px 8px; }
+  .filter-mode-btn { padding:5px 8px; font-size:0.68rem; }
+  .btn-add { padding:6px 10px; font-size:0.78rem; }
+  .scroll-area { padding:1rem; overflow-y:visible; }
+  .kpi-grid { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
+  .port-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
+  .credit-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
+  .sparkline-row { grid-template-columns:repeat(2,1fr) !important; gap:0.8rem; }
+  .charts-row   { grid-template-columns:1fr !important; }
+  .charts-3col  { grid-template-columns:1fr 1fr !important; }
+  .analytics-grid { grid-template-columns:1fr !important; }
+  .nw-row { flex-wrap:wrap; gap:0.7rem; }
+  .nw-card { flex:1; min-width:140px; }
+  .glass-panel { padding:0.9rem 1rem; }
+  table { min-width:580px; }
+  .glass-panel > div > table,
+  .port-table-wrap { overflow-x:auto; display:block; }
+  .modal-box { width:calc(100vw - 24px) !important; margin:12px; padding:1.2rem; }
+  .export-modal-box, .backup-modal-box { width:calc(100vw - 24px) !important; margin:12px; padding:1.2rem; }
+  .modal-row { flex-direction:column; gap:0; }
+  .emi-strip-inner { flex-direction:column; }
+  .emi-card { min-width:unset; }
+}
+
+/* Phone portrait (<600px) */
+@media (max-width:600px) {
+  .kpi-grid { grid-template-columns:1fr 1fr !important; }
+  .port-kpi-strip { grid-template-columns:1fr 1fr !important; }
+  .credit-kpi-strip { grid-template-columns:1fr 1fr !important; }
+  .sparkline-row { grid-template-columns:1fr 1fr !important; }
+  .charts-3col { grid-template-columns:1fr !important; }
+  .kpi-value { font-size:1.1rem; }
+  .topbar { padding:0.6rem 0.75rem; }
+  .filter-mode-toggle { display:none; }
+  .scroll-area { padding:0.75rem; }
+  .glass-panel { padding:0.75rem 0.85rem; border-radius:12px; }
+  .nw-milestone-strip { grid-template-columns:1fr 1fr; display:grid; }
+  .backup-stats { grid-template-columns:1fr 1fr; }
+  .search-box { border-radius:14px; }
+  .search-input { font-size:0.9rem; }
+}
 </style>
 </head>
 <body>
@@ -581,6 +689,9 @@ body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:
     </div>
     <button class="export-btn" onclick="openExportModal()">
       <i class="fas fa-file-csv"></i> Export CSV
+    </button>
+    <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
+      <i class="fas fa-database"></i> Backup / Restore
     </button>
   </div>
 </div>
@@ -817,6 +928,13 @@ body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:
 
     <!-- LIST VIEW -->
     <div id="view-list" class="view-section">
+      <div id="tag-filter-bar" style="margin-bottom:10px;display:none">
+        <div class="tag-filter-row">
+          <span style="font-size:0.7rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-right:4px">Filter by tag:</span>
+          <div id="tag-filter-chips"></div>
+          <span class="tag-filter-chip active" id="tag-filter-all" onclick="setTagFilter(null,this)" style="background:rgba(99,102,241,0.18);color:#a5b4fc;border-color:rgba(99,102,241,0.4)">All</span>
+        </div>
+      </div>
       <div class="glass-panel">
         <table>
           <thead>
@@ -824,6 +942,7 @@ body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:
               <th onclick="sortTable('name')" id="th-name">Name / Entity <span class="sort-arrow">↕</span></th>
               <th>Type</th>
               <th onclick="sortTable('sub')" id="th-sub">Category <span class="sort-arrow">↕</span></th>
+              <th>Tags</th>
               <th onclick="sortTable('date')" id="th-date">Date <span class="sort-arrow">↕</span></th>
               <th onclick="sortTable('amount')" id="th-amount" style="text-align:right">Amount <span class="sort-arrow">↕</span></th>
               <th></th>
@@ -1183,6 +1302,13 @@ body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:
         <input type="text" id="inp-notes" class="input-field" placeholder="Memo">
       </div>
     </div>
+    <div class="input-group tag-input-wrap">
+      <label>Tags <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0">(optional — press Enter or comma to add)</span></label>
+      <input type="text" id="inp-tags-input" class="input-field" placeholder="e.g. essential, emi, festival…" autocomplete="off" oninput="showTagSuggestions(this.value)" onkeydown="handleTagKey(event)">
+      <div class="tag-suggestions" id="tag-suggestions"></div>
+      <div class="tag-chips" id="tag-chips-preview"></div>
+      <input type="hidden" id="inp-tags">
+    </div>
     <div class="toggle-row">
       <div class="toggle-label"><i class="fas fa-redo" style="color:var(--accent);margin-right:6px"></i> Recurring monthly</div>
       <label class="toggle-switch">
@@ -1413,6 +1539,41 @@ body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:
         <i class="fas fa-download"></i> Download CSV
       </button>
       <button onclick="document.getElementById('export-modal').style.display='none'" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP / RESTORE MODAL -->
+<div class="modal-overlay" id="backup-modal">
+  <div class="backup-modal-box">
+    <div class="modal-title" style="color:var(--c-inc)"><i class="fas fa-database" style="margin-right:8px"></i>Backup & Restore</div>
+    <div class="backup-stats" id="backup-stats"></div>
+    <div class="backup-option-card" onclick="downloadBackup()">
+      <div class="backup-option-icon" style="background:rgba(52,211,153,0.12)"><i class="fas fa-download" style="color:#34d399"></i></div>
+      <div>
+        <div class="backup-option-title">Download JSON Backup</div>
+        <div class="backup-option-desc">Save all your data — transactions, portfolio, credit, budgets — to a local JSON file</div>
+      </div>
+    </div>
+    <div class="backup-option-card" onclick="document.getElementById('restore-file-input').click()">
+      <div class="backup-option-icon" style="background:rgba(99,102,241,0.12)"><i class="fas fa-upload" style="color:#6366f1"></i></div>
+      <div>
+        <div class="backup-option-title">Restore from Backup</div>
+        <div class="backup-option-desc">Load a previously saved JSON backup — this will replace your current data</div>
+      </div>
+    </div>
+    <input type="file" id="restore-file-input" accept=".json" style="display:none" onchange="handleRestoreFile(event)">
+    <div class="restore-drop-zone" id="restore-drop-zone"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleRestoreDrop(event)">
+      <i class="fas fa-cloud-upload-alt" style="font-size:1.6rem;display:block;margin-bottom:8px;opacity:0.4"></i>
+      Or drag & drop a .json backup file here
+    </div>
+    <div class="restore-preview" id="restore-preview"></div>
+    <div style="display:flex;gap:8px;margin-top:0.5rem">
+      <button id="restore-confirm-btn" onclick="confirmRestore()" class="btn-add" style="display:none;flex:1;justify-content:center;background:var(--c-inc);box-shadow:0 0 18px rgba(52,211,153,0.3)"><i class="fas fa-check"></i> Confirm Restore</button>
+      <button onclick="document.getElementById('backup-modal').style.display='none'" class="btn-secondary" style="flex:1;justify-content:center;display:flex">Close</button>
     </div>
   </div>
 </div>
@@ -2297,15 +2458,20 @@ function sortTable(col) {
 
 function renderTable() {
   buildFilterDropdowns();
+  updateTagFilterBar();
   const allData = getFilteredData();
-  const data = allData.filter(item => currentListFilter === 'all' ? true : item.type === currentListFilter);
+  let data = allData.filter(item => currentListFilter === 'all' ? true : item.type === currentListFilter);
+  // Apply tag filter
+  if (currentTagFilter) {
+    data = data.filter(item => (item.tags||[]).includes(currentTagFilter));
+  }
   updateSortArrows(sortCol, sortAsc);
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = '';
 
   if (!data.length) {
     const labels = {all:'entries', Loan:'loans or EMI', Investment:'investments', Income:'income', Expense:'expenses'};
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-inbox"></i><p>No ${labels[currentListFilter]||'entries'} found for the selected filter</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-inbox"></i><p>No ${labels[currentListFilter]||'entries'} found for the selected filter</p></div></td></tr>`;
     return;
   }
 
@@ -2318,10 +2484,14 @@ function renderTable() {
     const bc = item.type==='Loan'?'bg-loan':item.type==='Investment'?'bg-inv':item.type==='Income'?'bg-inc':'bg-exp';
     const sign = item.type === 'Income' ? '+' : '-';
     const color = item.type==='Income'?'var(--c-inc)':item.type==='Investment'?'var(--c-inv)':item.type==='Loan'?'var(--c-loan)':'var(--c-exp)';
+    const tagsHtml = (item.tags||[]).length
+      ? `<span class="inline-tags">${item.tags.map(t=>`<span class="inline-tag">#${t}</span>`).join('')}</span>`
+      : '<span style="color:var(--text-muted);font-size:0.7rem">—</span>';
     tbody.innerHTML += `<tr>
       <td style="font-weight:500">${item.name} ${item.recurring?'<i class="fas fa-redo recur-icon" title="Recurring"></i>':''} ${item.notes?`<span style="font-size:0.7rem;color:var(--text-muted)">(${item.notes})</span>`:''}</td>
       <td><span class="badge ${bc}">${item.type}</span></td>
       <td style="color:var(--text-muted)">${item.sub||'-'}</td>
+      <td>${tagsHtml}</td>
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.75rem">${item.date}</td>
       <td style="text-align:right;font-family:'DM Mono',monospace;color:${color};font-weight:600">${sign}${fmt(item.amount)}</td>
       <td style="text-align:right"><i class="fas fa-edit edit-icon" onclick="editFinanceEntry(${item.id})" title="Edit"></i><i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.75rem" onclick="deleteItem(${item.id})"></i></td>
@@ -2342,6 +2512,11 @@ function editFinanceEntry(id) {
   document.getElementById('inp-sub').value = entry.sub || '';
   document.getElementById('inp-notes').value = entry.notes || '';
   document.getElementById('inp-recurring').checked = entry.recurring;
+  const tags = entry.tags || [];
+  document.getElementById('inp-tags').value = tags.join(',');
+  document.getElementById('inp-tags-input').value = '';
+  document.getElementById('tag-suggestions').style.display = 'none';
+  renderTagChips(tags);
   document.getElementById('fin-save-btn').textContent = 'Update Entry';
   document.getElementById('fin-delete-btn').style.display = 'block';
   document.getElementById('modal').style.display = 'flex';
@@ -2958,7 +3133,9 @@ function openModal() {
   document.getElementById('inp-recurring').checked = false;
   document.getElementById('fin-save-btn').textContent = 'Save Entry';
   document.getElementById('fin-delete-btn').style.display = 'none';
-  ['inp-name','inp-amt','inp-sub','inp-notes'].forEach(id => document.getElementById(id).value = '');
+  ['inp-name','inp-amt','inp-sub','inp-notes','inp-tags','inp-tags-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tag-chips-preview').innerHTML = '';
+  document.getElementById('tag-suggestions').style.display = 'none';
   document.getElementById('modal').style.display = 'flex';
 }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -2971,13 +3148,15 @@ function saveEntry() {
   const date = document.getElementById('inp-date').value;
   const notes     = document.getElementById('inp-notes').value.trim();
   const recurring = document.getElementById('inp-recurring').checked;
+  const tagsRaw   = document.getElementById('inp-tags').value;
+  const tags      = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
   if (!name || !amt || !date) { alert('Please fill in Name, Amount and Date'); return; }
 
   if (editingFinanceId) {
     const idx = db.findIndex(x => x.id === editingFinanceId);
-    if (idx >= 0) db[idx] = { ...db[idx], name, amount:Number(amt), type, sub, date, notes, recurring };
+    if (idx >= 0) db[idx] = { ...db[idx], name, amount:Number(amt), type, sub, date, notes, recurring, tags };
   } else {
-    db.push({ id:Date.now(), name, amount:Number(amt), type, sub, date, notes, recurring });
+    db.push({ id:Date.now(), name, amount:Number(amt), type, sub, date, notes, recurring, tags });
   }
 
   scheduleSave();
@@ -3711,6 +3890,168 @@ function searchJumpTo(type, id) {
   switchView(view, navEl, group);
 }
 
+// ── TAGS ───────────────────────────────────────────────────────────────────
+let currentTagFilter = null;
+let pendingRestoreData = null;
+
+const TAG_SUGGESTIONS_LIST = ['essential','emi','festival','travel','medical','online','cash','recurring','one-time','family','work','gift','urgent','planned'];
+
+function getAllTags() {
+  const set = new Set();
+  db.forEach(r => (r.tags||[]).forEach(t => set.add(t)));
+  return [...set].sort();
+}
+
+function renderTagChips(tags) {
+  const container = document.getElementById('tag-chips-preview');
+  if (!container) return;
+  container.innerHTML = tags.map(t => `
+    <span class="tag-chip">${t}<span class="tag-remove" onclick="removeTag('${t}')">✕</span></span>
+  `).join('');
+}
+
+function getCurrentTags() {
+  const val = document.getElementById('inp-tags').value;
+  return val ? val.split(',').filter(Boolean) : [];
+}
+
+function addTag(tag) {
+  tag = tag.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if (!tag) return;
+  const tags = getCurrentTags();
+  if (!tags.includes(tag)) { tags.push(tag); }
+  document.getElementById('inp-tags').value = tags.join(',');
+  document.getElementById('inp-tags-input').value = '';
+  renderTagChips(tags);
+  document.getElementById('tag-suggestions').style.display = 'none';
+}
+
+function removeTag(tag) {
+  const tags = getCurrentTags().filter(t => t !== tag);
+  document.getElementById('inp-tags').value = tags.join(',');
+  renderTagChips(tags);
+}
+
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    addTag(e.target.value);
+  } else if (e.key === 'Escape') {
+    document.getElementById('tag-suggestions').style.display = 'none';
+  }
+}
+
+function showTagSuggestions(val) {
+  const box = document.getElementById('tag-suggestions');
+  const q = val.trim().toLowerCase();
+  const existing = getCurrentTags();
+  const allKnown = [...new Set([...TAG_SUGGESTIONS_LIST, ...getAllTags()])];
+  const matches = allKnown.filter(t => !existing.includes(t) && (!q || t.includes(q))).slice(0,6);
+  if (!matches.length) { box.style.display='none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = matches.map(t => `<div class="tag-suggestion-item" onclick="addTag('${t}')">#${t}</div>`).join('');
+}
+
+function setTagFilter(tag, el) {
+  currentTagFilter = tag;
+  document.querySelectorAll('.tag-filter-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderTable();
+}
+
+function updateTagFilterBar() {
+  const bar = document.getElementById('tag-filter-bar');
+  const chipsEl = document.getElementById('tag-filter-chips');
+  const allTags = getAllTags();
+  if (!allTags.length) { if(bar) bar.style.display='none'; return; }
+  if(bar) bar.style.display = 'block';
+  if(chipsEl) chipsEl.innerHTML = allTags.map(t =>
+    `<span class="tag-filter-chip ${currentTagFilter===t?'active':''}" onclick="setTagFilter('${t}',this)">#${t}</span>`
+  ).join('');
+}
+
+// ── JSON BACKUP / RESTORE ──────────────────────────────────────────────────
+function openBackupModal() {
+  const statsEl = document.getElementById('backup-stats');
+  statsEl.innerHTML = [
+    { val: db.length,       lbl: 'Transactions' },
+    { val: portDb.length,   lbl: 'Holdings' },
+    { val: creditDb.length, lbl: 'Credit Entries' },
+    { val: Object.keys(budgets).length, lbl: 'Budgets' },
+  ].map(s => `<div class="backup-stat"><div class="backup-stat-val">${s.val}</div><div class="backup-stat-lbl">${s.lbl}</div></div>`).join('');
+  document.getElementById('restore-preview').style.display = 'none';
+  document.getElementById('restore-confirm-btn').style.display = 'none';
+  pendingRestoreData = null;
+  document.getElementById('backup-modal').style.display = 'flex';
+}
+
+function downloadBackup() {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    db, portDb, creditDb, budgets
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().split('T')[0];
+  a.href = url; a.download = `financeos_backup_${date}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function handleRestoreFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  readRestoreFile(file);
+  e.target.value = '';
+}
+
+function handleRestoreDrop(e) {
+  e.preventDefault();
+  document.getElementById('restore-drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.json')) readRestoreFile(file);
+}
+
+function readRestoreFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.db && !data.portDb && !data.creditDb) throw new Error('Invalid backup file');
+      pendingRestoreData = data;
+      const preview = document.getElementById('restore-preview');
+      preview.style.display = 'block';
+      preview.innerHTML = `
+        <i class="fas fa-check-circle" style="margin-right:6px"></i>
+        <strong>Backup file loaded:</strong> ${file.name}<br>
+        <span style="opacity:0.8">
+          ${(data.db||[]).length} transactions · 
+          ${(data.portDb||[]).length} holdings · 
+          ${(data.creditDb||[]).length} credit entries · 
+          Exported ${data.exportedAt ? new Date(data.exportedAt).toLocaleDateString() : 'unknown date'}
+        </span>`;
+      document.getElementById('restore-confirm-btn').style.display = 'flex';
+    } catch(err) {
+      alert('⚠️ Could not read backup file. Make sure it\'s a valid FinanceOS JSON backup.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function confirmRestore() {
+  if (!pendingRestoreData) return;
+  if (!confirm('⚠️ This will replace ALL your current data with the backup. Are you sure?')) return;
+  if (pendingRestoreData.db)       { db       = pendingRestoreData.db; localStorage.setItem('fos_db_v3', JSON.stringify(db)); }
+  if (pendingRestoreData.portDb)   { portDb   = pendingRestoreData.portDb.map(normalizePortRecord); localStorage.setItem('fos_port_v3', JSON.stringify(portDb)); }
+  if (pendingRestoreData.creditDb) { creditDb = pendingRestoreData.creditDb; localStorage.setItem('fos_credit_v1', JSON.stringify(creditDb)); }
+  if (pendingRestoreData.budgets)  { budgets  = pendingRestoreData.budgets; localStorage.setItem('fos_budgets', JSON.stringify(budgets)); }
+  pendingRestoreData = null;
+  document.getElementById('backup-modal').style.display = 'none';
+  buildFilterDropdowns(); buildPortDropdowns(); renderDashboard();
+  alert('✅ Backup restored successfully!');
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────
 window.onload = () => {
   portFilterMode = 'only';
@@ -3728,6 +4069,9 @@ window.onload = () => {
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
   });
+  // Close backup modal on overlay click
+  const bkModal = document.getElementById('backup-modal');
+  if (bkModal) bkModal.addEventListener('click', e => { if (e.target === bkModal) bkModal.style.display = 'none'; });
 
   // Auto-reconnect Google Drive if the user previously connected.
   // We wait up to 3 seconds for the GIS (Google Identity Services) library
