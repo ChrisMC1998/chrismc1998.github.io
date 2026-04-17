@@ -63,6 +63,39 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .export-btn { padding:9px 10px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-mid); cursor:pointer; display:flex; align-items:center; gap:9px; font-size:0.84rem; font-weight:500; font-family:'DM Sans',sans-serif; transition:0.16s; }
 .export-btn:hover { background:white; color:#07091a; border-color:white; }
 
+/* ── BUDGET BADGE ── */
+.budget-badge { display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px; border-radius:9px; font-size:0.6rem; font-weight:800; padding:0 4px; margin-left:auto; line-height:1; }
+.budget-badge.over  { background:#ef4444; color:white; }
+.budget-badge.warn  { background:#f59e0b; color:#07091a; }
+
+/* ── EMI REMINDER STRIP ── */
+.emi-strip { margin-bottom:1.3rem; }
+.emi-strip-inner { display:flex; gap:8px; flex-wrap:wrap; }
+.emi-card { display:flex; align-items:center; gap:10px; background:rgba(96,165,250,0.07); border:1px solid rgba(96,165,250,0.18); border-radius:11px; padding:9px 13px; flex:1; min-width:180px; transition:border-color 0.16s; }
+.emi-card:hover { border-color:rgba(96,165,250,0.4); }
+.emi-card.due-today { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.35); }
+.emi-card.due-soon  { background:rgba(245,158,11,0.07); border-color:rgba(245,158,11,0.3); }
+.emi-card-icon { width:32px; height:32px; border-radius:9px; background:rgba(96,165,250,0.15); display:flex; align-items:center; justify-content:center; font-size:0.85rem; color:#60a5fa; flex-shrink:0; }
+.emi-card.due-today .emi-card-icon { background:rgba(239,68,68,0.15); color:#ef4444; }
+.emi-card.due-soon  .emi-card-icon { background:rgba(245,158,11,0.15); color:#f59e0b; }
+.emi-card-info { flex:1; min-width:0; }
+.emi-card-name { font-size:0.8rem; font-weight:600; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.emi-card-due  { font-size:0.68rem; color:var(--text-muted); margin-top:2px; }
+.emi-card-amt  { font-family:'DM Mono',monospace; font-size:0.85rem; font-weight:700; color:#60a5fa; white-space:nowrap; }
+.emi-card.due-today .emi-card-amt { color:#ef4444; }
+.emi-card.due-soon  .emi-card-amt { color:#f59e0b; }
+
+/* ── SPARKLINE TREND ROW ── */
+.sparkline-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.3rem; }
+.spark-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:13px; padding:1rem 1.1rem 0.7rem; position:relative; overflow:hidden; }
+.spark-card-label { font-size:0.65rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
+.spark-card-value { font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:-0.5px; margin-bottom:2px; }
+.spark-card-trend { font-size:0.68rem; font-weight:600; display:flex; align-items:center; gap:3px; margin-bottom:6px; }
+.spark-card-trend.up   { color:#34d399; }
+.spark-card-trend.down { color:#ef4444; }
+.spark-card-trend.flat { color:#94a3b8; }
+.spark-canvas-wrap { height:48px; margin:0 -4px; }
+
 .port-sidebar {
   width: var(--port-sidebar-w);
   background: rgba(12,10,30,0.98);
@@ -331,6 +364,122 @@ tr:last-child td { border-bottom:none; }
   .scroll-area { padding:0.75rem; }
   .glass-panel { padding:0.8rem 0.85rem; border-radius:12px; }
 }
+
+/* ══════════════════════════════════════════════
+   LIGHT MODE
+══════════════════════════════════════════════ */
+body.light-mode {
+  --glass-border: rgba(0,0,0,0.09);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-mid: #475569;
+  background: #f1f5f9;
+  color: var(--text-main);
+}
+body.light-mode .sidebar         { background: rgba(255,255,255,0.97); border-right-color: rgba(0,0,0,0.08); }
+body.light-mode .port-sidebar    { background: rgba(248,246,255,0.98); border-right-color: rgba(167,139,250,0.2); }
+body.light-mode .topbar          { background: rgba(241,245,249,0.9); border-bottom-color: rgba(0,0,0,0.08); }
+body.light-mode .glass-panel     { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); }
+body.light-mode .kpi-card        { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.08); }
+body.light-mode .nav-item        { color: #475569; }
+body.light-mode .nav-item:hover  { background: rgba(0,0,0,0.04); color: #0f172a; }
+body.light-mode .nav-item.active { background: rgba(99,102,241,0.1); color: #0f172a; }
+body.light-mode .port-nav-item   { color: #5b4fa8; }
+body.light-mode .port-nav-item:hover  { background: rgba(167,139,250,0.1); color: #3b2f8f; }
+body.light-mode .port-nav-item.active { background: rgba(167,139,250,0.18); color: #3b2f8f; }
+body.light-mode .filter-select   { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.12); color: #0f172a; }
+body.light-mode .filter-select option { background: #fff; color: #0f172a; }
+body.light-mode td               { color: #0f172a; border-bottom-color: rgba(0,0,0,0.05); }
+body.light-mode th               { color: #475569; border-bottom-color: rgba(0,0,0,0.08); }
+body.light-mode tr:hover td      { background: rgba(0,0,0,0.02); }
+body.light-mode .port-filter-box { background: rgba(167,139,250,0.07); border-color: rgba(167,139,250,0.2); }
+body.light-mode .port-filter-select { background: rgba(255,255,255,0.9); color: #0f172a; border-color: rgba(167,139,250,0.3); }
+body.light-mode .port-filter-select option { background: #fff; color: #0f172a; }
+body.light-mode .nw-card         { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.08); }
+body.light-mode .kpi-label       { color: #64748b; }
+body.light-mode .panel-title     { color: #475569; }
+body.light-mode .spark-card      { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.08); }
+body.light-mode .spark-card-label { color: #64748b; }
+body.light-mode .emi-card        { background: rgba(96,165,250,0.06); border-color: rgba(96,165,250,0.25); }
+body.light-mode .modal-box, body.light-mode .export-modal-box { background: #fff; border-color: rgba(99,102,241,0.2); }
+body.light-mode .input-field     { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.12); color: #0f172a; }
+body.light-mode .toggle-row      { background: rgba(0,0,0,0.03); }
+body.light-mode .export-btn      { color: #475569; border-color: rgba(0,0,0,0.12); }
+body.light-mode .export-btn:hover { background: #0f172a; color: white; }
+body.light-mode .scroll-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+body.light-mode .port-kpi-card   { background: rgba(167,139,250,0.07); border-color: rgba(167,139,250,0.18); }
+body.light-mode .credit-kpi-card { background: rgba(251,169,106,0.06); }
+
+/* Light mode toggle button */
+.theme-toggle-btn {
+  display:flex; align-items:center; gap:7px; padding:7px 11px; border-radius:9px;
+  border:1px solid var(--glass-border); background:transparent; color:var(--text-mid);
+  cursor:pointer; font-size:0.78rem; font-weight:600; font-family:'DM Sans',sans-serif;
+  transition:all 0.2s; white-space:nowrap;
+}
+.theme-toggle-btn:hover { background:rgba(255,255,255,0.08); color:white; }
+body.light-mode .theme-toggle-btn { color: #475569; }
+body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f172a; }
+
+/* ══════════════════════════════════════════════
+   GLOBAL SEARCH
+══════════════════════════════════════════════ */
+.search-overlay {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(14px);
+  justify-content:center; align-items:flex-start; padding-top:10vh;
+}
+.search-overlay.open { display:flex; }
+.search-box {
+  width:620px; max-width:calc(100vw - 32px);
+  background:#0c1020; border:1px solid rgba(99,102,241,0.4);
+  border-radius:18px; box-shadow:0 0 60px rgba(99,102,241,0.2);
+  overflow:hidden;
+}
+body.light-mode .search-box { background:#fff; border-color:rgba(99,102,241,0.3); }
+.search-input-row {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.06);
+}
+body.light-mode .search-input-row { border-bottom-color: rgba(0,0,0,0.07); }
+.search-input-row i { color:#6366f1; font-size:1rem; flex-shrink:0; }
+.search-input {
+  flex:1; background:transparent; border:none; outline:none;
+  font-size:1rem; color:var(--text-main); font-family:'DM Sans',sans-serif;
+  font-weight:500;
+}
+body.light-mode .search-input { color:#0f172a; }
+.search-input::placeholder { color:var(--text-muted); }
+.search-kbd { font-size:0.65rem; color:var(--text-muted); background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:5px; padding:3px 6px; white-space:nowrap; }
+body.light-mode .search-kbd { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); }
+.search-results { max-height:380px; overflow-y:auto; padding:8px; }
+.search-results::-webkit-scrollbar { width:3px; }
+.search-results::-webkit-scrollbar-thumb { background:rgba(99,102,241,0.3); border-radius:2px; }
+.search-result-item {
+  display:flex; align-items:center; gap:12px; padding:10px 12px;
+  border-radius:10px; cursor:pointer; transition:background 0.14s;
+}
+.search-result-item:hover, .search-result-item.active { background:rgba(99,102,241,0.1); }
+body.light-mode .search-result-item:hover, body.light-mode .search-result-item.active { background:rgba(99,102,241,0.07); }
+.search-result-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.82rem; flex-shrink:0; }
+.search-result-name { font-size:0.86rem; font-weight:600; color:var(--text-main); }
+body.light-mode .search-result-name { color:#0f172a; }
+.search-result-meta { font-size:0.7rem; color:var(--text-muted); margin-top:2px; }
+.search-result-amt  { font-family:'DM Mono',monospace; font-size:0.88rem; font-weight:700; margin-left:auto; white-space:nowrap; }
+.search-empty { text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.85rem; }
+.search-footer { padding:10px 18px; border-top:1px solid rgba(255,255,255,0.05); display:flex; gap:14px; }
+body.light-mode .search-footer { border-top-color:rgba(0,0,0,0.06); }
+.search-hint { font-size:0.65rem; color:var(--text-muted); display:flex; align-items:center; gap:5px; }
+
+/* ══════════════════════════════════════════════
+   ENHANCED NET WORTH
+══════════════════════════════════════════════ */
+.nw-milestone-strip { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.2rem; }
+.nw-milestone { flex:1; min-width:130px; background:rgba(167,139,250,0.07); border:1px solid rgba(167,139,250,0.15); border-radius:11px; padding:10px 13px; }
+.nw-milestone-label { font-size:0.65rem; color:#a78bfa; text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:4px; }
+.nw-milestone-val { font-size:1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
+.nw-milestone-sub { font-size:0.65rem; color:var(--text-muted); margin-top:2px; }
+body.light-mode .nw-milestone { background:rgba(167,139,250,0.06); border-color:rgba(167,139,250,0.2); }
 </style>
 </head>
 <body>
@@ -415,6 +564,7 @@ tr:last-child td { border-bottom:none; }
   </div>
   <div class="nav-item" onclick="openBudgetModal()">
     <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>Budgets
+    <span id="budget-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
 
   <div class="sidebar-footer">
@@ -502,6 +652,13 @@ tr:last-child td { border-bottom:none; }
   <div class="topbar">
     <div class="page-title" id="page-header"><span>Dashboard</span> <b>Overview</b></div>
     <div class="topbar-right">
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle light/dark mode">
+        <i class="fas fa-sun" id="theme-icon"></i><span id="theme-label">Light</span>
+      </button>
+      <button class="theme-toggle-btn" onclick="openSearch()" title="Search (Ctrl+K)" style="gap:8px">
+        <i class="fas fa-search" style="color:var(--accent)"></i>Search
+        <span class="search-kbd">Ctrl K</span>
+      </button>
       <div class="filter-mode-toggle">
         <button class="filter-mode-btn active" id="fin-mode-only" onclick="setFilterMode('only',this)">Only</button>
         <button class="filter-mode-btn" id="fin-mode-cumul" onclick="setFilterMode('cumulative',this)">Cumul.</button>
@@ -575,6 +732,42 @@ tr:last-child td { border-bottom:none; }
       </div>
 
       <div id="budget-alerts-container"></div>
+
+      <!-- EMI REMINDER STRIP -->
+      <div id="emi-reminder-strip" class="emi-strip" style="display:none">
+        <div class="panel-title" style="margin-bottom:0.6rem">
+          <i class="fas fa-bell" style="color:#f59e0b;margin-right:6px"></i>Upcoming EMIs
+        </div>
+        <div class="emi-strip-inner" id="emi-strip-cards"></div>
+      </div>
+
+      <!-- SPARKLINE TREND ROW -->
+      <div class="sparkline-row">
+        <div class="spark-card">
+          <div class="spark-card-label">Income Trend</div>
+          <div class="spark-card-value" id="spark-inc-val" style="color:var(--c-inc)">—</div>
+          <div class="spark-card-trend" id="spark-inc-trend"></div>
+          <div class="spark-canvas-wrap"><canvas id="spark-inc"></canvas></div>
+        </div>
+        <div class="spark-card">
+          <div class="spark-card-label">Expense Trend</div>
+          <div class="spark-card-value" id="spark-exp-val" style="color:var(--c-exp)">—</div>
+          <div class="spark-card-trend" id="spark-exp-trend"></div>
+          <div class="spark-canvas-wrap"><canvas id="spark-exp"></canvas></div>
+        </div>
+        <div class="spark-card">
+          <div class="spark-card-label">Loan Outflow Trend</div>
+          <div class="spark-card-value" id="spark-loan-val" style="color:var(--c-loan)">—</div>
+          <div class="spark-card-trend" id="spark-loan-trend"></div>
+          <div class="spark-canvas-wrap"><canvas id="spark-loan"></canvas></div>
+        </div>
+        <div class="spark-card">
+          <div class="spark-card-label">Investment Trend</div>
+          <div class="spark-card-value" id="spark-inv-val" style="color:var(--c-inv)">—</div>
+          <div class="spark-card-trend" id="spark-inv-trend"></div>
+          <div class="spark-canvas-wrap"><canvas id="spark-inv"></canvas></div>
+        </div>
+      </div>
 
       <div class="charts-row">
         <div class="glass-panel" style="margin-bottom:0">
@@ -697,14 +890,33 @@ tr:last-child td { border-bottom:none; }
         <div class="nw-card"><div class="kpi-label">Total Assets</div><div class="nw-val" id="nw-assets" style="color:var(--c-inc)">₹0</div></div>
         <div class="nw-card"><div class="kpi-label">Total Liabilities</div><div class="nw-val" id="nw-liab" style="color:var(--c-exp)">₹0</div></div>
         <div class="nw-card"><div class="kpi-label">Net Worth</div><div class="nw-val" id="nw-total" style="color:var(--c-net)">₹0</div></div>
+        <div class="nw-card"><div class="kpi-label">Portfolio Value</div><div class="nw-val" id="nw-port-val" style="color:#a78bfa">₹0</div></div>
+        <div class="nw-card"><div class="kpi-label">Monthly Growth</div><div class="nw-val" id="nw-growth">—</div></div>
       </div>
+
+      <!-- Milestone strip -->
+      <div class="nw-milestone-strip" id="nw-milestones"></div>
+
       <div class="glass-panel">
-        <div class="panel-title">Net Worth Over Time</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
+          <div class="panel-title" style="margin-bottom:0">Net Worth Trajectory</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="setNwRange(6,this)"  class="filter-mode-btn active" id="nw-r6">6M</button>
+            <button onclick="setNwRange(12,this)" class="filter-mode-btn" id="nw-r12">12M</button>
+            <button onclick="setNwRange(0,this)"  class="filter-mode-btn" id="nw-rall">All</button>
+          </div>
+        </div>
         <div style="height:280px"><canvas id="chart-networth"></canvas></div>
       </div>
-      <div class="glass-panel">
-        <div class="panel-title">Assets vs Liabilities (Monthly)</div>
-        <div style="height:230px"><canvas id="chart-nw-breakdown"></canvas></div>
+      <div class="charts-row" style="margin-bottom:1.3rem">
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Assets vs Liabilities (Monthly)</div>
+          <div style="height:230px"><canvas id="chart-nw-breakdown"></canvas></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:0">
+          <div class="panel-title">Monthly Net Worth Change</div>
+          <div style="height:230px"><canvas id="chart-nw-delta"></canvas></div>
+        </div>
       </div>
     </div>
 
@@ -915,6 +1127,26 @@ tr:last-child td { border-bottom:none; }
 
   </div>
 </div>
+
+<!-- GLOBAL SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay" onclick="handleSearchOverlayClick(event)">
+  <div class="search-box" id="search-box">
+    <div class="search-input-row">
+      <i class="fas fa-search"></i>
+      <input class="search-input" id="search-input" placeholder="Search transactions, loans, investments…" oninput="runSearch(this.value)" onkeydown="handleSearchKey(event)">
+      <span class="search-kbd">ESC</span>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-empty"><i class="fas fa-search" style="font-size:1.8rem;opacity:0.2;display:block;margin-bottom:8px"></i>Start typing to search…</div>
+    </div>
+    <div class="search-footer">
+      <span class="search-hint"><span class="search-kbd">↑↓</span> navigate</span>
+      <span class="search-hint"><span class="search-kbd">Enter</span> jump to view</span>
+      <span class="search-hint"><span class="search-kbd">ESC</span> close</span>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-title" id="modal-title">Add Finance Record</div>
@@ -1853,6 +2085,9 @@ function renderDashboard() {
     </div>`).join('') : '<div class="empty-state"><i class="fas fa-inbox"></i>No portfolio data</div>';
 
   renderDashCreditCharts();
+  renderSparklines();
+  renderEmiStrip();
+  updateBudgetBadge();
 }
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
@@ -1877,7 +2112,168 @@ function renderBudgetAlerts(data) {
   container.innerHTML = html + '</div></div>';
 }
 
-// ── TABLE ──────────────────────────────────────────────────────────────────
+// ── BUDGET SIDEBAR BADGE ────────────────────────────────────────────────────
+function updateBudgetBadge() {
+  const badge = document.getElementById('budget-sidebar-badge');
+  if (!badge) return;
+  const data = getFilteredData();
+  let overCount = 0, warnCount = 0;
+  Object.entries(budgets).forEach(([cat, limit]) => {
+    const spent = data.filter(x => x.sub === cat || x.name === cat).reduce((a,b) => a+b.amount, 0);
+    const pct = (spent / limit) * 100;
+    if (spent > limit) overCount++;
+    else if (pct >= 80) warnCount++;
+  });
+  if (overCount > 0) {
+    badge.textContent = overCount;
+    badge.className = 'budget-badge over';
+    badge.style.display = 'inline-flex';
+  } else if (warnCount > 0) {
+    badge.textContent = warnCount;
+    badge.className = 'budget-badge warn';
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ── EMI REMINDER STRIP ─────────────────────────────────────────────────────
+function renderEmiStrip() {
+  const strip    = document.getElementById('emi-reminder-strip');
+  const cardsEl  = document.getElementById('emi-strip-cards');
+  if (!strip || !cardsEl) return;
+
+  const today    = new Date();
+  const todayDay = today.getDate();
+  const upcoming = [];
+
+  creditDb.forEach(loan => {
+    if (loan.status !== 'Active' || !loan.monthlyEmi || loan.monthlyEmi <= 0) return;
+    const dueMatch = String(loan.dueDate || '').match(/\d+/);
+    if (!dueMatch) return;
+    const dueDay = parseInt(dueMatch[0]);
+
+    // Days until next due
+    let daysUntil = dueDay - todayDay;
+    if (daysUntil < 0) {
+      // Already passed this month — next occurrence next month
+      const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+      daysUntil = daysInMonth - todayDay + dueDay;
+    }
+
+    if (daysUntil <= 7) {
+      upcoming.push({ name: loan.lenderName, emi: loan.monthlyEmi, dueDay, daysUntil, type: loan.type });
+    }
+  });
+
+  if (upcoming.length === 0) { strip.style.display = 'none'; return; }
+
+  upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+  strip.style.display = 'block';
+
+  cardsEl.innerHTML = upcoming.map(item => {
+    const cls = item.daysUntil === 0 ? 'due-today' : item.daysUntil <= 3 ? 'due-soon' : '';
+    const dueTxt = item.daysUntil === 0 ? 'Due TODAY' : item.daysUntil === 1 ? 'Due tomorrow' : `Due in ${item.daysUntil} days (${item.dueDay}${ordinal(item.dueDay)})`;
+    return `<div class="emi-card ${cls}">
+      <div class="emi-card-icon"><i class="fas fa-landmark"></i></div>
+      <div class="emi-card-info">
+        <div class="emi-card-name">${item.name}</div>
+        <div class="emi-card-due">${dueTxt} · ${item.type}</div>
+      </div>
+      <div class="emi-card-amt">${fmt(item.emi)}</div>
+    </div>`;
+  }).join('');
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return s[(v-20)%10] || s[v] || s[0];
+}
+
+// ── SPARKLINES ─────────────────────────────────────────────────────────────
+function renderSparklines() {
+  // Build last 6 months of data
+  const now   = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ y: d.getFullYear(), m: String(d.getMonth()+1).padStart(2,'0'), label: MONTHS[d.getMonth()] });
+  }
+
+  const series = { Income:[], Expense:[], Loan:[], Investment:[] };
+  months.forEach(({ y, m }) => {
+    Object.keys(series).forEach(type => {
+      const total = db.filter(r => r.type === type && r.date.slice(0,4) === String(y) && r.date.slice(5,7) === m)
+                      .reduce((a,b) => a + b.amount, 0);
+      series[type].push(total);
+    });
+  });
+
+  const configs = [
+    { key:'Income',     canvasId:'spark-inc',  valId:'spark-inc-val',  trendId:'spark-inc-trend',  color:'#34d399' },
+    { key:'Expense',    canvasId:'spark-exp',  valId:'spark-exp-val',  trendId:'spark-exp-trend',  color:'#f472b6' },
+    { key:'Loan',       canvasId:'spark-loan', valId:'spark-loan-val', trendId:'spark-loan-trend', color:'#60a5fa' },
+    { key:'Investment', canvasId:'spark-inv',  valId:'spark-inv-val',  trendId:'spark-inv-trend',  color:'#fbbf24' },
+  ];
+
+  configs.forEach(({ key, canvasId, valId, trendId, color }) => {
+    const vals = series[key];
+    const latest = vals[vals.length - 1] || 0;
+    const prev   = vals[vals.length - 2] || 0;
+    const diff   = latest - prev;
+    const pct    = prev > 0 ? ((diff / prev) * 100).toFixed(1) : null;
+
+    document.getElementById(valId).textContent = fmt(latest);
+
+    const trendEl = document.getElementById(trendId);
+    if (pct !== null) {
+      const up = diff >= 0;
+      const isGoodUp = key === 'Income' || key === 'Investment';
+      const cls = diff === 0 ? 'flat' : (up === isGoodUp ? 'up' : 'down');
+      const arrow = diff === 0 ? '→' : up ? '↑' : '↓';
+      trendEl.className = 'spark-card-trend ' + cls;
+      trendEl.innerHTML = `${arrow} ${Math.abs(pct)}% vs last month`;
+    } else {
+      trendEl.className = 'spark-card-trend flat';
+      trendEl.textContent = 'No prior data';
+    }
+
+    // Draw sparkline
+    destroyChart('spark-' + key);
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    charts['spark-' + key] = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: months.map(m => m.label),
+        datasets: [{
+          data: vals,
+          borderColor: color,
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 3,
+          fill: true,
+          backgroundColor: (ctx2) => {
+            const g = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 48);
+            g.addColorStop(0, color + '55');
+            g.addColorStop(1, color + '00');
+            return g;
+          },
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => ' '+fmt(c.raw) } } },
+        scales: {
+          x: { display:false },
+          y: { display:false, beginAtZero:true }
+        },
+        animation: { duration: 600 }
+      }
+    });
+  });
+}
 function updateSortArrows(col, asc) {
   ['name','sub','date','amount'].forEach(c => {
     const th = document.getElementById('th-'+c);
@@ -2391,43 +2787,140 @@ function matchMonth(item, m) {
 }
 
 // ── NET WORTH ──────────────────────────────────────────────────────────────
+let nwRange = 6; // months to show, 0 = all
+
+function setNwRange(months, btn) {
+  nwRange = months;
+  document.querySelectorAll('#nw-r6,#nw-r12,#nw-rall').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderNetWorth();
+}
+
 function renderNetWorth() {
   buildFilterDropdowns();
   const totalInv  = sumType('Investment', db);
   const totalInc  = sumType('Income', db);
   const totalLoan = sumType('Loan', db);
-  document.getElementById('nw-assets').textContent = fmt(totalInv + totalInc);
-  document.getElementById('nw-liab').textContent   = fmt(totalLoan);
-  document.getElementById('nw-total').textContent  = fmt(totalInv + totalInc - totalLoan);
+  const portStats = portAggStats(getPortFiltered());
 
-  const sortedM = [...new Set(db.map(d => d.date.slice(0,7)))].sort();
+  document.getElementById('nw-assets').textContent   = fmt(totalInv + totalInc);
+  document.getElementById('nw-liab').textContent     = fmt(totalLoan);
+  document.getElementById('nw-total').textContent    = fmt(totalInv + totalInc - totalLoan);
+  document.getElementById('nw-port-val').textContent = fmt(portStats.totalVal);
+
+  let sortedM = [...new Set(db.map(d => d.date.slice(0,7)))].sort();
   if (!sortedM.length) return;
 
+  // Apply range filter
+  if (nwRange > 0) {
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - nwRange);
+    const cutStr = cutoff.toISOString().slice(0,7);
+    sortedM = sortedM.filter(m => m >= cutStr);
+  }
+
   let cumA = 0, cumL = 0;
-  const nwL = [], nwD = [], aD = [], lD = [];
+  // Pre-accumulate everything before range start
+  const allM = [...new Set(db.map(d => d.date.slice(0,7)))].sort();
+  allM.filter(m => !sortedM.includes(m)).forEach(ym => {
+    const items = db.filter(d => d.date.slice(0,7) === ym);
+    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
+    cumL += items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
+  });
+
+  const nwL=[], nwD=[], aD=[], lD=[], deltaD=[];
+  let prevNW = cumA - cumL;
   sortedM.forEach(ym => {
     const [y,m] = ym.split('-').map(Number);
     const items = db.filter(d => d.date.slice(0,7) === ym);
-    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b) => a+b.amount, 0);
-    cumL += items.filter(d => d.type==='Loan').reduce((a,b) => a+b.amount, 0);
+    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
+    cumL += items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
+    const nw = cumA - cumL;
     nwL.push(MONTHS[m-1]+' '+String(y).slice(2));
-    nwD.push(cumA - cumL); aD.push(cumA); lD.push(cumL);
+    nwD.push(nw); aD.push(cumA); lD.push(cumL);
+    deltaD.push(nw - prevNW);
+    prevNW = nw;
   });
 
+  // Monthly growth stat
+  const growthEl = document.getElementById('nw-growth');
+  if (deltaD.length >= 1) {
+    const last = deltaD[deltaD.length-1];
+    const prev = nwD[nwD.length-2] || 0;
+    const pct  = prev !== 0 ? ((last/Math.abs(prev))*100).toFixed(1) : null;
+    growthEl.textContent  = fmt(last);
+    growthEl.style.color  = last >= 0 ? 'var(--c-inc)' : 'var(--danger)';
+    if (pct) growthEl.title = pct + '% this month';
+  }
+
+  // Milestones
+  const milestoneEl = document.getElementById('nw-milestones');
+  const curNW  = nwD[nwD.length-1] || 0;
+  const peakNW = Math.max(...nwD);
+  const targets = [500000,1000000,2500000,5000000,10000000];
+  const nextTarget = targets.find(t => t > curNW) || null;
+  const milestones = [
+    { label:'Current NW', val:fmt(curNW), sub:'as of latest month' },
+    { label:'Peak NW',    val:fmt(peakNW), sub:'all-time high' },
+    { label:'Avg Monthly Δ', val:fmt(deltaD.reduce((a,b)=>a+b,0)/Math.max(deltaD.length,1)), sub:'avg monthly change' },
+    { label:'Next Milestone', val:nextTarget?fmt(nextTarget):'🏆 Goal Met!', sub:nextTarget?fmt(nextTarget-curNW)+' to go':'amazing work!' },
+  ];
+  milestoneEl.innerHTML = milestones.map(ms => `
+    <div class="nw-milestone">
+      <div class="nw-milestone-label">${ms.label}</div>
+      <div class="nw-milestone-val">${ms.val}</div>
+      <div class="nw-milestone-sub">${ms.sub}</div>
+    </div>`).join('');
+
+  // Net Worth Trajectory chart
   destroyChart('networth');
   charts['networth'] = new Chart(document.getElementById('chart-networth').getContext('2d'), {
     type: 'line',
-    data: { labels:nwL, datasets:[{ label:'Net Worth', data:nwD, borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.08)', fill:true, tension:0.4, borderWidth:2.5, pointRadius:3, pointBackgroundColor:'#a78bfa' }] },
-    options: { ...cOpts(false), scales: { y:{ grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'} }, x:{ ticks:{color:'#64748b'} } } }
+    data: { labels:nwL, datasets:[{
+      label:'Net Worth', data:nwD,
+      borderColor:'#a78bfa',
+      backgroundColor: (ctx) => {
+        const g = ctx.chart.ctx.createLinearGradient(0,0,0,280);
+        g.addColorStop(0,'rgba(167,139,250,0.25)'); g.addColorStop(1,'rgba(167,139,250,0.01)');
+        return g;
+      },
+      fill:true, tension:0.4, borderWidth:2.5, pointRadius:4,
+      pointBackgroundColor:'#a78bfa', pointBorderColor:'rgba(167,139,250,0.3)', pointBorderWidth:3
+    }]},
+    options: { ...cOpts(false), scales: {
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+    }}
   });
+
+  // Assets vs Liabilities chart
   destroyChart('nwbreak');
   charts['nwbreak'] = new Chart(document.getElementById('chart-nw-breakdown').getContext('2d'), {
     type: 'bar',
     data: { labels:nwL, datasets:[
-      { label:'Assets',      data:aD, backgroundColor:'rgba(52,211,153,0.5)', borderColor:'#34d399', borderWidth:1, borderRadius:4 },
+      { label:'Assets',      data:aD, backgroundColor:'rgba(52,211,153,0.5)',  borderColor:'#34d399', borderWidth:1, borderRadius:4 },
       { label:'Liabilities', data:lD, backgroundColor:'rgba(96,165,250,0.5)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4 }
     ]},
-    options: { ...cOpts(true), scales: { y:{ grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'} }, x:{ ticks:{color:'#64748b'} } } }
+    options: { ...cOpts(true), scales: {
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+    }}
+  });
+
+  // Monthly Delta chart
+  destroyChart('nwdelta');
+  charts['nwdelta'] = new Chart(document.getElementById('chart-nw-delta').getContext('2d'), {
+    type: 'bar',
+    data: { labels:nwL, datasets:[{
+      label:'Monthly Change', data:deltaD,
+      backgroundColor: deltaD.map(v => v>=0 ? 'rgba(52,211,153,0.6)' : 'rgba(239,68,68,0.6)'),
+      borderColor:     deltaD.map(v => v>=0 ? '#34d399' : '#ef4444'),
+      borderWidth:1, borderRadius:5
+    }]},
+    options: { ...cOpts(false), scales: {
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:'#ffffff',font:{weight:'bold',family:'DM Sans'}} }
+    }}
   });
 }
 
@@ -3066,12 +3559,171 @@ function mobNav(view, group) {
   closeMobileDrawer();
 }
 
+// ── LIGHT MODE ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('fos_theme', isLight ? 'light' : 'dark');
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (isLight) {
+    icon.className  = 'fas fa-moon';
+    label.textContent = 'Dark';
+  } else {
+    icon.className  = 'fas fa-sun';
+    label.textContent = 'Light';
+  }
+}
+function applyStoredTheme() {
+  const stored = localStorage.getItem('fos_theme');
+  if (stored === 'light') {
+    document.body.classList.add('light-mode');
+    const icon  = document.getElementById('theme-icon');
+    const label = document.getElementById('theme-label');
+    if (icon)  icon.className = 'fas fa-moon';
+    if (label) label.textContent = 'Dark';
+  }
+}
+
+// ── GLOBAL SEARCH ──────────────────────────────────────────────────────────
+let searchActiveIdx = -1;
+
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('search-input').focus(), 60);
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').innerHTML =
+    '<div class="search-empty"><i class="fas fa-search" style="font-size:1.8rem;opacity:0.2;display:block;margin-bottom:8px"></i>Start typing to search…</div>';
+  searchActiveIdx = -1;
+}
+function closeSearch() {
+  document.getElementById('search-overlay').classList.remove('open');
+}
+function handleSearchOverlayClick(e) {
+  if (e.target === document.getElementById('search-overlay')) closeSearch();
+}
+function handleSearchKey(e) {
+  const items = document.querySelectorAll('.search-result-item');
+  if (e.key === 'Escape') { closeSearch(); return; }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    searchActiveIdx = Math.min(searchActiveIdx + 1, items.length - 1);
+    items.forEach((el,i) => el.classList.toggle('active', i === searchActiveIdx));
+    if (items[searchActiveIdx]) items[searchActiveIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    searchActiveIdx = Math.max(searchActiveIdx - 1, 0);
+    items.forEach((el,i) => el.classList.toggle('active', i === searchActiveIdx));
+    if (items[searchActiveIdx]) items[searchActiveIdx].scrollIntoView({block:'nearest'});
+  } else if (e.key === 'Enter') {
+    if (items[searchActiveIdx]) items[searchActiveIdx].click();
+  }
+}
+function runSearch(q) {
+  searchActiveIdx = -1;
+  const resultsEl = document.getElementById('search-results');
+  if (!q.trim()) {
+    resultsEl.innerHTML = '<div class="search-empty"><i class="fas fa-search" style="font-size:1.8rem;opacity:0.2;display:block;margin-bottom:8px"></i>Start typing to search…</div>';
+    return;
+  }
+  const ql = q.toLowerCase();
+  const typeColors = { Income:'rgba(52,211,153,0.15)', Expense:'rgba(244,114,182,0.15)', Loan:'rgba(96,165,250,0.15)', Investment:'rgba(251,191,36,0.15)' };
+  const typeIcons  = { Income:'fa-arrow-down', Expense:'fa-shopping-bag', Loan:'fa-landmark', Investment:'fa-coins' };
+  const typeColSolid = { Income:'#34d399', Expense:'#f472b6', Loan:'#60a5fa', Investment:'#fbbf24' };
+
+  // Search finance db
+  const finHits = db.filter(r =>
+    r.name.toLowerCase().includes(ql) ||
+    (r.sub||'').toLowerCase().includes(ql) ||
+    (r.notes||'').toLowerCase().includes(ql) ||
+    r.type.toLowerCase().includes(ql)
+  ).slice(0,8);
+
+  // Search creditDb
+  const credHits = creditDb.filter(r =>
+    r.lenderName.toLowerCase().includes(ql) ||
+    r.type.toLowerCase().includes(ql) ||
+    (r.remarks||'').toLowerCase().includes(ql)
+  ).slice(0,4);
+
+  // Search portDb
+  const portHits = portDb.filter(r =>
+    r.assetType.toLowerCase().includes(ql) ||
+    (r.notes||'').toLowerCase().includes(ql)
+  ).slice(0,4);
+
+  if (!finHits.length && !credHits.length && !portHits.length) {
+    resultsEl.innerHTML = `<div class="search-empty"><i class="fas fa-inbox" style="font-size:1.8rem;opacity:0.2;display:block;margin-bottom:8px"></i>No results for "<b>${q}</b>"</div>`;
+    return;
+  }
+
+  let html = '';
+  finHits.forEach(r => {
+    const bg   = typeColors[r.type] || 'rgba(255,255,255,0.07)';
+    const icon = typeIcons[r.type]  || 'fa-circle';
+    const col  = typeColSolid[r.type] || '#94a3b8';
+    html += `<div class="search-result-item" onclick="searchJumpTo('${r.type}','${r.id}')">
+      <div class="search-result-icon" style="background:${bg}"><i class="fas ${icon}" style="color:${col}"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="search-result-name">${highlight(r.name,q)}</div>
+        <div class="search-result-meta">${r.type} · ${r.sub||'General'} · ${r.date}</div>
+      </div>
+      <div class="search-result-amt" style="color:${col}">${fmt(r.amount)}</div>
+    </div>`;
+  });
+  credHits.forEach(r => {
+    html += `<div class="search-result-item" onclick="searchJumpTo('credit','${r.id}')">
+      <div class="search-result-icon" style="background:rgba(249,115,22,0.12)"><i class="fas fa-credit-card" style="color:#f97316"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="search-result-name">${highlight(r.lenderName,q)}</div>
+        <div class="search-result-meta">Credit · ${r.type} · Due ${r.dueDate}</div>
+      </div>
+      <div class="search-result-amt" style="color:#f97316">${fmt(r.monthlyEmi)}/mo</div>
+    </div>`;
+  });
+  portHits.forEach(r => {
+    html += `<div class="search-result-item" onclick="searchJumpTo('portfolio','${r.id}')">
+      <div class="search-result-icon" style="background:rgba(167,139,250,0.12)"><i class="fas fa-gem" style="color:#a78bfa"></i></div>
+      <div style="flex:1;min-width:0">
+        <div class="search-result-name">${highlight(assetTypeLabel(r.assetType),q)}</div>
+        <div class="search-result-meta">Portfolio · ${r.date} · ${r.quantity} ${r.unit}</div>
+      </div>
+      <div class="search-result-amt" style="color:#a78bfa">${fmt(r.purchasePrice * r.quantity)}</div>
+    </div>`;
+  });
+
+  resultsEl.innerHTML = html;
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return text.replace(re, '<mark style="background:rgba(99,102,241,0.35);color:inherit;border-radius:3px;padding:0 2px">$1</mark>');
+}
+
+function searchJumpTo(type, id) {
+  closeSearch();
+  const navMap = { Income:'transactions', Expense:'transactions', Loan:'loans', Investment:'investments', credit:'credit', portfolio:'port-table' };
+  const view = navMap[type] || 'transactions';
+  const group = view.startsWith('port') ? 'portfolio' : 'finance';
+  const navEl = group === 'finance'
+    ? document.getElementById('fin-nav-' + view)
+    : document.getElementById('port-nav-' + view.replace('port-',''));
+  switchView(view, navEl, group);
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────
 window.onload = () => {
   portFilterMode = 'only';
   buildFilterDropdowns();
   buildPortDropdowns();
   renderDashboard();
+  applyStoredTheme();
+
+  // Ctrl+K / Cmd+K to open search
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+    if (e.key === 'Escape') closeSearch();
+  });
 
   document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; });
