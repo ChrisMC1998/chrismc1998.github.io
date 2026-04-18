@@ -178,13 +178,26 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .kpi-value { font-size:1.45rem; font-weight:700; font-family:'DM Mono',monospace; letter-spacing:-1px; }
 .kpi-sub { font-size:0.7rem; color:#94a3b8; margin-top:3px; font-weight:500; }
 
-.budget-alert-item { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:9px 12px; }
+.budget-status-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.budget-alert-item { 
+  display:flex; 
+  align-items:center; 
+  gap:10px; 
+  background:rgba(255,255,255,0.03); 
+  border:1px solid var(--glass-border); 
+  border-radius:11px; 
+  padding:9px 12px;
+  flex:1 1 auto;
+  min-width:fit-content;
+  max-width:100%;
+}
 .budget-alert-item.over { border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.05); }
 .budget-alert-item.warn { border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.05); }
-.budget-progress-bar { flex:1; height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+.budget-progress-bar { flex:1; height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; min-width:60px; }
 .budget-progress-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
-.budget-label { font-size:0.75rem; min-width:95px; font-weight:500; }
-.budget-pct { font-size:0.72rem; font-family:'DM Mono',monospace; min-width:40px; text-align:right; }
+.budget-label { font-size:0.75rem; min-width:95px; font-weight:500; white-space:nowrap; }
+.budget-pct { font-size:0.72rem; font-family:'DM Mono',monospace; min-width:40px; text-align:right; white-space:nowrap; }
+.budget-amounts { font-size:0.68rem; color:var(--text-muted); min-width:fit-content; text-align:right; white-space:nowrap; }
 
 table { width:100%; border-collapse:collapse; }
 th { text-align:left; padding:9px 10px; color:#94a3b8; font-weight:700; font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--glass-border); cursor:pointer; user-select:none; white-space:nowrap; }
@@ -535,6 +548,9 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .export-btn, .gdrive-btn { justify-content:center; padding:8px; width:100%; }
   .kpi-grid { grid-template-columns:repeat(3,1fr) !important; }
   .sparkline-row { grid-template-columns:repeat(2,1fr) !important; }
+  /* Budget responsive for medium screens */
+  .budget-alert-item { flex:1 1 calc(50% - 4px); min-width:240px; }
+  .budget-label { min-width:85px; }
 }
 
 /* Tablet portrait (600–900px) */
@@ -569,6 +585,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .modal-row { flex-direction:column; gap:0; }
   .emi-strip-inner { flex-direction:column; }
   .emi-card { min-width:unset; }
+  /* Budget responsive */
+  .budget-status-grid { flex-wrap:wrap; }
+  .budget-alert-item { flex:1 1 calc(50% - 4px); min-width:280px; }
+  .budget-label { min-width:80px; font-size:0.72rem; }
+  .budget-amounts { font-size:0.65rem; min-width:fit-content; }
 }
 
 /* Phone portrait (<600px) */
@@ -587,6 +608,31 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .backup-stats { grid-template-columns:1fr 1fr; }
   .search-box { border-radius:14px; }
   .search-input { font-size:0.9rem; }
+  /* Budget responsive for phone */
+  .budget-status-grid { flex-direction:column; gap:6px; }
+  .budget-alert-item { 
+    flex:1 1 100%; 
+    min-width:unset;
+    padding:8px 10px;
+    gap:8px;
+  }
+  .budget-label { 
+    min-width:70px; 
+    font-size:0.7rem; 
+    flex-shrink:0;
+  }
+  .budget-progress-bar { 
+    min-width:50px;
+    flex:1;
+  }
+  .budget-pct { 
+    min-width:35px; 
+    font-size:0.7rem;
+  }
+  .budget-amounts { 
+    font-size:0.62rem;
+    min-width:fit-content;
+  }
 }
 </style>
 </head>
@@ -2256,9 +2302,17 @@ function renderBudgetAlerts(data) {
   const container = document.getElementById('budget-alerts-container');
   const cats = Object.keys(budgets);
   if (!cats.length) { container.innerHTML = ''; return; }
-  let html = '<div style="margin-bottom:1.3rem"><div class="panel-title">Budget Status</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:7px">';
+  
+  // Check if all months are selected
+  const fM = document.getElementById('filter-month').value;
+  const fY = document.getElementById('filter-year').value;
+  const isAllMonths = fM === 'all' && fY === 'all';
+  const multiplier = isAllMonths ? 12 : 1;
+  
+  let html = '<div style="margin-bottom:1.3rem"><div class="panel-title">Budget Status</div><div class="budget-status-grid">';
   cats.forEach(cat => {
-    const limit = budgets[cat];
+    const monthlyLimit = budgets[cat];
+    const limit = monthlyLimit * multiplier;
     const spent = (data || getFilteredData()).filter(x => x.sub === cat || x.name === cat).reduce((a,b) => a+b.amount, 0);
     const pct = Math.min(Math.round((spent/limit)*100), 100);
     const over = spent > limit, warn = pct >= 80 && !over;
@@ -2267,7 +2321,7 @@ function renderBudgetAlerts(data) {
       <div class="budget-label">${cat}</div>
       <div class="budget-progress-bar"><div class="budget-progress-fill" style="width:${pct}%;background:${color}"></div></div>
       <div class="budget-pct" style="color:${color}">${pct}%</div>
-      <div style="font-size:0.68rem;color:var(--text-muted);min-width:85px;text-align:right">${fmt(spent)} / ${fmt(limit)}</div>
+      <div class="budget-amounts">${fmt(spent)} / ${fmt(limit)}</div>
     </div>`;
   });
   container.innerHTML = html + '</div></div>';
@@ -2278,8 +2332,16 @@ function updateBudgetBadge() {
   const badge = document.getElementById('budget-sidebar-badge');
   if (!badge) return;
   const data = getFilteredData();
+  
+  // Check if all months are selected
+  const fM = document.getElementById('filter-month').value;
+  const fY = document.getElementById('filter-year').value;
+  const isAllMonths = fM === 'all' && fY === 'all';
+  const multiplier = isAllMonths ? 12 : 1;
+  
   let overCount = 0, warnCount = 0;
-  Object.entries(budgets).forEach(([cat, limit]) => {
+  Object.entries(budgets).forEach(([cat, monthlyLimit]) => {
+    const limit = monthlyLimit * multiplier;
     const spent = data.filter(x => x.sub === cat || x.name === cat).reduce((a,b) => a+b.amount, 0);
     const pct = (spent / limit) * 100;
     if (spent > limit) overCount++;
