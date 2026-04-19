@@ -436,13 +436,10 @@ body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f
    DRAG AND DROP STYLES
 ══════════════════════════════════════════════ */
 .draggable-section {
-  cursor: grab;
+  cursor: default;
   transition: all 0.2s ease;
   position: relative;
   margin-bottom: 0;
-}
-.draggable-section:active {
-  cursor: grabbing;
 }
 .draggable-section::before {
   content: '⋮⋮';
@@ -454,7 +451,8 @@ body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f
   font-weight: bold;
   opacity: 0;
   transition: opacity 0.2s;
-  pointer-events: none;
+  pointer-events: all;
+  cursor: grab;
   z-index: 100;
   background: rgba(99,102,241,0.7);
   padding: 6px 10px;
@@ -464,6 +462,9 @@ body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f
 }
 .draggable-section:hover::before {
   opacity: 1;
+}
+.draggable-section::before:active {
+  cursor: grabbing;
 }
 .draggable-section.dragging {
   opacity: 0.4;
