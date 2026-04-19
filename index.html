@@ -1747,7 +1747,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
         <i class="fas fa-file-pdf"></i> Export PDF Report
       </button>
       <button onclick="runExport()" class="btn-add" style="justify-content:center">
-        <i class="fas fa-download"></i> Download CSV
+        <i class="fas fa-download"></i> Export Data
       </button>
       <button onclick="document.getElementById('export-modal').style.display='none'" class="btn-secondary" style="justify-content:center">Cancel</button>
     </div>
@@ -4080,7 +4080,7 @@ async function runPDFExport() {
   const maxWidth = pageWidth - (margin * 2);
 
   // Helper to check if we need a new page
-  function checkNewPage(neededSpace = 40) {
+  function checkNewPage(neededSpace = 50) {
     if (yPos + neededSpace > pageHeight - 20) {
       doc.addPage();
       yPos = 20;
@@ -4089,13 +4089,31 @@ async function runPDFExport() {
     return false;
   }
 
+  // Helper to add a chart using Chart.js canvas
+  async function addChartToPDF(chartConfig, width, height) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width * 2;
+      canvas.height = height * 2;
+      const ctx = canvas.getContext('2d');
+      
+      const chart = new Chart(ctx, chartConfig);
+      
+      setTimeout(() => {
+        const imgData = canvas.toDataURL('image/png');
+        chart.destroy();
+        resolve(imgData);
+      }, 500);
+    });
+  }
+
   // Title Page
   doc.setFillColor(99, 102, 241);
   doc.rect(0, 0, pageWidth, 60, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(28);
+  doc.setFontSize(32);
   doc.setFont('helvetica', 'bold');
-  doc.text('FinanceOS Report', pageWidth / 2, 30, { align: 'center' });
+  doc.text('FinanceOS Report', pageWidth / 2, 32, { align: 'center' });
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -4109,117 +4127,177 @@ async function runPDFExport() {
   yPos = 75;
   doc.setTextColor(0, 0, 0);
 
-  // Executive Summary
-  doc.setFontSize(18);
+  // Executive Summary with better formatting
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(99, 102, 241);
   doc.text('Executive Summary', margin, yPos);
-  yPos += 10;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
+  yPos += 12;
 
   const totalIncome = db.filter(r => r.type === 'Income' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0);
   const totalExpenses = db.filter(r => r.type === 'Expense' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0);
   const netBalance = totalIncome - totalExpenses;
 
   const summaryData = [
-    ['Total Income', `₹${totalIncome.toLocaleString()}`],
-    ['Total Expenses', `₹${totalExpenses.toLocaleString()}`],
-    ['Net Balance', `₹${netBalance.toLocaleString()}`]
+    ['Total Income', `₹${totalIncome.toLocaleString('en-IN')}`],
+    ['Total Expenses', `₹${totalExpenses.toLocaleString('en-IN')}`],
+    ['Net Balance', `₹${netBalance.toLocaleString('en-IN')}`]
   ];
 
   doc.autoTable({
     startY: yPos,
     head: [['Metric', 'Value']],
     body: summaryData,
-    theme: 'striped',
-    headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold' },
-    margin: { left: margin, right: margin },
-    styles: { fontSize: 10, cellPadding: 5 }
+    theme: 'grid',
+    headStyles: { 
+      fillColor: [99, 102, 241], 
+      textColor: 255, 
+      fontStyle: 'bold',
+      fontSize: 11,
+      halign: 'center'
+    },
+    bodyStyles: {
+      fontSize: 10,
+      cellPadding: 6
+    },
+    columnStyles: {
+      0: { cellWidth: 100, fontStyle: 'bold' },
+      1: { cellWidth: 80, halign: 'right', fontStyle: 'bold', textColor: [99, 102, 241] }
+    },
+    margin: { left: margin, right: margin }
   });
 
   yPos = doc.lastAutoTable.finalY + 15;
 
+  // Add Income vs Expense Chart
+  if (wantTransactions) {
+    checkNewPage(90);
+    
+    const incomeExpenseData = {
+      income: db.filter(r => r.type === 'Income' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0),
+      expense: db.filter(r => r.type === 'Expense' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0)
+    };
+
+    if (incomeExpenseData.income > 0 || incomeExpenseData.expense > 0) {
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(99, 102, 241);
+      doc.text('Income vs Expenses Overview', margin, yPos);
+      yPos += 10;
+
+      const chartImg = await addChartToPDF({
+        type: 'doughnut',
+        data: {
+          labels: ['Income', 'Expenses'],
+          datasets: [{
+            data: [incomeExpenseData.income, incomeExpenseData.expense],
+            backgroundColor: ['#34d399', '#f472b6'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: { size: 14, weight: 'bold' },
+                padding: 15
+              }
+            },
+            title: {
+              display: false
+            }
+          }
+        }
+      }, 400, 300);
+
+      doc.addImage(chartImg, 'PNG', margin + 20, yPos, 150, 100);
+      yPos += 110;
+    }
+  }
+
   // TRANSACTIONS SECTION
   if (wantTransactions) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(70);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(99, 102, 241);
     doc.text('Transactions', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     const transactions = db.filter(r => r.type !== 'Loan' && r.type !== 'Investment' && inRange(r.date));
     
     if (transactions.length > 0) {
-      // Create chart for income vs expenses
-      const incomeByMonth = {};
-      const expenseByMonth = {};
-      
-      transactions.forEach(r => {
-        const monthKey = r.date.substring(0, 7); // YYYY-MM
-        if (r.type === 'Income') {
-          incomeByMonth[monthKey] = (incomeByMonth[monthKey] || 0) + r.amount;
-        } else {
-          expenseByMonth[monthKey] = (expenseByMonth[monthKey] || 0) + r.amount;
-        }
-      });
-
-      const tableData = transactions.slice(0, 50).map(r => [
+      const tableData = transactions.slice(0, 30).map(r => [
         r.name,
-        r.sub || '',
+        r.sub || '-',
         r.type,
-        `₹${r.amount.toLocaleString()}`,
-        r.date
+        `₹${r.amount.toLocaleString('en-IN')}`,
+        new Date(r.date).toLocaleDateString('en-IN')
       ]);
 
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(80, 80, 80);
-      doc.text(`Showing ${Math.min(transactions.length, 50)} of ${transactions.length} transactions`, margin, yPos);
-      yPos += 5;
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Showing ${Math.min(transactions.length, 30)} of ${transactions.length} transactions`, margin, yPos);
+      yPos += 6;
 
       doc.autoTable({
         startY: yPos,
         head: [['Name', 'Category', 'Type', 'Amount', 'Date']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin },
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [99, 102, 241], 
+          textColor: 255, 
+          fontStyle: 'bold', 
+          fontSize: 9,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          cellPadding: 4
+        },
         columnStyles: {
-          3: { halign: 'right', fontStyle: 'bold' }
-        }
+          0: { cellWidth: 50 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 30, halign: 'center' },
+          3: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
+          4: { cellWidth: 30, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No transactions in selected date range', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
   // LOANS & EMI SECTION
   if (wantLoans) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(70);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(96, 165, 250);
     doc.text('Loans & EMI', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     const loans = db.filter(r => r.type === 'Loan' && inRange(r.date));
     
     if (loans.length > 0) {
       const tableData = loans.map(r => [
         r.name,
-        r.sub || '',
-        `₹${r.amount.toLocaleString()}`,
-        r.date,
+        r.sub || '-',
+        `₹${r.amount.toLocaleString('en-IN')}`,
+        new Date(r.date).toLocaleDateString('en-IN'),
         r.recurring ? 'Yes' : 'No'
       ]);
 
@@ -4227,38 +4305,56 @@ async function runPDFExport() {
         startY: yPos,
         head: [['Loan Name', 'Category', 'Amount', 'Date', 'Recurring']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [96, 165, 250], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin }
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [96, 165, 250], 
+          textColor: 255, 
+          fontStyle: 'bold', 
+          fontSize: 9,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          cellPadding: 4
+        },
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
+          3: { cellWidth: 30, halign: 'center' },
+          4: { cellWidth: 25, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No loans in selected date range', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
   // CREDIT TRACKER SECTION
   if (wantCredit) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(70);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(249, 115, 22);
     doc.text('Credit Tracker', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     if (creditDb.length > 0) {
       const tableData = creditDb.map(c => [
         c.lenderName,
         c.type,
-        `₹${c.principalAmount.toLocaleString()}`,
-        `₹${c.outstandingBalance.toLocaleString()}`,
+        `₹${c.principalAmount.toLocaleString('en-IN')}`,
+        `₹${c.outstandingBalance.toLocaleString('en-IN')}`,
         `${c.interestRate}%`,
-        `₹${c.monthlyEmi.toLocaleString()}`,
+        `₹${c.monthlyEmi.toLocaleString('en-IN')}`,
         c.status
       ]);
 
@@ -4266,127 +4362,169 @@ async function runPDFExport() {
         startY: yPos,
         head: [['Lender', 'Type', 'Principal', 'Outstanding', 'Rate', 'EMI', 'Status']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [249, 115, 22], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-        styles: { fontSize: 7, cellPadding: 2 },
-        margin: { left: margin, right: margin },
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [249, 115, 22], 
+          textColor: 255, 
+          fontStyle: 'bold', 
+          fontSize: 8,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 7,
+          cellPadding: 3
+        },
         columnStyles: {
-          2: { halign: 'right' },
-          3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right' }
-        }
+          0: { cellWidth: 30 },
+          1: { cellWidth: 22, halign: 'center' },
+          2: { cellWidth: 28, halign: 'right' },
+          3: { cellWidth: 28, halign: 'right', fontStyle: 'bold' },
+          4: { cellWidth: 18, halign: 'center' },
+          5: { cellWidth: 28, halign: 'right' },
+          6: { cellWidth: 22, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No credit records', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
-  // INVESTMENTS SECTION
+  // INVESTMENTS SECTION with Chart
   if (wantInvestments) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(70);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(251, 191, 36);
     doc.text('Investments', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     const investments = db.filter(r => r.type === 'Investment' && inRange(r.date));
     
     if (investments.length > 0) {
       const tableData = investments.map(r => [
         r.name,
-        r.sub || '',
-        `₹${r.amount.toLocaleString()}`,
-        r.date
+        r.sub || '-',
+        `₹${r.amount.toLocaleString('en-IN')}`,
+        new Date(r.date).toLocaleDateString('en-IN')
       ]);
 
       doc.autoTable({
         startY: yPos,
         head: [['Investment Name', 'Category', 'Amount', 'Date']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [251, 191, 36], textColor: 0, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin },
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [251, 191, 36], 
+          textColor: [0, 0, 0], 
+          fontStyle: 'bold', 
+          fontSize: 9,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          cellPadding: 4
+        },
         columnStyles: {
-          2: { halign: 'right', fontStyle: 'bold' }
-        }
+          0: { cellWidth: 70 },
+          1: { cellWidth: 45 },
+          2: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
+          3: { cellWidth: 30, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No investments in selected date range', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
   // PORTFOLIO HOLDINGS SECTION
   if (wantHoldings) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(70);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(167, 139, 250);
     doc.text('Portfolio Holdings', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     const holdings = portDb.filter(e => inRange(e.date));
     
     if (holdings.length > 0) {
       const tableData = holdings.map(e => {
         const c = portCalc(e);
+        const gainLossColor = c.gainLoss >= 0 ? [52, 211, 153] : [239, 68, 68];
         return [
           e.assetType,
           `${e.quantity} ${e.unit}`,
-          `₹${e.purchasePrice.toLocaleString()}`,
-          `₹${e.currentPrice.toLocaleString()}`,
-          `₹${c.currentValue.toLocaleString()}`,
-          `₹${c.gainLoss.toLocaleString()}`,
+          `₹${e.purchasePrice.toLocaleString('en-IN')}`,
+          `₹${e.currentPrice.toLocaleString('en-IN')}`,
+          `₹${c.currentValue.toLocaleString('en-IN')}`,
+          `₹${c.gainLoss.toLocaleString('en-IN')}`,
           `${c.roi.toFixed(1)}%`
         ];
       });
 
       doc.autoTable({
         startY: yPos,
-        head: [['Asset Type', 'Quantity', 'Buy Price', 'Current', 'Value', 'Gain/Loss', 'ROI']],
+        head: [['Asset', 'Quantity', 'Buy Price', 'Current', 'Value', 'Gain/Loss', 'ROI']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [167, 139, 250], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-        styles: { fontSize: 7, cellPadding: 2 },
-        margin: { left: margin, right: margin },
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [167, 139, 250], 
+          textColor: 255, 
+          fontStyle: 'bold', 
+          fontSize: 8,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 7,
+          cellPadding: 3
+        },
         columnStyles: {
-          2: { halign: 'right' },
-          3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right' },
-          6: { halign: 'right' }
-        }
+          0: { cellWidth: 30 },
+          1: { cellWidth: 28, halign: 'center' },
+          2: { cellWidth: 26, halign: 'right' },
+          3: { cellWidth: 26, halign: 'right' },
+          4: { cellWidth: 28, halign: 'right', fontStyle: 'bold' },
+          5: { cellWidth: 28, halign: 'right' },
+          6: { cellWidth: 20, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No holdings in selected date range', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
-  // ALL ASSETS SUMMARY SECTION
+  // ALL ASSETS SUMMARY SECTION with Chart
   if (wantAssets) {
-    checkNewPage(60);
-    doc.setFontSize(16);
+    checkNewPage(100);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(52, 211, 153);
     doc.text('Assets Summary', margin, yPos);
-    yPos += 8;
+    yPos += 10;
 
     const byType = {};
     portDb.forEach(e => {
@@ -4401,47 +4539,108 @@ async function runPDFExport() {
     });
 
     if (Object.keys(byType).length > 0) {
+      // Add Asset Allocation Chart
+      const assetLabels = Object.keys(byType).map(k => assetTypeLabel(k));
+      const assetValues = Object.values(byType).map(v => v.val);
+      const assetColors = Object.keys(byType).map(k => ASSET_COLOR[k] || '#a78bfa');
+
+      const assetChartImg = await addChartToPDF({
+        type: 'pie',
+        data: {
+          labels: assetLabels,
+          datasets: [{
+            data: assetValues,
+            backgroundColor: assetColors,
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                font: { size: 12, weight: 'bold' },
+                padding: 10
+              }
+            },
+            title: {
+              display: true,
+              text: 'Asset Allocation',
+              font: { size: 16, weight: 'bold' }
+            }
+          }
+        }
+      }, 400, 300);
+
+      doc.addImage(assetChartImg, 'PNG', margin, yPos, 170, 100);
+      yPos += 110;
+
+      checkNewPage(70);
+
       const tableData = Object.entries(byType).map(([k, v]) => {
         const avgRoi = v.roi.length ? (v.roi.reduce((a, b) => a + b, 0) / v.roi.length) : 0;
         return [
           assetTypeLabel(k),
-          `₹${v.inv.toLocaleString()}`,
-          `₹${v.val.toLocaleString()}`,
-          `₹${v.gain.toLocaleString()}`,
+          `₹${v.inv.toLocaleString('en-IN')}`,
+          `₹${v.val.toLocaleString('en-IN')}`,
+          `₹${v.gain.toLocaleString('en-IN')}`,
           `${avgRoi.toFixed(1)}%`
         ];
       });
 
       doc.autoTable({
         startY: yPos,
-        head: [['Asset Type', 'Total Invested', 'Current Value', 'Gain/Loss', 'Avg ROI']],
+        head: [['Asset Type', 'Invested', 'Current Value', 'Gain/Loss', 'Avg ROI']],
         body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [52, 211, 153], textColor: 0, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 9, cellPadding: 4 },
-        margin: { left: margin, right: margin },
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [52, 211, 153], 
+          textColor: [0, 0, 0], 
+          fontStyle: 'bold', 
+          fontSize: 9,
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 9,
+          cellPadding: 5
+        },
         columnStyles: {
-          1: { halign: 'right' },
-          2: { halign: 'right' },
-          3: { halign: 'right', fontStyle: 'bold' },
-          4: { halign: 'right' }
-        }
+          0: { cellWidth: 40, fontStyle: 'bold' },
+          1: { cellWidth: 38, halign: 'right' },
+          2: { cellWidth: 38, halign: 'right', fontStyle: 'bold' },
+          3: { cellWidth: 38, halign: 'right' },
+          4: { cellWidth: 28, halign: 'center' }
+        },
+        margin: { left: margin, right: margin },
+        alternateRowStyles: { fillColor: [248, 249, 250] }
       });
 
-      yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 15;
     } else {
       doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont('helvetica', 'italic');
       doc.text('No asset data available', margin, yPos);
-      yPos += 10;
+      yPos += 15;
     }
   }
 
-  // Footer on last page
-  checkNewPage(30);
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  doc.text('Generated by FinanceOS - Personal Finance Dashboard', pageWidth / 2, pageHeight - 10, { align: 'center' });
+  // Footer on all pages
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `Generated by FinanceOS | Page ${i} of ${totalPages}`,
+      pageWidth / 2,
+      pageHeight - 10,
+      { align: 'center' }
+    );
+  }
 
   // Save the PDF
   const date = new Date().toISOString().split('T')[0];
