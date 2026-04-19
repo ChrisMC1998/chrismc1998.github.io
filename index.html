@@ -3294,17 +3294,123 @@ function groupData(type, data) {
   (data||db).filter(x => x.type===type).forEach(i => { const k = i.sub||'General'; g[k] = (g[k]||0) + Number(i.amount); });
   return g;
 }
+
+// ── CHART GRADIENTS ────────────────────────────────────────────────────────
+function createGradient(ctx, color1, color2) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, color1);
+  gradient.addColorStop(1, color2);
+  return gradient;
+}
+
+function createRadialGradient(ctx, innerColor, outerColor) {
+  const gradient = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
+  gradient.addColorStop(0, innerColor);
+  gradient.addColorStop(1, outerColor);
+  return gradient;
+}
+
+// Global Chart.js styling for modern neumorphic look
+Chart.defaults.font.family = 'DM Sans';
+Chart.defaults.font.weight = '600';
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.95)';
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,0.3)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.cornerRadius = 10;
+Chart.defaults.plugins.tooltip.titleFont = {family:'DM Sans',size:12,weight:'600'};
+Chart.defaults.plugins.tooltip.bodyFont = {family:'DM Mono',size:11};
+Chart.defaults.elements.bar.borderRadius = 8;
+Chart.defaults.elements.bar.borderSkipped = false;
+
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
 function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#ffffff'; }
 function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.04)'; }
 function cOpts(legend) {
-  return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:!!legend, labels:{ color:'#94a3b8', boxWidth:11, font:{ family:'DM Sans', size:11 } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } };
+  return { 
+    responsive:true, 
+    maintainAspectRatio:false,
+    plugins:{ 
+      legend:{ 
+        display:!!legend, 
+        labels:{ color:chartTextColor(), boxWidth:11, font:{ family:'DM Sans', size:11, weight:'600' }, padding:12 } 
+      }, 
+      tooltip:{ 
+        backgroundColor:'rgba(15,23,42,0.95)',
+        padding:12,
+        borderColor:'rgba(99,102,241,0.3)',
+        borderWidth:1,
+        titleFont:{family:'DM Sans',size:12,weight:'600'},
+        bodyFont:{family:'DM Mono',size:11},
+        callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } 
+      } 
+    },
+    scales: {
+      x: { 
+        grid:{ color:chartGridColor(), drawBorder:false },
+        ticks:{ color:chartTextColor(), font:{weight:'600',family:'DM Sans'} }
+      },
+      y: { 
+        grid:{ color:chartGridColor(), drawBorder:false },
+        ticks:{ color:chartTextColor(), font:{weight:'600',family:'DM Sans'} }
+      }
+    }
+  };
 }
+
 function makeDonut(id, labels, data, colors) {
-  return new Chart(document.getElementById(id).getContext('2d'), {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  
+  // Create gradient backgrounds for donut
+  const gradientColors = colors.map((color, i) => {
+    const grad = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+    grad.addColorStop(0, color + 'dd');
+    grad.addColorStop(1, color + '88');
+    return grad;
+  });
+  
+  return new Chart(ctx, {
     type: 'doughnut',
-    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:5 }] },
-    options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'right', labels:{ color:'#94a3b8', boxWidth:9, font:{ size:10, family:'DM Sans' } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } }
+    data: { 
+      labels, 
+      datasets:[{ 
+        data, 
+        backgroundColor:gradientColors.length ? gradientColors : colors,
+        borderWidth:3,
+        borderColor:'rgba(255,255,255,0.1)',
+        hoverOffset:8,
+        hoverBorderWidth:4,
+        hoverBorderColor:'rgba(255,255,255,0.3)'
+      }] 
+    },
+    options: { 
+      responsive:true, 
+      maintainAspectRatio:false, 
+      cutout:'68%',
+      plugins:{ 
+        legend:{ 
+          position:'right', 
+          labels:{ 
+            color:chartTextColor(), 
+            boxWidth:10, 
+            font:{ size:10, family:'DM Sans', weight:'600' },
+            padding:10,
+            usePointStyle:true,
+            pointStyle:'circle'
+          } 
+        }, 
+        tooltip:{ 
+          backgroundColor:'rgba(15,23,42,0.95)',
+          padding:12,
+          borderColor:'rgba(99,102,241,0.3)',
+          borderWidth:1,
+          titleFont:{family:'DM Sans',size:12,weight:'600'},
+          bodyFont:{family:'DM Mono',size:11},
+          callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } 
+        } 
+      } 
+    }
   });
 }
 function renderDonut(id, labels, data, colors, key) {
