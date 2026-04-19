@@ -789,7 +789,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
   <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--glass-border);display:flex;flex-direction:column;gap:8px">
     <button class="gdrive-btn" style="width:100%;justify-content:center" onclick="connectGoogleDrive()"><i class="fab fa-google-drive"></i> Connect Drive</button>
-    <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export CSV</button>
+    <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export</button>
   </div>
 </div>
 <div class="sidebar">
@@ -846,7 +846,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
       <span id="autosave-label">Auto-saved</span>
     </div>
     <button class="export-btn" onclick="openExportModal()">
-      <i class="fas fa-file-csv"></i> Export CSV
+      <i class="fas fa-file-csv"></i> Export
     </button>
     <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
       <i class="fas fa-database"></i> Backup / Restore
@@ -1700,7 +1700,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 <!-- MODAL: Export CSV -->
 <div class="modal-overlay" id="export-modal">
   <div class="modal-box export-modal-box">
-    <div class="modal-title">Export CSV</div>
+    <div class="modal-title">Export</div>
     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Select what you want to export and optionally filter by date range.</p>
 
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.2rem">
@@ -3085,10 +3085,22 @@ function renderPortAnalytics() {
       pointRadius: 6,
       pointHoverRadius: 8
     }))},
-    options: { ...cOpts(true), scales: {
-      x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
-      y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
-    }}
+    options: { 
+      ...cOpts(true), 
+      plugins: {
+        ...cOpts(true).plugins,
+        tooltip: {
+          ...cOpts(true).plugins.tooltip,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: Invested ₹${ctx.parsed.x.toLocaleString('en-IN')}, ROI ${ctx.parsed.y}%`
+          }
+        }
+      },
+      scales: {
+        x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
   });
 
   // 3. Waterfall — positive bars use asset colour, negative use red
@@ -3201,10 +3213,22 @@ function renderAnalytics() {
       { label:'Expense',  pointBackgroundColor:'#f472b6', pointRadius:5, data:sp.filter(p=>p.t==='Expense').map(p=>({x:p.x,y:p.y})) },
       { label:'Loan/EMI', pointBackgroundColor:'#60a5fa', pointRadius:5, data:sp.filter(p=>p.t==='Loan').map(p=>({x:p.x,y:p.y})) }
     ]},
-    options: { ...cOpts(true), scales: {
-      x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
-      y: { ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} }
-    }}
+    options: { 
+      ...cOpts(true), 
+      plugins: {
+        ...cOpts(true).plugins,
+        tooltip: {
+          ...cOpts(true).plugins.tooltip,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: Day ${ctx.parsed.x}, ₹${ctx.parsed.y.toLocaleString('en-IN')}`
+          }
+        }
+      },
+      scales: {
+        x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+        y: { title:{display:true,text:'Amount (₹)',color:'#64748b'}, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} }
+      }
+    }
   });
 
   const hBar = (canvasId, type, colors, chartKey) => {
@@ -3214,7 +3238,7 @@ function renderAnalytics() {
       charts[chartKey] = new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'bar',
         data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:colors, borderRadius:5, borderSkipped:false }] },
-        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#94a3b8'}} } }
+        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#94a3b8',autoSkip:false}} } }
       });
     }
   };
@@ -3280,11 +3304,13 @@ function renderNetWorth() {
   sortedM.forEach(ym => {
     const [y,m] = ym.split('-').map(Number);
     const items = db.filter(d => d.date.slice(0,7) === ym);
-    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
-    cumL += items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
+    const monthA = items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
+    const monthL = items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
+    cumA += monthA;
+    cumL += monthL;
     const nw = cumA - cumL;
     nwL.push(MONTHS[m-1]+' '+String(y).slice(2));
-    nwD.push(nw); aD.push(cumA); lD.push(cumL);
+    nwD.push(nw); aD.push(monthA); lD.push(monthL);
     deltaD.push(nw - prevNW);
     prevNW = nw;
   });
