@@ -613,6 +613,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .port-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
   .credit-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
   .sparkline-row { grid-template-columns:repeat(2,1fr) !important; gap:0.8rem; }
+  .radar-row { grid-template-columns:1fr !important; }
   .charts-row   { grid-template-columns:1fr !important; }
   .charts-3col  { grid-template-columns:1fr 1fr !important; }
   .analytics-grid { grid-template-columns:1fr !important; }
@@ -947,6 +948,20 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
           <button onclick="document.getElementById('badge-showcase').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem">✕</button>
         </div>
         <div class="badge-collection" id="badge-collection"></div>
+      </div>
+
+      <!-- RADAR INSIGHTS ROW -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;margin-bottom:1.3rem" class="radar-row">
+        <div class="glass-panel">
+          <div class="panel-title">Weekly Spending Pattern</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:1rem">Day of week analysis</div>
+          <div style="height:280px"><canvas id="radar-weekly"></canvas></div>
+        </div>
+        <div class="glass-panel">
+          <div class="panel-title" style="color:#34d399">Financial Health Score</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:1rem">Composite metrics</div>
+          <div style="height:280px"><canvas id="radar-health"></canvas></div>
+        </div>
       </div>
 
       <div class="glass-panel" style="margin-bottom:1.3rem">
@@ -2419,6 +2434,8 @@ function renderDashboard() {
   updateBudgetBadge();
   updateGameStats();
   checkAlerts();
+  renderWeeklyRadar();
+  renderHealthRadar();
 }
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
@@ -4188,6 +4205,154 @@ function searchJumpTo(type, id) {
     ? document.getElementById('fin-nav-' + view)
     : document.getElementById('port-nav-' + view.replace('port-',''));
   switchView(view, navEl, group);
+}
+
+// ── RADAR CHARTS ────────────────────────────────────────────────────────────
+function renderWeeklyRadar() {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const spendByDay = {Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
+  
+  db.filter(r => r.type === 'Expense').forEach(entry => {
+    const date = new Date(entry.date);
+    const dayName = days[date.getDay() === 0 ? 6 : date.getDay() - 1]; // Convert Sunday=0 to index 6
+    spendByDay[dayName] += entry.amount;
+  });
+
+  const data = days.map(d => spendByDay[d]);
+  destroyChart('radar-weekly');
+  charts['radar-weekly'] = new Chart(document.getElementById('radar-weekly').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Spending',
+        data,
+        backgroundColor: 'rgba(244,114,182,0.15)',
+        borderColor: '#f472b6',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#f472b6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          grid: { color: chartGridColor() },
+          angleLines: { color: chartGridColor() },
+          ticks: { 
+            color: chartTextColor(), 
+            backdropColor: 'transparent',
+            font: { size: 9, family: 'DM Sans', weight: '600' },
+            callback: v => '₹' + (v/1000).toFixed(0) + 'k'
+          },
+          pointLabels: { 
+            color: chartTextColor(), 
+            font: { size: 11, family: 'DM Sans', weight: '600' } 
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15,23,42,0.95)',
+          padding: 12,
+          borderColor: 'rgba(244,114,182,0.3)',
+          borderWidth: 1,
+          titleFont: { family: 'DM Sans', size: 12, weight: '600' },
+          bodyFont: { family: 'DM Mono', size: 11 },
+          callbacks: { label: ctx => ' ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+        }
+      }
+    }
+  });
+}
+
+function renderHealthRadar() {
+  const totalInc = sumType('Income', db);
+  const totalExp = sumType('Expense', db);
+  const totalInv = sumType('Investment', db);
+  const totalLoan = sumType('Loan', db);
+  
+  // Calculate 5 financial health metrics (0-100 scale)
+  const savingsRate = totalInc > 0 ? Math.min(((totalInc - totalExp) / totalInc) * 100, 100) : 0;
+  const debtToIncome = totalInc > 0 ? Math.max(100 - (totalLoan / totalInc) * 100, 0) : 0;
+  const emergencyFund = Math.min((totalInv / (totalExp * 6)) * 100, 100); // 6 months expenses
+  const investmentDiversity = portDb.length > 0 ? Math.min((new Set(portDb.map(p => normalizeAssetType(p.assetType))).size / 5) * 100, 100) : 0;
+  
+  // Budget adherence
+  let budgetScore = 100;
+  if (Object.keys(budgets).length > 0) {
+    const data = getFilteredData();
+    let overCount = 0;
+    Object.entries(budgets).forEach(([cat, limit]) => {
+      const spent = data.filter(x => x.sub === cat || x.name === cat).reduce((a, b) => a + b.amount, 0);
+      if (spent > limit) overCount++;
+    });
+    budgetScore = Math.max(100 - (overCount / Object.keys(budgets).length) * 100, 0);
+  }
+
+  const scores = [savingsRate, debtToIncome, emergencyFund, investmentDiversity, budgetScore];
+  const labels = ['Savings Rate', 'Debt-to-Income', 'Emergency Fund', 'Investment Diversity', 'Budget Adherence'];
+
+  destroyChart('radar-health');
+  charts['radar-health'] = new Chart(document.getElementById('radar-health').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Score',
+        data: scores,
+        backgroundColor: 'rgba(52,211,153,0.15)',
+        borderColor: '#34d399',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#34d399',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          grid: { color: chartGridColor() },
+          angleLines: { color: chartGridColor() },
+          ticks: { 
+            color: chartTextColor(), 
+            backdropColor: 'transparent',
+            stepSize: 20,
+            font: { size: 9, family: 'DM Sans', weight: '600' }
+          },
+          pointLabels: { 
+            color: chartTextColor(), 
+            font: { size: 10, family: 'DM Sans', weight: '600' } 
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15,23,42,0.95)',
+          padding: 12,
+          borderColor: 'rgba(52,211,153,0.3)',
+          borderWidth: 1,
+          titleFont: { family: 'DM Sans', size: 12, weight: '600' },
+          bodyFont: { family: 'DM Mono', size: 11 },
+          callbacks: { label: ctx => ' ' + ctx.raw.toFixed(0) + '/100' }
+        }
+      }
+    }
+  });
 }
 
 // ── PWA SERVICE WORKER ──────────────────────────────────────────────────────
