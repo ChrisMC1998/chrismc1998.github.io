@@ -433,6 +433,68 @@ body.light-mode .theme-toggle-btn { color: #475569; }
 body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f172a; }
 
 /* ══════════════════════════════════════════════
+   DRAG AND DROP STYLES
+══════════════════════════════════════════════ */
+.draggable-section {
+  cursor: move;
+  transition: opacity 0.2s, transform 0.2s;
+  position: relative;
+  margin-bottom: 0;
+}
+.draggable-section::before {
+  content: '⋮⋮';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 10;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.draggable-section:hover::before {
+  opacity: 0.7;
+}
+.draggable-section.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+.draggable-section.drag-over {
+  border-color: var(--accent);
+}
+.drag-placeholder {
+  border: 2px dashed var(--accent);
+  background: rgba(99,102,241,0.08);
+  border-radius: 15px;
+  margin-bottom: 1.3rem;
+  animation: pulse-placeholder 1.5s infinite;
+}
+@keyframes pulse-placeholder {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+body.light-mode .draggable-section::before {
+  color: #475569;
+  background: rgba(255,255,255,0.8);
+}
+body.light-mode .drag-placeholder {
+  background: rgba(99,102,241,0.05);
+  border-color: var(--accent);
+}
+
+/* Ensure wrapped sections maintain proper spacing */
+.draggable-section > * {
+  margin-bottom: 1.3rem;
+}
+.draggable-section:last-child > * {
+  margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════
    GLOBAL SEARCH
 ══════════════════════════════════════════════ */
 .search-overlay {
@@ -4781,7 +4843,235 @@ window.onload = () => {
     };
     setTimeout(() => tryReconnect(6), 300);
   }
+
+  // Initialize drag and drop for dashboard sections
+  initDragAndDrop();
 };
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DRAG AND DROP FUNCTIONALITY - VERTICAL MOVEMENT
+// ══════════════════════════════════════════════════════════════════════════════
+
+function initDragAndDrop() {
+  const LAYOUT_KEY = 'fos_dashboard_layout_v2';
+  
+  // Load saved layout
+  function loadLayout(viewId) {
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    const layouts = saved ? JSON.parse(saved) : {};
+    return layouts[viewId] || null;
+  }
+  
+  // Save current layout
+  function saveLayout(viewId, order) {
+    const saved = localStorage.getItem(LAYOUT_KEY);
+    const layouts = saved ? JSON.parse(saved) : {};
+    layouts[viewId] = order;
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(layouts));
+  }
+  
+  // Create wrapper for sections
+  function wrapSections(view) {
+    if (!view) return null;
+    
+    // Find all major sections (everything that's a direct child and contains charts/cards)
+    const children = Array.from(view.children);
+    const sections = [];
+    
+    children.forEach((child, index) => {
+      // Skip certain elements
+      if (child.id === 'tag-filter-bar' || 
+          child.classList.contains('filter-controls') ||
+          child.tagName === 'STYLE') {
+        return;
+      }
+      
+      // Wrap individual cards/sections that should be draggable
+      if (child.classList.contains('glass-panel') || 
+          child.classList.contains('radar-row') ||
+          child.classList.contains('charts-row') ||
+          child.classList.contains('charts-3col') ||
+          child.classList.contains('sparkline-row') ||
+          child.id === 'emi-reminder-strip' ||
+          child.id === 'budget-alerts-container' ||
+          (child.style && child.style.display === 'grid') ||
+          (child.style && child.style.marginBottom)) {
+        
+        // Create wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'draggable-section';
+        wrapper.setAttribute('draggable', 'true');
+        wrapper.dataset.sectionId = `section-${view.id}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Move the child into the wrapper
+        child.parentNode.insertBefore(wrapper, child);
+        wrapper.appendChild(child);
+        
+        sections.push(wrapper);
+      }
+    });
+    
+    return sections;
+  }
+  
+  // Make sections draggable with vertical movement
+  function makeSectionsDraggable(view) {
+    if (!view) return;
+    
+    const viewId = view.id;
+    let draggedElement = null;
+    let placeholder = null;
+    
+    const sections = view.querySelectorAll('.draggable-section');
+    
+    sections.forEach(section => {
+      section.addEventListener('dragstart', (e) => {
+        draggedElement = section;
+        section.classList.add('dragging');
+        
+        // Create placeholder
+        placeholder = document.createElement('div');
+        placeholder.className = 'drag-placeholder';
+        placeholder.style.height = section.offsetHeight + 'px';
+        
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', section.innerHTML);
+        
+        setTimeout(() => {
+          section.style.display = 'none';
+          section.parentNode.insertBefore(placeholder, section);
+        }, 0);
+      });
+      
+      section.addEventListener('dragend', (e) => {
+        section.classList.remove('dragging');
+        section.style.display = '';
+        
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.removeChild(placeholder);
+        }
+        
+        view.querySelectorAll('.draggable-section').forEach(s => {
+          s.classList.remove('drag-over');
+        });
+        
+        // Save new order
+        const newOrder = Array.from(view.querySelectorAll('.draggable-section'))
+          .map(s => s.dataset.sectionId);
+        saveLayout(viewId, newOrder);
+      });
+      
+      section.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        if (!draggedElement || section === draggedElement) return;
+        
+        const rect = section.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        
+        // Determine if we should insert before or after
+        if (e.clientY < midpoint) {
+          // Insert before this section
+          if (placeholder && placeholder.parentNode) {
+            section.parentNode.insertBefore(placeholder, section);
+          }
+        } else {
+          // Insert after this section
+          if (placeholder && placeholder.parentNode) {
+            section.parentNode.insertBefore(placeholder, section.nextSibling);
+          }
+        }
+      });
+      
+      section.addEventListener('dragenter', (e) => {
+        if (section !== draggedElement) {
+          section.classList.add('drag-over');
+        }
+      });
+      
+      section.addEventListener('dragleave', (e) => {
+        section.classList.remove('drag-over');
+      });
+      
+      section.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (draggedElement && placeholder && placeholder.parentNode) {
+          placeholder.parentNode.insertBefore(draggedElement, placeholder);
+        }
+      });
+    });
+  }
+  
+  // Apply saved layout
+  function applyLayout(view) {
+    if (!view) return;
+    
+    const layout = loadLayout(view.id);
+    if (!layout) return;
+    
+    const sections = Array.from(view.querySelectorAll('.draggable-section'));
+    const sectionMap = {};
+    
+    sections.forEach(section => {
+      sectionMap[section.dataset.sectionId] = section;
+    });
+    
+    // Reorder sections based on saved layout
+    layout.forEach(sectionId => {
+      const section = sectionMap[sectionId];
+      if (section) {
+        view.appendChild(section);
+      }
+    });
+  }
+  
+  // Initialize a specific view
+  function initView(viewId) {
+    const view = document.getElementById(viewId);
+    if (!view) return;
+    
+    // Wrap sections if not already wrapped
+    if (view.querySelectorAll('.draggable-section').length === 0) {
+      wrapSections(view);
+    }
+    
+    // Make sections draggable
+    makeSectionsDraggable(view);
+    
+    // Apply saved layout
+    applyLayout(view);
+  }
+  
+  // Initialize all views
+  function initAllViews() {
+    initView('view-dashboard');
+    initView('view-analytics');
+    initView('view-portfolio');
+    initView('view-credit');
+  }
+  
+  // Initialize on load
+  setTimeout(initAllViews, 500);
+  
+  // Re-initialize when switching views
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      setTimeout(initAllViews, 300);
+    });
+  });
+  
+  // Also initialize portfolio nav items
+  const portNavItems = document.querySelectorAll('.port-nav-item');
+  portNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+      setTimeout(initAllViews, 300);
+    });
+  });
+}
 </script>
 </body>
 </html>
