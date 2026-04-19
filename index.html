@@ -5336,7 +5336,8 @@ function initDragAndDrop() {
   // Get or create unique ID for an element
   function getElementId(element, viewId, index) {
     if (!element.dataset.dragId) {
-      element.dataset.dragId = `${viewId}-section-${index}-${Date.now()}`;
+      // Use deterministic ID without timestamp for consistent default layouts
+      element.dataset.dragId = `${viewId}-section-${index}`;
     }
     return element.dataset.dragId;
   }
@@ -5504,8 +5505,67 @@ function initDragAndDrop() {
     loadLayout(viewId, view);
   }
   
+  // Set default layouts for all views (based on user preferences)
+  function setDefaultLayouts() {
+    const allLayouts = JSON.parse(localStorage.getItem(LAYOUT_KEY) || '{}');
+    
+    // Only set defaults if no layout exists for a view OR if user wants to reset
+    // Note: The sections are indexed based on their order in the HTML
+    // Dashboard sections in HTML order:
+    // 0: KPI Grid
+    // 1: Gamification Strip  
+    // 2: Badge Showcase
+    // 3: Radar Row (Weekly Spending + Financial Health)
+    // 4: Portfolio Snapshot
+    // 5: Budget Alerts
+    // 6: EMI Reminder
+    // 7: Sparkline Row
+    // 8: Cash Flow + Spending Mix
+    // 9: Portfolio charts (3col)
+    // 10: Credit Overview title
+    // 11: Credit charts (3col)
+    
+    if (!allLayouts['view-dashboard']) {
+      // Desired order based on images: Keep KPI at top, then gamification, then portfolio snapshot,
+      // budget alerts, emi reminders, sparklines, radar charts, cash flow charts, portfolio charts, credit overview
+      allLayouts['view-dashboard'] = [
+        'view-dashboard-section-0',   // KPI Grid (stays at top)
+        'view-dashboard-section-1',   // Gamification Strip  
+        'view-dashboard-section-2',   // Badge Showcase
+        'view-dashboard-section-4',   // Portfolio Snapshot
+        'view-dashboard-section-5',   // Budget Alerts
+        'view-dashboard-section-6',   // EMI Reminder
+        'view-dashboard-section-7',   // Sparkline Row (Income/Expense/Loan/Investment trends)
+        'view-dashboard-section-3',   // Radar Row (Weekly Spending Pattern + Financial Health Score)
+        'view-dashboard-section-8',   // Cash Flow Snapshot + Spending Mix
+        'view-dashboard-section-9',   // Portfolio by Asset Type + ROI % + Top 3 Holdings
+        'view-dashboard-section-10',  // Credit Overview section title
+        'view-dashboard-section-11'   // Credit charts (Outstanding + EMI + Summary)
+      ];
+    }
+    
+    if (!allLayouts['view-credit']) {
+      // Credit Tracker sections in HTML order:
+      // 0: KPI Strip (Total Principal, Outstanding, EMI, Active Accounts, Avg Rate)
+      // 1: Credit Register table
+      // 2: Charts Row (Outstanding by Lender + Loan Type Mix)
+      
+      // Desired order based on image 4: KPI at top, charts next, then table
+      allLayouts['view-credit'] = [
+        'view-credit-section-0',  // KPI cards (stays at top)
+        'view-credit-section-2',  // Outstanding Balance by Lender + Loan Type Mix charts
+        'view-credit-section-1'   // Credit Register table
+      ];
+    }
+    
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(allLayouts));
+  }
+  
   // Initialize all views
   function initAllViews() {
+    // Set default layouts first (only if not already set)
+    setDefaultLayouts();
+    
     setupDragDrop('view-dashboard');
     setupDragDrop('view-analytics');
     setupDragDrop('view-portfolio');
