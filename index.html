@@ -996,12 +996,16 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
       <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
         <i class="fas fa-database"></i> Backup / Restore
       </button>
+      <button class="export-btn" onclick="resetGamification()" style="color:var(--warning);border-color:rgba(245,158,11,0.25)" title="Reset Saving Streak, Achievements & Milestones">
+        <i class="fas fa-redo"></i> Reset Gamification
+      </button>
     </div>
     <!-- Collapsed footer: icon-only -->
     <div class="sidebar-footer-collapsed">
       <div class="collapsed-icon-btn" onclick="connectGoogleDrive()" title="Google Drive"><i class="fab fa-google-drive"></i></div>
       <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export"><i class="fas fa-file-csv"></i></div>
       <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
+      <div class="collapsed-icon-btn" onclick="resetGamification()" title="Reset Gamification" style="color:var(--warning)"><i class="fas fa-redo"></i></div>
     </div>
   </div>
 </div>
@@ -5961,6 +5965,39 @@ function restoreSidebarStates() {
 
 // Call restore on page load
 restoreSidebarStates();
+
+// ── RESET GAMIFICATION FUNCTION ──────────────────────────────────────────────
+function resetGamification() {
+  if(!confirm('Are you sure you want to reset your Saving Streak, Achievements, and Milestone Progress? This action cannot be undone.')) {
+    return;
+  }
+  
+  // Reset saving streak
+  localStorage.setItem('fos_saving_streak', '0');
+  localStorage.setItem('fos_last_saving_date', '');
+  
+  // Reset achievements (unlock all badges again by clearing the achievement data)
+  const achievements = {
+    firstTransaction: false,
+    budgetWarrior: false,
+    savingsKing: false,
+    zeroLoans: false,
+    investor: false,
+  };
+  localStorage.setItem('fos_achievements', JSON.stringify(achievements));
+  
+  // Reset milestone progress
+  localStorage.setItem('fos_milestone_progress', '0');
+  
+  // Show success message
+  alert('Gamification data has been reset successfully!');
+  
+  // Reload the page to reflect changes
+  location.reload();
+}
+
+// Make function globally accessible
+window.resetGamification = resetGamification;
 
 </script>
 </body>
