@@ -2685,6 +2685,13 @@ function renderDashboard() {
   renderHealthRadar();
 }
 
+// ── CHECK ALERTS ───────────────────────────────────────────────────────────
+function checkAlerts() {
+  // Placeholder for custom alert checking functionality
+  // This can be extended to check custom alert rules and trigger notifications
+}
+
+
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
 function renderBudgetAlerts(data) {
   const container = document.getElementById('budget-alerts-container');
@@ -3419,14 +3426,18 @@ function renderAnalytics() {
     const g = groupData(type, data);
     destroyChart(chartKey);
     if (Object.keys(g).length > 0) {
-      const hCtx = document.getElementById(canvasId).getContext('2d');
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return; // Canvas doesn't exist
+      const hCtx = canvas.getContext('2d');
+      // Ensure canvas has width before creating gradient
+      const canvasWidth = canvas.offsetWidth || canvas.clientWidth || 400;
       const hGrads = hexColors.map(hex => {
-        const gr = hCtx.createLinearGradient(0,0,hCtx.canvas.width,0);
+        const gr = hCtx.createLinearGradient(0,0,canvasWidth,0);
         gr.addColorStop(0, hex); gr.addColorStop(1, hex.replace('0.7','0.25')); return gr;
       });
       charts[chartKey] = new Chart(hCtx, {
         type: 'bar',
-        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:hGrads, borderColor:hexColors.map(h=>h.replace('0.7','1').replace('rgba','rgb').replace(/,[^,)]+\)$/,')')), borderWidth:1, borderRadius:5, borderSkipped:false }] },
+        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:hGrads, borderColor:hexColors.map(h=>h.replace('0.7','1')), borderWidth:1, borderRadius:5, borderSkipped:false }] },
         options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
       });
     }
@@ -3799,7 +3810,17 @@ Chart.defaults.elements.bar.borderSkipped = false;
 // Bar shadow via borderWidth top face
 Chart.defaults.elements.bar.borderWidth = 0;
 
-function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function destroyChart(key) { 
+  try {
+    if (charts[key]) { 
+      charts[key].destroy(); 
+      delete charts[key]; 
+    } 
+  } catch(e) {
+    console.warn(`Error destroying chart ${key}:`, e);
+    delete charts[key];
+  }
+}
 function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#e2e8f0'; }
 function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'; }
 function donutBorderColor() { return document.body.classList.contains('light-mode') ? 'rgba(255,255,255,0.9)' : 'rgba(7,9,26,0.9)'; }
@@ -3868,8 +3889,12 @@ function cOpts(legend) {
 // ── 3D Donut/Pie factory ───────────────────────────────────────────────────
 function makeDonut(id, labels, data, colors) {
   const canvas = document.getElementById(id);
+  if (!canvas) {
+    console.warn(`Canvas ${id} not found`);
+    return null;
+  }
   const ctx = canvas.getContext('2d');
-  const w = canvas.offsetWidth || 300;
+  const w = canvas.offsetWidth || canvas.clientWidth || 300;
 
   // Multi-stop gradient per slice for 3D depth
   const gradColors = colors.map((hex, i) => {
@@ -3936,7 +3961,8 @@ function makeDonut(id, labels, data, colors) {
 
 function renderDonut(id, labels, data, colors, key) {
   destroyChart(key);
-  charts[key] = makeDonut(id, labels, data, colors);
+  const chart = makeDonut(id, labels, data, colors);
+  if (chart) charts[key] = chart;
 }
 
 // ── FINANCE ENTRY MODAL ────────────────────────────────────────────────────
@@ -4132,6 +4158,7 @@ function saveBudgets() {
     if (val && Number(val) > 0) budgets[sub] = Number(val); else delete budgets[sub];
   });
   localStorage.setItem('fos_budgets', JSON.stringify(budgets));
+  scheduleSave(); // Trigger autosave for Google Drive sync
   document.getElementById('budget-modal').style.display = 'none';
   if (activeView === 'dashboard') renderDashboard();
 }
