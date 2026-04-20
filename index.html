@@ -7,6 +7,7 @@
 <meta name="description" content="Personal finance dashboard - track income, expenses, investments, loans and portfolio">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZU9TIiwic2hvcnRfbmFtZSI6IkZpbmFuY2VPUyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA3MDkxYSIsInRoZW1lX2NvbG9yIjoiIzYzNjZmMSIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgZmluYW5jZSBkYXNoYm9hcmQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyUyMzYzNjZmMScvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNjUlMjUnIGZvbnQtc2l6ZT0nNTAnIGZpbGw9J3doaXRlJyUzRSVFMiU4MiVCOSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
 <title>FinanceOS - Chris Mcguinness</title>
+<script src="https://apis.google.com/js/api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -6016,36 +6017,54 @@ function restoreSidebarStates() {
 // Call restore on page load
 restoreSidebarStates();
 // ================= GOOGLE DRIVE =================
-const CLIENT_ID = "522409616559-te1m0dg72s3b0tuf7trqrnlfcrt1rf8p.apps.googleusercontent.com"
-const API_KEY = "AIzaSyBNSUMExLsGID8CEFQHqa1y3t_WS4b1ONo"
+const CLIENT_ID = "522409616559-te1m0dg72s3b0tuf7trqrnlfcrt1rf8p.apps.googleusercontent.com";
+const API_KEY = "AIzaSyBNSUMExLsGID8CEFQHqa1y3t_WS4b1ONo";
 
 function initGapi() {
-  gapi.load('client', async () => {
-    await gapi.client.init({
-      apiKey: API_KEY,
-      clientId: CLIENT_ID,
-      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-      scope: "https://www.googleapis.com/auth/drive.file"
-    });
+  gapi.load('client:auth2', async () => {
+    try {
+      await gapi.client.init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+        scope: "https://www.googleapis.com/auth/drive.file"
+      });
 
-    // Initialize auth properly
-    gapi.auth2.init({
-      client_id: CLIENT_ID
-    });
+      const auth = gapi.auth2.getAuthInstance();
+      const isSignedIn = auth.isSignedIn.get();
 
-    const auth = gapi.auth2.getAuthInstance();
-    const isSignedIn = auth.isSignedIn.get();
-
-    updateDriveStatus(isSignedIn);
+      updateDriveStatus(isSignedIn);
+      
+      // Listen for sign-in state changes
+      auth.isSignedIn.listen(updateDriveStatus);
+    } catch (error) {
+      console.error('Error initializing GAPI:', error);
+      updateDriveStatus(false);
+    }
   });
 }
 
 function reconnectDrive() {
+  if (typeof gapi === 'undefined' || !gapi.auth2) {
+    console.error('Google API not properly initialized');
+    alert('Google Drive API is not loaded. Please refresh the page.');
+    updateDriveStatus(false);
+    return;
+  }
+
   const auth = gapi.auth2.getAuthInstance();
+  
+  if (!auth) {
+    console.error('Auth instance not initialized');
+    alert('Authentication not initialized. Please refresh the page.');
+    updateDriveStatus(false);
+    return;
+  }
 
   auth.signIn().then(() => {
     updateDriveStatus(true);
-  }).catch(() => {
+  }).catch((error) => {
+    console.error('Sign in failed:', error);
     updateDriveStatus(false);
   });
 }
@@ -6063,7 +6082,20 @@ function updateDriveStatus(isConnected) {
   }
 }
 
-window.addEventListener('load', initGapi);
+// Wait for both window load AND gapi to be available
+function initializeGoogleDrive() {
+  if (typeof gapi !== 'undefined') {
+    initGapi();
+  } else {
+    console.error('Google API library not loaded');
+    updateDriveStatus(false);
+  }
+}
+
+window.addEventListener('load', () => {
+  // Small delay to ensure gapi script loads
+  setTimeout(initializeGoogleDrive, 500);
+});
 
 </script>
 </body>
