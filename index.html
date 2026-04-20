@@ -1180,20 +1180,43 @@ async function loadFromGoogleDrive() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// REST OF YOUR JAVASCRIPT CODE STARTS HERE
-// (All your existing functions: data management, charts, modals, etc.)
-// ══════════════════════════════════════════════════════════════════════════════
+<script>
+// ══════ GOOGLE DRIVE CONFIGURATION ══════
+const GDRIVE_CONFIG = { ... };
+// ... (all your Google Drive functions)
 
-// [PASTE ALL YOUR EXISTING JAVASCRIPT CODE HERE]
-// Everything from const MONTHS = [...] to window.onload = () => {...}
-// I'm omitting it here to keep this response focused on the Google Drive fix
+// ══════ REST OF YOUR APP CODE ══════
+const MONTHS = ['Jan','Feb','Mar',...];
 
-// The key changes are:
-// 1. Removed the duplicate Google Drive code at the bottom
-// 2. Fixed the syntax error (missing quotes on API_KEY)
-// 3. Organized Google Drive functions in one clean section
-// 4. Improved error handling and token refresh logic
+// ASSET COLOUR MAP
+const ASSET_COLOR = { ... };
+
+let db = JSON.parse(localStorage.getItem('fos_db_v3')) || [...];
+let portDb = ...;
+let creditDb = ...;
+
+// All your functions...
+function renderDashboard() { ... }
+function saveEntry() { ... }
+// ... etc
+
+// At the very end:
+window.onload = () => {
+  portFilterMode = 'only';
+  buildFilterDropdowns();
+  buildPortDropdowns();
+  renderDashboard();
+  applyStoredTheme();
+  
+  // ... rest of window.onload code
+  
+  // Auto-reconnect Google Drive
+  if (localStorage.getItem(STORAGE_KEYS.GDRIVE_CONNECTED)) {
+    console.log('Auto-reconnecting to Google Drive...');
+    setTimeout(() => silentTokenRefresh(), 300);
+  }
+};
+</script>
 
 </script>
 </body>
