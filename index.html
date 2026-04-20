@@ -2202,35 +2202,48 @@ function connectGoogleDrive() {
 function silentTokenRefresh() {
   if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
   try {
+    console.log('Attempting silent Google Drive token refresh...');
     const client = google.accounts.oauth2.initTokenClient({
       client_id: GDRIVE_CLIENT_ID,
       scope: GDRIVE_SCOPES,
       prompt: '',   // empty string = no consent screen if already granted
       callback: (tokenResponse) => {
         if (tokenResponse.error) {
+          console.error('Silent refresh failed:', tokenResponse.error);
           // Silent refresh failed — clear flag so user can manually reconnect
           localStorage.removeItem(GDRIVE_CONNECTED_KEY);
           gdriveConnected = false;
           gdriveAccessToken = null;
-          setDriveStatus('', 'Google Drive');
+          setDriveStatus('error', 'Session expired');
           const btn = document.getElementById('gdrive-btn');
-          if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Connect Drive';
+          if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
           return;
         }
+        console.log('Silent token refresh successful');
         gdriveAccessToken = tokenResponse.access_token;
         gdriveConnected = true;
         localStorage.setItem(GDRIVE_CONNECTED_KEY, '1');
         setDriveStatus('connected', 'Drive connected');
         const btn = document.getElementById('gdrive-btn');
         if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
+        // Load data after successful refresh
+        loadFromGoogleDrive();
         // Schedule next refresh
         setTimeout(silentTokenRefresh, 55 * 60 * 1000);
       }
     });
     client.requestAccessToken({ prompt: '' });
   } catch(e) {
+    console.error('Silent refresh error:', e);
     // GIS library not ready yet — retry after 3 seconds
-    setTimeout(silentTokenRefresh, 3000);
+    if (e.message && e.message.includes('google is not defined')) {
+      console.log('Google library not loaded, retrying in 3s...');
+      setTimeout(silentTokenRefresh, 3000);
+    } else {
+      // Other error - clear connection state
+      localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+      setDriveStatus('error', 'Connection failed');
+    }
   }
 }
 
@@ -2306,22 +2319,57 @@ async function saveToGoogleDrive() {
 
 async function loadFromGoogleDrive() {
   const token = gdriveAccessToken;
-  if (!token) return;
+  if (!token) {
+    console.warn('No Google Drive access token available');
+    setDriveStatus('error', 'Not authenticated');
+    return;
+  }
   try {
+    console.log('Loading data from Google Drive...');
     const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='financeos_data.json'+and+'${GDRIVE_FOLDER_ID}'+in+parents&fields=files(id)`, {
       headers:{'Authorization':'Bearer '+token}
     });
+    
+    if (!search.ok) {
+      console.error('Google Drive search failed:', search.status, search.statusText);
+      if (search.status === 401) {
+        // Token expired - clear and prompt re-auth
+        localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+        gdriveConnected = false;
+        gdriveAccessToken = null;
+        setDriveStatus('error', 'Session expired');
+        const btn = document.getElementById('gdrive-btn');
+        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
+        return;
+      }
+      throw new Error(`Search failed: ${search.status}`);
+    }
+    
     const searchData = await search.json();
+    console.log('Google Drive search result:', searchData);
+    
     if (!searchData.files || searchData.files.length === 0) {
+      console.log('No existing file found - creating new one');
       setDriveStatus('connected', 'Drive ready (new)');
       saveToGoogleDrive(); // push current local data up
       return;
     }
+    
     gdriveFileIds.main = searchData.files[0].id;
+    console.log('Loading file:', gdriveFileIds.main);
+    
     const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${gdriveFileIds.main}?alt=media`, {
       headers:{'Authorization':'Bearer '+token}
     });
+    
+    if (!fileResp.ok) {
+      console.error('Google Drive file fetch failed:', fileResp.status, fileResp.statusText);
+      throw new Error(`File fetch failed: ${fileResp.status}`);
+    }
+    
     const payload = await fileResp.json();
+    console.log('Loaded data from Google Drive');
+    
     if (payload.db)       { db       = payload.db; localStorage.setItem('fos_db_v3', JSON.stringify(db)); }
     if (payload.portDb)   { portDb   = payload.portDb.map(normalizePortRecord); localStorage.setItem('fos_port_v3', JSON.stringify(portDb)); }
     if (payload.creditDb) { creditDb = payload.creditDb; localStorage.setItem('fos_credit_v1', JSON.stringify(creditDb)); }
@@ -2329,7 +2377,14 @@ async function loadFromGoogleDrive() {
     setDriveStatus('connected', 'Drive loaded ✓');
     buildFilterDropdowns(); buildPortDropdowns(); renderDashboard();
   } catch(e) {
+    console.error('Google Drive load error:', e);
     setDriveStatus('error', 'Load failed');
+    // Clear connection state on repeated failures
+    localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+    gdriveConnected = false;
+    gdriveAccessToken = null;
+    const btn = document.getElementById('gdrive-btn');
+    if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
   }
 }
 
@@ -5586,18 +5641,27 @@ window.onload = () => {
   // We wait up to 3 seconds for the GIS (Google Identity Services) library
   // to finish loading before attempting the silent refresh.
   if (localStorage.getItem(GDRIVE_CONNECTED_KEY)) {
+    console.log('Google Drive was previously connected, attempting auto-reconnect...');
     setDriveStatus('connected', 'Reconnecting…');
     const tryReconnect = (attempts) => {
       if (typeof google !== 'undefined' && google.accounts) {
+        console.log('Google API loaded, attempting silent token refresh...');
         silentTokenRefresh();
       } else if (attempts > 0) {
+        console.log(`Google API not ready, ${attempts} attempts remaining...`);
         setTimeout(() => tryReconnect(attempts - 1), 500);
       } else {
-        // GIS library failed to load — reset status so user can manually connect
-        setDriveStatus('', 'Google Drive');
+        // GIS library failed to load — clear connection and reset status
+        console.error('Google API failed to load after all attempts');
+        localStorage.removeItem(GDRIVE_CONNECTED_KEY);
+        setDriveStatus('error', 'API not loaded');
+        const btn = document.getElementById('gdrive-btn');
+        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
       }
     };
     setTimeout(() => tryReconnect(6), 300);
+  } else {
+    console.log('Google Drive not previously connected');
   }
 
   // Initialize drag and drop for dashboard sections
