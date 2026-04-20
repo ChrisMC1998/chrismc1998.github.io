@@ -6015,55 +6015,6 @@ function restoreSidebarStates() {
 
 // Call restore on page load
 restoreSidebarStates();
-// ================= GOOGLE DRIVE =================
-const CLIENT_ID = 522409616559-te1m0dg72s3b0tuf7trqrnlfcrt1rf8p.apps.googleusercontent.com
-const API_KEY = AIzaSyBNSUMExLsGID8CEFQHqa1y3t_WS4b1ONo
-
-function initGapi() {
-  gapi.load('client', async () => {
-    await gapi.client.init({
-      apiKey: API_KEY,
-      clientId: CLIENT_ID,
-      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-      scope: "https://www.googleapis.com/auth/drive.file"
-    });
-
-    // Initialize auth properly
-    gapi.auth2.init({
-      client_id: CLIENT_ID
-    });
-
-    const auth = gapi.auth2.getAuthInstance();
-    const isSignedIn = auth.isSignedIn.get();
-
-    updateDriveStatus(isSignedIn);
-  });
-}
-
-function reconnectDrive() {
-  const auth = gapi.auth2.getAuthInstance();
-
-  auth.signIn().then(() => {
-    updateDriveStatus(true);
-  }).catch(() => {
-    updateDriveStatus(false);
-  });
-}
-
-function updateDriveStatus(isConnected) {
-  const dot = document.querySelector('.gdrive-dot');
-  if (!dot) return;
-
-  dot.classList.remove('connected', 'error');
-
-  if (isConnected) {
-    dot.classList.add('connected');
-  } else {
-    dot.classList.add('error');
-  }
-}
-
-window.addEventListener('load', initGapi);
 
 </script>
 </body>
