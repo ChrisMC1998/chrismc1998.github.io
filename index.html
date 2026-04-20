@@ -898,7 +898,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="drawer-item" id="mob-analytics" onclick="mobNav('analytics','finance')"><i class="fas fa-chart-line" style="width:16px;text-align:center"></i> Analytics</div>
   <div class="drawer-item" id="mob-networth" onclick="mobNav('networth','finance')"><i class="fas fa-chart-area" style="width:16px;text-align:center"></i> Net Worth</div>
   <div class="drawer-item" onclick="openBudgetModal();closeMobileDrawer()"><i class="fas fa-sliders-h" style="width:16px;text-align:center"></i> Budgets</div>
-  <div class="drawer-item" onclick="openAlertsModal();closeMobileDrawer()"><i class="fas fa-bell" style="width:16px;text-align:center"></i> Custom Alerts</div>
 
   <div class="drawer-section-label" style="color:#7c6eb3">Portfolio</div>
   <div class="drawer-item" id="mob-port-overview" onclick="mobNav('port-overview','portfolio')"><i class="fas fa-layer-group" style="color:#a78bfa;width:16px;text-align:center"></i> Summary</div>
@@ -969,11 +968,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>
     <span class="nav-label">Budgets</span>
     <span id="budget-sidebar-badge" style="display:none" class="budget-badge"></span>
-  </div>
-  <div class="nav-item" onclick="openAlertsModal()">
-    <div class="nav-icon"><i class="fas fa-bell"></i></div>
-    <span class="nav-label">Custom Alerts</span>
-    <span id="alerts-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
 
   <div class="sidebar-footer" style="margin-top:auto">
@@ -3808,6 +3802,7 @@ Chart.defaults.elements.bar.borderWidth = 0;
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
 function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#e2e8f0'; }
 function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'; }
+function donutBorderColor() { return document.body.classList.contains('light-mode') ? 'rgba(255,255,255,0.9)' : 'rgba(7,9,26,0.9)'; }
 
 // ── 3D gradient bar background helper ─────────────────────────────────────
 function make3DBarColor(ctx, hex, alpha1, alpha2) {
@@ -3883,7 +3878,7 @@ function makeDonut(id, labels, data, colors) {
         data,
         backgroundColor: gradColors,
         borderWidth: 3,
-        borderColor: 'rgba(7,9,26,0.9)',
+        borderColor: donutBorderColor(),
         hoverOffset: 14,
         hoverBorderWidth: 0,
         hoverBorderColor: 'rgba(255,255,255,0.3)',
