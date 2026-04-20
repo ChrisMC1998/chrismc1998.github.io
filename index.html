@@ -286,7 +286,7 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .btn-add { background:var(--accent); color:white; border:none; padding:7px 14px; border-radius:9px; font-weight:600; font-size:0.82rem; cursor:pointer; font-family:'DM Sans',sans-serif; box-shadow:0 0 18px rgba(99,102,241,0.35); transition:0.18s; display:flex; gap:6px; align-items:center; white-space:nowrap; }
 .btn-add:hover { transform:translateY(-1px); box-shadow:0 0 28px rgba(99,102,241,0.55); }
 
-.scroll-area { flex:1; overflow-y:auto; padding:1.4rem 1.8rem; }
+.scroll-area { flex:1; overflow-y:auto; overflow-x:hidden; padding:1.4rem 1.8rem; }
 .scroll-area::-webkit-scrollbar { width:3px; }
 .scroll-area::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
 
@@ -1485,6 +1485,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
             <thead>
               <tr>
                 <th onclick="sortPortTable('assetType')">Asset <span class="sort-arrow">↕</span></th>
+                <th onclick="sortPortTable('subType')">Sub-Type <span class="sort-arrow">↕</span></th>
                 <th onclick="sortPortTable('date')">Date <span class="sort-arrow">↕</span></th>
                 <th onclick="sortPortTable('quantity')" style="text-align:right">Qty <span class="sort-arrow">↕</span></th>
                 <th>Unit</th>
@@ -1713,8 +1714,19 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
         <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Real Estate / MF / Bonds / Stocks / Crypto" oninput="updatePortUnit()">
       </div>
       <div class="input-group">
+        <label>Sub-Type</label>
+        <input type="text" id="p-subType" class="input-field port-focus" placeholder="e.g. Coins, Jewellery, Land, House, Stock Name...">
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <div class="input-group">
         <label>Date of Purchase</label>
         <input type="date" id="p-date" class="input-field port-focus">
+      </div>
+      <div class="input-group" style="opacity:0;pointer-events:none">
+        <label>&nbsp;</label>
+        <input type="text" class="input-field" disabled>
       </div>
     </div>
 
@@ -1961,16 +1973,16 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
 <!-- CUSTOM ALERTS MODAL -->
 <div class="modal-overlay" id="alerts-modal">
-  <div class="modal-box" style="max-width:580px">
+  <div class="modal-box" style="max-width:580px;max-height:none;overflow-y:visible">
     <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
     
-    <div class="alert-rule-list" id="active-alerts-list"></div>
+    <div class="alert-rule-list" id="active-alerts-list" style="margin-bottom:1rem"></div>
 
-    <div style="border-top:1px solid var(--glass-border);padding-top:1rem;margin-top:1rem">
+    <div style="border-top:1px solid var(--glass-border);padding-top:1rem">
       <div class="panel-title" style="font-size:0.7rem;margin-bottom:0.8rem">➕ Create New Alert</div>
       <div class="alert-builder-row">
-        <select class="alert-builder-select" id="alert-field">
+        <select class="alert-builder-select" id="alert-field" onchange="checkAlertCategory()">
           <option value="balance">Net Balance</option>
           <option value="category">Category Spend</option>
           <option value="networth">Net Worth</option>
@@ -1981,17 +1993,15 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
           <option value="lt">is less than</option>
           <option value="eq">equals</option>
         </select>
-        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount">
-        <button onclick="addCustomAlert()" class="btn-add" style="padding:7px 12px;font-size:0.75rem;white-space:nowrap"><i class="fas fa-plus"></i> Add</button>
+        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount" onkeypress="if(event.key==='Enter') addCustomAlert()">
       </div>
       <div id="alert-category-row" style="display:none;margin-top:8px">
-        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0">
+        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0" onkeypress="if(event.key==='Enter') addCustomAlert()">
       </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:1.4rem">
-      <button onclick="saveAlerts()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-save"></i> Save</button>
-      <button onclick="document.getElementById('alerts-modal').style.display='none'" class="btn-secondary">Close</button>
+      <button onclick="closeAlertsModal()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-check"></i> Save & Close</button>
     </div>
   </div>
 </div>
@@ -3003,7 +3013,7 @@ function renderPortTable() {
   tbody.innerHTML = '';
 
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state"><i class="fas fa-gem"></i><p>No portfolio entries for the selected filter</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><i class="fas fa-gem"></i><p>No portfolio entries for the selected filter</p></div></td></tr>`;
     document.getElementById('port-summary-panel').style.display = 'none';
     return;
   }
@@ -3028,6 +3038,7 @@ function renderPortTable() {
           ${assetTypeLabel(e.assetType)}
         </span>
       </td>
+      <td style="color:var(--text-muted);font-size:0.8rem">${e.subType || '-'}</td>
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.72rem">${e.date}</td>
       <td style="text-align:right;font-family:'DM Mono',monospace">${e.quantity}</td>
       <td style="color:var(--text-muted);font-size:0.75rem">${e.unit}</td>
@@ -4029,7 +4040,7 @@ function openPortModal() {
   document.getElementById('p-unit-hint').textContent = '(grams)';
   document.getElementById('port-save-btn').textContent = 'Save Asset';
   document.getElementById('port-delete-btn').style.display = 'none';
-  ['p-assetType','p-qty','p-unit','p-buyPrice','p-currPrice','p-notes'].forEach(id => document.getElementById(id).value = '');
+  ['p-assetType','p-subType','p-qty','p-unit','p-buyPrice','p-currPrice','p-notes'].forEach(id => document.getElementById(id).value = '');
   calcPortPreview();
   document.getElementById('port-modal').style.display = 'flex';
 }
@@ -4041,6 +4052,7 @@ function editPortEntry(id) {
   editingPortId = id;
   document.getElementById('port-modal-title').textContent = 'Edit Portfolio Asset';
   document.getElementById('p-assetType').value = entry.assetType;
+  document.getElementById('p-subType').value = entry.subType || '';
   document.getElementById('p-date').value = entry.date;
   document.getElementById('p-qty').value = entry.quantity;
   document.getElementById('p-unit').value = entry.unit;
@@ -4063,6 +4075,7 @@ function deleteCurrentPortEntry() {
 
 function savePortEntry() {
   const assetType    = normalizeAssetType(document.getElementById('p-assetType').value.trim());
+  const subType      = document.getElementById('p-subType').value.trim();
   const date         = document.getElementById('p-date').value;
   const quantity     = parseFloat(document.getElementById('p-qty').value);
   const unit         = document.getElementById('p-unit').value.trim() || 'units';
@@ -4075,9 +4088,9 @@ function savePortEntry() {
 
   if (editingPortId) {
     const idx = portDb.findIndex(x => x.id === editingPortId);
-    if (idx >= 0) portDb[idx] = { ...portDb[idx], assetType, date, quantity, unit, purchasePrice, currentPrice, notes };
+    if (idx >= 0) portDb[idx] = { ...portDb[idx], assetType, subType, date, quantity, unit, purchasePrice, currentPrice, notes };
   } else {
-    portDb.push({ id:Date.now(), assetType, date, quantity, unit, purchasePrice, currentPrice, notes });
+    portDb.push({ id:Date.now(), assetType, subType, date, quantity, unit, purchasePrice, currentPrice, notes });
   }
 
   scheduleSave();
@@ -5346,6 +5359,12 @@ function saveAlerts() {
   document.getElementById('alerts-modal').style.display='none';
 }
 
+function closeAlertsModal() {
+  localStorage.setItem('fos_alerts',JSON.stringify(customAlerts));
+  checkAlerts();
+  document.getElementById('alerts-modal').style.display='none';
+}
+
 function checkAlerts() {
   if(!('Notification' in window))return;
   const activeAlerts=customAlerts.filter(a=>a.active);
@@ -5883,6 +5902,18 @@ function toggleFinanceSidebar() {
   
   // Save state to localStorage
   localStorage.setItem('fos_finance_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+  
+  // Trigger chart resize after animation completes
+  setTimeout(() => {
+    Object.values(charts).forEach(chart => {
+      if(chart && typeof chart.resize === 'function') {
+        chart.resize();
+      }
+    });
+    // Re-render current view to fix layout
+    if(activeView === 'dashboard') renderDashboard();
+    else if(activeView === 'analytics') renderAnalytics();
+  }, 350);
 }
 
 function togglePortfolioSidebar() {
@@ -5898,6 +5929,18 @@ function togglePortfolioSidebar() {
   
   // Save state to localStorage
   localStorage.setItem('fos_portfolio_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+  
+  // Trigger chart resize after animation completes
+  setTimeout(() => {
+    Object.values(charts).forEach(chart => {
+      if(chart && typeof chart.resize === 'function') {
+        chart.resize();
+      }
+    });
+    // Re-render current view to fix layout
+    if(activeView === 'port-overview') renderPortOverview();
+    else if(activeView === 'port-analytics') renderPortAnalytics();
+  }, 350);
 }
 
 // Restore sidebar states on page load
