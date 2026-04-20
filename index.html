@@ -2458,8 +2458,22 @@ function setFilterMode(mode, btn) {
 }
 
 function getFilteredData() {
-  const fM = document.getElementById('filter-month').value;
-  const fY = document.getElementById('filter-year').value;
+  // Check which filter elements to use based on active view
+  let fM, fY;
+  if (activeView === 'analytics') {
+    // Analytics view uses trend-month and trend-year
+    const trendMonth = document.getElementById('trend-month');
+    const trendYear = document.getElementById('trend-year');
+    fM = trendMonth ? trendMonth.value : 'all';
+    fY = trendYear ? trendYear.value : 'all';
+  } else {
+    // Dashboard and other views use filter-month and filter-year
+    const filterMonth = document.getElementById('filter-month');
+    const filterYear = document.getElementById('filter-year');
+    fM = filterMonth ? filterMonth.value : 'all';
+    fY = filterYear ? filterYear.value : 'all';
+  }
+  
   if (fM === 'all' && fY === 'all') return [...db];
 
   return db.filter(item => {
@@ -2684,6 +2698,13 @@ function renderDashboard() {
   renderWeeklyRadar();
   renderHealthRadar();
 }
+
+// ── CHECK ALERTS ───────────────────────────────────────────────────────────
+function checkAlerts() {
+  // Placeholder for custom alert checking functionality
+  // This can be extended to check custom alert rules and trigger notifications
+}
+
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
 function renderBudgetAlerts(data) {
@@ -3343,9 +3364,12 @@ function renderPortAnalytics() {
 
 // ── ANALYTICS (Finance) ────────────────────────────────────────────────────
 function renderAnalytics() {
+  console.log('=== renderAnalytics called ===');
   buildFilterDropdowns();
   const fM = document.getElementById('trend-month').value;
   const fY = document.getElementById('trend-year').value;
+  console.log('Filter values - Month:', fM, 'Year:', fY);
+  
   const range = parseInt(document.getElementById('trend-range').value);
   const today = new Date();
   let months = [];
@@ -3389,6 +3413,9 @@ function renderAnalytics() {
   });
 
   const data = getFilteredData();
+  console.log('Filtered data count:', data.length);
+  console.log('Sample data:', data.slice(0, 3));
+  
   const sp = data.filter(d => d.type==='Expense'||d.type==='Loan').map(d => ({ x:new Date(d.date).getDate(), y:d.amount, t:d.type }));
   destroyChart('scatter');
   charts['scatter'] = new Chart(document.getElementById('chart-scatter').getContext('2d'), {
@@ -3419,16 +3446,54 @@ function renderAnalytics() {
     const g = groupData(type, data);
     destroyChart(chartKey);
     if (Object.keys(g).length > 0) {
-      const hCtx = document.getElementById(canvasId).getContext('2d');
-      const hGrads = hexColors.map(hex => {
-        const gr = hCtx.createLinearGradient(0,0,hCtx.canvas.width,0);
-        gr.addColorStop(0, hex); gr.addColorStop(1, hex.replace('0.7','0.25')); return gr;
-      });
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) {
+        console.warn(`Canvas ${canvasId} not found`);
+        return;
+      }
+      const hCtx = canvas.getContext('2d');
+      // Ensure canvas has width before creating gradient
+      const canvasWidth = canvas.offsetWidth || canvas.clientWidth || 400;
+      
+      // Create gradients for each data point (not just predefined colors)
+      const dataCount = Object.keys(g).length;
+      const hGrads = [];
+      const borderColors = [];
+      
+      for (let i = 0; i < dataCount; i++) {
+        const colorIndex = i % hexColors.length; // Cycle through colors if more data than colors
+        const hex = hexColors[colorIndex];
+        const gr = hCtx.createLinearGradient(0,0,canvasWidth,0);
+        gr.addColorStop(0, hex);
+        gr.addColorStop(1, hex.replace('0.7','0.25'));
+        hGrads.push(gr);
+        borderColors.push(hex.replace('0.7','1'));
+      }
+      
       charts[chartKey] = new Chart(hCtx, {
         type: 'bar',
-        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:hGrads, borderColor:hexColors.map(h=>h.replace('0.7','1').replace('rgba','rgb').replace(/,[^,)]+\)$/,')')), borderWidth:1, borderRadius:5, borderSkipped:false }] },
-        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
+        data: { 
+          labels: Object.keys(g), 
+          datasets: [{ 
+            data: Object.values(g), 
+            backgroundColor: hGrads, 
+            borderColor: borderColors, 
+            borderWidth: 1, 
+            borderRadius: 5, 
+            borderSkipped: false 
+          }] 
+        },
+        options: { 
+          ...cOpts(false), 
+          indexAxis: 'y', 
+          scales: { 
+            x: {ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, 
+            y: {ticks:{color:chartTextColor(),autoSkip:false}} 
+          } 
+        }
       });
+    } else {
+      console.log(`No data for ${type} chart (${chartKey})`);
     }
   };
 
@@ -3799,7 +3864,17 @@ Chart.defaults.elements.bar.borderSkipped = false;
 // Bar shadow via borderWidth top face
 Chart.defaults.elements.bar.borderWidth = 0;
 
-function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function destroyChart(key) { 
+  try {
+    if (charts[key]) { 
+      charts[key].destroy(); 
+      delete charts[key]; 
+    } 
+  } catch(e) {
+    console.warn(`Error destroying chart ${key}:`, e);
+    delete charts[key];
+  }
+}
 function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#e2e8f0'; }
 function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'; }
 function donutBorderColor() { return document.body.classList.contains('light-mode') ? 'rgba(255,255,255,0.9)' : 'rgba(7,9,26,0.9)'; }
@@ -3839,7 +3914,17 @@ function cOpts(legend) {
         borderWidth: 1,
         titleFont: { family:'DM Sans', size:12, weight:'700' },
         bodyFont:  { family:'DM Mono', size:11 },
-        callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+        callbacks: { 
+          label: ctx => {
+            // Handle different chart data structures
+            const value = ctx.raw !== undefined ? ctx.raw : 
+                         (ctx.parsed && ctx.parsed.y !== undefined) ? ctx.parsed.y : 
+                         ctx.parsed;
+            const numValue = Number(value);
+            if (isNaN(numValue)) return '  N/A';
+            return '  ₹' + numValue.toLocaleString('en-IN');
+          }
+        }
       }
     },
     scales: {
@@ -3858,8 +3943,12 @@ function cOpts(legend) {
 // ── 3D Donut/Pie factory ───────────────────────────────────────────────────
 function makeDonut(id, labels, data, colors) {
   const canvas = document.getElementById(id);
+  if (!canvas) {
+    console.warn(`Canvas ${id} not found`);
+    return null;
+  }
   const ctx = canvas.getContext('2d');
-  const w = canvas.offsetWidth || 300;
+  const w = canvas.offsetWidth || canvas.clientWidth || 300;
 
   // Multi-stop gradient per slice for 3D depth
   const gradColors = colors.map((hex, i) => {
@@ -3909,7 +3998,15 @@ function makeDonut(id, labels, data, colors) {
           borderWidth: 1,
           titleFont: { family:'DM Sans', size:12, weight:'700' },
           bodyFont:  { family:'DM Mono', size:11 },
-          callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+          callbacks: { 
+            label: ctx => {
+              const value = ctx.raw !== undefined ? ctx.raw : 
+                           (ctx.parsed !== undefined) ? ctx.parsed : 0;
+              const numValue = Number(value);
+              if (isNaN(numValue)) return '  N/A';
+              return '  ₹' + numValue.toLocaleString('en-IN');
+            }
+          }
         }
       }
     }
@@ -3918,7 +4015,8 @@ function makeDonut(id, labels, data, colors) {
 
 function renderDonut(id, labels, data, colors, key) {
   destroyChart(key);
-  charts[key] = makeDonut(id, labels, data, colors);
+  const chart = makeDonut(id, labels, data, colors);
+  if (chart) charts[key] = chart;
 }
 
 // ── FINANCE ENTRY MODAL ────────────────────────────────────────────────────
@@ -4107,15 +4205,35 @@ function openBudgetModal() {
 }
 
 function saveBudgets() {
-  const allSubs = [...new Set(db.map(d => d.sub).filter(Boolean))];
-  allSubs.forEach(sub => {
-    const el  = document.getElementById('bgt-'+sanitizeId(sub));
-    const val = el?.value;
-    if (val && Number(val) > 0) budgets[sub] = Number(val); else delete budgets[sub];
-  });
-  localStorage.setItem('fos_budgets', JSON.stringify(budgets));
-  document.getElementById('budget-modal').style.display = 'none';
-  if (activeView === 'dashboard') renderDashboard();
+  try {
+    const allSubs = [...new Set(db.map(d => d.sub).filter(Boolean))];
+    console.log('Saving budgets for subcategories:', allSubs);
+    
+    allSubs.forEach(sub => {
+      const el  = document.getElementById('bgt-'+sanitizeId(sub));
+      if (!el) {
+        console.warn(`Budget input element not found for: ${sub}`);
+        return;
+      }
+      const val = el.value;
+      if (val && Number(val) > 0) {
+        budgets[sub] = Number(val);
+        console.log(`Set budget for ${sub}: ${val}`);
+      } else {
+        delete budgets[sub];
+        console.log(`Removed budget for ${sub}`);
+      }
+    });
+    
+    localStorage.setItem('fos_budgets', JSON.stringify(budgets));
+    console.log('Budgets saved to localStorage:', budgets);
+    scheduleSave(); // Trigger autosave for Google Drive sync
+    document.getElementById('budget-modal').style.display = 'none';
+    if (activeView === 'dashboard') renderDashboard();
+  } catch(error) {
+    console.error('Error saving budgets:', error);
+    alert('Error saving budgets. Please try again.');
+  }
 }
 
 // ── CREDIT TRACKER ─────────────────────────────────────────────────────────
