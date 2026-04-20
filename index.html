@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#07091a">
-<meta name="description" content="Personal finance dashboard - track income, expenses, investments, loans and portfolio">
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZU9TIiwic2hvcnRfbmFtZSI6IkZpbmFuY2VPUyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA3MDkxYSIsInRoZW1lX2NvbG9yIjoiIzYzNjZmMSIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgZmluYW5jZSBkYXNoYm9hcmQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyUyMzYzNjZmMScvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNjUlMjUnIGZvbnQtc2l6ZT0nNTAnIGZpbGw9J3doaXRlJyUzRSVFMiU4MiVCOSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
-<title>FinanceOS - Chris Mcguinness</title>
+<title>FinanceOS - </title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -26,11 +23,10 @@
   /* ── ASSET COLOURS — single source of truth ── */
   --c-gold:   #f59e0b;
   --c-silver: #94a3b8;
-  --c-realestate: #34d399;
+  --c-land:   #34d399;
   --c-mf:     #6366f1;
   --c-bonds:  #f472b6;
   --c-stocks: #38bdf8;
-  --c-crypto: #a78bfa;
   --c-other:  #a78bfa;
   --sidebar-w: 220px;
   --port-sidebar-w: 200px;
@@ -40,77 +36,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
 body { background: #07091a; color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
 
-/* ── SIDEBAR BASE ── */
 .sidebar {
   width: var(--sidebar-w); background: rgba(8,11,26,0.98);
   border-right: 1px solid var(--glass-border);
   padding: 1.4rem 1rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
-  transition: width 0.3s ease, padding 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ── COLLAPSED: Finance sidebar ── */
-.sidebar.collapsed {
-  width: 60px;
-  padding: 1.4rem 0.5rem;
-}
-/* Kill ALL text/labels/sections when collapsed */
-.sidebar.collapsed .nav-label,
-.sidebar.collapsed .welcome-msg,
-.sidebar.collapsed .nav-section-label,
-.sidebar.collapsed .brand-title .nav-label,
-.sidebar.collapsed .sidebar-footer-expanded {
-  display: none !important;
-}
-/* Centre brand icon */
-.sidebar.collapsed .brand-section { padding: 0; text-align: center; }
-.sidebar.collapsed .brand-title { justify-content: center; font-size: 1.1rem; }
-/* Centre nav items, clip anything that overflows */
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-  padding: 10px 0;
-  width: 40px;
-  margin: 0 auto;
-  overflow: hidden;
-  white-space: nowrap;
-}
-/* Hide badges too */
-.sidebar.collapsed .budget-badge { display: none !important; }
-/* Show collapsed footer icons */
-.sidebar-footer-expanded { display: flex; flex-direction: column; gap: 7px; }
-.sidebar-footer-collapsed { display: none; flex-direction: column; align-items: center; gap: 6px; }
-.sidebar.collapsed .sidebar-footer-collapsed { display: flex; }
-.collapsed-icon-btn {
-  width: 36px; height: 36px; border-radius: 9px;
-  border: 1px solid var(--glass-border); background: transparent;
-  color: var(--text-mid); display: flex; align-items: center;
-  justify-content: center; cursor: pointer; font-size: 0.85rem; transition: 0.16s;
-}
-.collapsed-icon-btn:hover { background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.2); }
-.sidebar-toggle {
-  position: absolute;
-  top: 1.4rem;
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(8,11,26,0.98);
-  border: 1px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s;
-  color: var(--text-mid);
-  font-size: 0.7rem;
-}
-.sidebar-toggle:hover {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  transform: scale(1.1);
 }
 .brand-section { margin-bottom: 1.8rem; padding: 0 6px; }
 .brand-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 9px; letter-spacing: -0.5px; }
@@ -125,9 +54,8 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .nav-item:hover { background: rgba(255,255,255,0.04); color: white; }
 .nav-item.active { background: rgba(99,102,241,0.12); color: white; }
 .nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:55%; background:var(--accent); border-radius:2px; }
-.nav-icon { width: 18px; min-width: 18px; text-align: center; font-size: 0.9rem; opacity: 0.85; flex-shrink: 0; }
-.nav-label { white-space: nowrap; overflow: hidden; transition: opacity 0.2s; }
-.sidebar-footer { margin-top: auto; }
+.nav-icon { width: 16px; text-align: center; font-size: 0.82rem; opacity: 0.8; }
+.sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
 .autosave-indicator { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
 .autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--c-inc); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -174,60 +102,6 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
   border-right: 1px solid rgba(167,139,250,0.12);
   padding: 1.4rem 0.9rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
   position: relative;
-  transition: width 0.3s ease, padding 0.3s ease;
-  overflow: hidden;
-}
-/* ── COLLAPSED: Portfolio sidebar ── */
-.port-sidebar.collapsed {
-  width: 60px;
-  padding: 1.4rem 0.5rem;
-}
-.port-sidebar.collapsed .nav-label,
-.port-sidebar.collapsed .port-brand-sub,
-.port-sidebar.collapsed .nav-section-label,
-.port-sidebar.collapsed .port-filter-box {
-  display: none !important;
-}
-.port-sidebar.collapsed .port-brand { padding: 0; text-align: center; }
-.port-sidebar.collapsed .port-brand-title { justify-content: center; }
-.port-sidebar.collapsed .port-nav-item {
-  justify-content: center;
-  padding: 10px 0;
-  width: 40px;
-  margin: 0 auto;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.port-sidebar.collapsed .btn-port-add {
-  justify-content: center;
-  padding: 8px 0;
-  width: 40px;
-  margin: 0 auto;
-  overflow: hidden;
-}
-.port-sidebar-toggle {
-  position: absolute;
-  top: 1.4rem;
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(12,10,30,0.98);
-  border: 1px solid rgba(167,139,250,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.2s;
-  color: #c4b5fd;
-  font-size: 0.7rem;
-}
-.port-sidebar-toggle:hover {
-  background: #a78bfa;
-  color: white;
-  border-color: #a78bfa;
-  transform: scale(1.1);
 }
 .port-sidebar::before {
   content:''; position:absolute; top:0; left:0; right:0; height:2px;
@@ -286,7 +160,7 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .btn-add { background:var(--accent); color:white; border:none; padding:7px 14px; border-radius:9px; font-weight:600; font-size:0.82rem; cursor:pointer; font-family:'DM Sans',sans-serif; box-shadow:0 0 18px rgba(99,102,241,0.35); transition:0.18s; display:flex; gap:6px; align-items:center; white-space:nowrap; }
 .btn-add:hover { transform:translateY(-1px); box-shadow:0 0 28px rgba(99,102,241,0.55); }
 
-.scroll-area { flex:1; overflow-y:auto; overflow-x:hidden; padding:1.4rem 1.8rem; }
+.scroll-area { flex:1; overflow-y:auto; padding:1.4rem 1.8rem; }
 .scroll-area::-webkit-scrollbar { width:3px; }
 .scroll-area::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
 
@@ -403,11 +277,9 @@ tr:last-child td { border-bottom:none; }
 /* Sidebar asset dot colours */
 .asset-gold   { color: var(--c-gold); }
 .asset-silver { color: var(--c-silver); }
-.asset-realestate { color: var(--c-realestate); }
+.asset-land   { color: var(--c-land); }
 .asset-mf     { color: var(--c-mf); }
 .asset-bonds  { color: var(--c-bonds); }
-.asset-stocks { color: var(--c-stocks); }
-.asset-crypto { color: var(--c-crypto); }
 .asset-other  { color: var(--text-mid); }
 
 .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
@@ -459,45 +331,6 @@ tr:last-child td { border-bottom:none; }
 .drawer-item.port-active { background:rgba(167,139,250,0.14); color:#e2d9f3; }
 .drawer-close { margin-bottom:1rem; display:flex; justify-content:flex-end; }
 .drawer-close button { background:transparent; border:1px solid var(--glass-border); color:var(--text-mid); border-radius:8px; padding:6px 12px; cursor:pointer; font-size:0.82rem; }
-
-/* ══════════════════════════════════════════════
-   GAMIFICATION & CUSTOM ALERTS
-══════════════════════════════════════════════ */
-.gamification-strip { display:flex; gap:12px; margin-bottom:1.3rem; flex-wrap:wrap; }
-.game-card { flex:1; min-width:160px; background:linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(167,139,250,0.06) 100%); border:1px solid rgba(99,102,241,0.25); border-radius:13px; padding:1rem 1.2rem; position:relative; overflow:hidden; }
-.game-card::before { content:''; position:absolute; top:0; right:0; width:60px; height:60px; background:radial-gradient(circle, rgba(99,102,241,0.2), transparent); border-radius:50%; }
-.game-card-icon { font-size:1.8rem; margin-bottom:8px; }
-.game-card-label { font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
-.game-card-value { font-size:1.4rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
-.game-card-sub { font-size:0.68rem; color:var(--text-muted); margin-top:4px; }
-.badge-collection { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-.achievement-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399; border-radius:20px; padding:4px 10px; font-size:0.7rem; font-weight:700; }
-.achievement-badge.locked { background:rgba(100,116,139,0.08); border-color:rgba(100,116,139,0.2); color:#64748b; opacity:0.5; }
-.progress-ring-wrap { position:relative; width:80px; height:80px; margin:0 auto; }
-.progress-ring-bg { fill:none; stroke:rgba(99,102,241,0.15); stroke-width:6; }
-.progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
-.progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
-.confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
-.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
-.alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
-.alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
-.alert-rule-card.active { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
-.alert-rule-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; background:rgba(99,102,241,0.12); color:#6366f1; }
-.alert-rule-card.active .alert-rule-icon { background:rgba(52,211,153,0.15); color:#34d399; }
-.alert-rule-info { flex:1; min-width:0; }
-.alert-rule-name { font-size:0.82rem; font-weight:600; color:var(--text-main); margin-bottom:2px; }
-.alert-rule-desc { font-size:0.68rem; color:var(--text-muted); }
-.alert-toggle { width:40px; height:22px; position:relative; }
-.alert-toggle input { opacity:0; width:0; height:0; }
-.alert-toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:22px; cursor:pointer; transition:0.2s; }
-.alert-toggle-slider:before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s; }
-.alert-toggle input:checked + .alert-toggle-slider { background:#34d399; }
-.alert-toggle input:checked + .alert-toggle-slider:before { transform:translateX(18px); }
-.alert-builder-row { display:grid; grid-template-columns:1fr auto 1fr auto; gap:8px; align-items:center; margin-bottom:10px; }
-.alert-builder-select, .alert-builder-input { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); padding:7px 10px; border-radius:8px; font-size:0.8rem; font-family:'DM Sans',monospace; cursor:pointer; outline:none; }
-body.light-mode .game-card { background:linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(167,139,250,0.04) 100%); }
-body.light-mode .alert-rule-card { background:rgba(0,0,0,0.02); }
-body.light-mode .alert-builder-select, body.light-mode .alert-builder-input { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
 
 /* responsive handled below in IMPROVED MOBILE section */
 
@@ -556,70 +389,6 @@ body.light-mode .credit-kpi-card { background: rgba(251,169,106,0.06); }
 .theme-toggle-btn:hover { background:rgba(255,255,255,0.08); color:white; }
 body.light-mode .theme-toggle-btn { color: #475569; }
 body.light-mode .theme-toggle-btn:hover { background:rgba(0,0,0,0.06); color:#0f172a; }
-
-/* ══════════════════════════════════════════════
-   DRAG AND DROP STYLES
-══════════════════════════════════════════════ */
-.draggable-section {
-  cursor: default;
-  transition: all 0.2s ease;
-  position: relative;
-  margin-bottom: 0;
-}
-.draggable-section::before {
-  content: '⋮⋮';
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  color: white;
-  font-size: 1.3rem;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: all;
-  cursor: grab;
-  z-index: 100;
-  background: rgba(99,102,241,0.7);
-  padding: 6px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  line-height: 1;
-}
-.draggable-section:hover::before {
-  opacity: 1;
-}
-.draggable-section::before:active {
-  cursor: grabbing;
-}
-.draggable-section.dragging {
-  opacity: 0.4;
-  cursor: grabbing;
-  transform: scale(0.98);
-}
-.draggable-section.drag-over {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-  background: rgba(99,102,241,0.05);
-  border-radius: 15px;
-}
-
-/* Ensure wrapped sections maintain proper spacing */
-.draggable-section > * {
-  margin-bottom: 1.3rem;
-}
-.draggable-section:last-child > * {
-  margin-bottom: 0;
-}
-
-/* Light mode adjustments */
-body.light-mode .draggable-section::before {
-  color: white;
-  background: rgba(99,102,241,0.8);
-}
-body.light-mode .draggable-section.drag-over {
-  background: rgba(99,102,241,0.08);
-  outline-color: var(--accent);
-}
 
 /* ══════════════════════════════════════════════
    GLOBAL SEARCH
@@ -802,7 +571,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .port-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
   .credit-kpi-strip { grid-template-columns:repeat(3,1fr) !important; gap:0.7rem; }
   .sparkline-row { grid-template-columns:repeat(2,1fr) !important; gap:0.8rem; }
-  .radar-row { grid-template-columns:1fr !important; }
   .charts-row   { grid-template-columns:1fr !important; }
   .charts-3col  { grid-template-columns:1fr 1fr !important; }
   .analytics-grid { grid-template-columns:1fr !important; }
@@ -907,158 +675,110 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="drawer-section-label" style="color:#7c6eb3">By Asset</div>
   <div class="drawer-item" onclick="filterPortAsset('Gold');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-gold);font-size:0.55rem;width:16px;text-align:center"></i> Gold</div>
   <div class="drawer-item" onclick="filterPortAsset('Silver');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-silver);font-size:0.55rem;width:16px;text-align:center"></i> Silver</div>
-  <div class="drawer-item" onclick="filterPortAsset('RealEstate');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-realestate);font-size:0.55rem;width:16px;text-align:center"></i> Real Estate</div>
+  <div class="drawer-item" onclick="filterPortAsset('Land');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-land);font-size:0.55rem;width:16px;text-align:center"></i> Land</div>
   <div class="drawer-item" onclick="filterPortAsset('MutualFund');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-mf);font-size:0.55rem;width:16px;text-align:center"></i> Mutual Funds</div>
-  <div class="drawer-item" onclick="filterPortAsset('Bonds');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-bonds);font-size:0.55rem;width:16px;text-align:center"></i> Bonds</div>
-  <div class="drawer-item" onclick="filterPortAsset('Stocks');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-stocks);font-size:0.55rem;width:16px;text-align:center"></i> Stocks</div>
-  <div class="drawer-item" onclick="filterPortAsset('Crypto');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-crypto);font-size:0.55rem;width:16px;text-align:center"></i> Crypto</div>
   <div class="drawer-item" onclick="filterPortAsset('all');closeMobileDrawer()"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem;width:16px;text-align:center"></i> All Assets</div>
 
   <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--glass-border);display:flex;flex-direction:column;gap:8px">
     <button class="gdrive-btn" style="width:100%;justify-content:center" onclick="connectGoogleDrive()"><i class="fab fa-google-drive"></i> Connect Drive</button>
-    <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export</button>
+    <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export CSV</button>
   </div>
 </div>
-<div class="sidebar" id="finance-sidebar">
-  <div class="sidebar-toggle" onclick="toggleFinanceSidebar()" title="Toggle sidebar">
-    <i class="fas fa-chevron-left" id="finance-toggle-icon"></i>
-  </div>
+<div class="sidebar">
   <div class="brand-section">
-    <div class="brand-title">
-      <i class="fas fa-cube" style="color:var(--accent);flex-shrink:0"></i>
-      <span class="nav-label">Finance<span style="color:var(--accent)">OS</span></span>
-    </div>
-    <div class="welcome-msg">Welcome Chris Mcguinness</div>
+    <div class="brand-title"><i class="fas fa-cube" style="color:var(--accent)"></i>Finance<span>OS</span></div>
+    <div class="welcome-msg">Welcome </div>
   </div>
 
   <div class="nav-section-label">Main</div>
   <div class="nav-item active" id="fin-nav-dashboard" onclick="switchView('dashboard',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
-    <span class="nav-label">Dashboard</span>
+    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>Dashboard
   </div>
   <div class="nav-item" id="fin-nav-transactions" onclick="switchView('transactions',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-list"></i></div>
-    <span class="nav-label">Transactions</span>
+    <div class="nav-icon"><i class="fas fa-list"></i></div>Transactions
   </div>
 
   <div class="nav-section-label">Finance</div>
   <div class="nav-item" id="fin-nav-loans" onclick="switchView('loans',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-landmark"></i></div>
-    <span class="nav-label">Loans &amp; EMI</span>
+    <div class="nav-icon"><i class="fas fa-landmark"></i></div>Loans & EMI
   </div>
   <div class="nav-item" id="fin-nav-investments" onclick="switchView('investments',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-coins"></i></div>
-    <span class="nav-label">Investments</span>
+    <div class="nav-icon"><i class="fas fa-coins"></i></div>Investments
   </div>
   <div class="nav-item" id="fin-nav-credit" onclick="switchView('credit',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-credit-card" style="color:#f97316"></i></div>
-    <span class="nav-label">Credit Tracker</span>
+    <div class="nav-icon"><i class="fas fa-credit-card" style="color:#f97316"></i></div>Credit Tracker
   </div>
 
   <div class="nav-section-label">Insights</div>
   <div class="nav-item" id="fin-nav-analytics" onclick="switchView('analytics',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
-    <span class="nav-label">Analytics</span>
+    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>Analytics
   </div>
   <div class="nav-item" id="fin-nav-networth" onclick="switchView('networth',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-area"></i></div>
-    <span class="nav-label">Net Worth</span>
+    <div class="nav-icon"><i class="fas fa-chart-area"></i></div>Net Worth
   </div>
   <div class="nav-item" onclick="openBudgetModal()">
-    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>
-    <span class="nav-label">Budgets</span>
+    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>Budgets
     <span id="budget-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
 
-  <div class="sidebar-footer" style="margin-top:auto">
-    <!-- Expanded footer -->
-    <div class="sidebar-footer-expanded">
-      <div class="gdrive-status">
-        <div class="gdrive-dot" id="gdrive-dot"></div>
-        <span id="gdrive-label">Google Drive</span>
-      </div>
-      <button class="gdrive-btn" onclick="connectGoogleDrive()" id="gdrive-btn">
-        <i class="fab fa-google-drive"></i> Connect Drive
-      </button>
-      <div class="autosave-indicator">
-        <div class="autosave-dot" id="autosave-dot"></div>
-        <span id="autosave-label">Auto-saved</span>
-      </div>
-      <button class="export-btn" onclick="openExportModal()">
-        <i class="fas fa-file-csv"></i> Export
-      </button>
-      <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
-        <i class="fas fa-database"></i> Backup / Restore
-      </button>
+  <div class="sidebar-footer">
+    <div class="gdrive-status">
+      <div class="gdrive-dot" id="gdrive-dot"></div>
+      <span id="gdrive-label">Google Drive</span>
     </div>
-    <!-- Collapsed footer: icon-only -->
-    <div class="sidebar-footer-collapsed">
-      <div class="collapsed-icon-btn" onclick="connectGoogleDrive()" title="Google Drive"><i class="fab fa-google-drive"></i></div>
-      <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export"><i class="fas fa-file-csv"></i></div>
-      <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
+    <button class="gdrive-btn" onclick="connectGoogleDrive()" id="gdrive-btn">
+      <i class="fab fa-google-drive"></i> Connect Drive
+    </button>
+    <div class="autosave-indicator">
+      <div class="autosave-dot" id="autosave-dot"></div>
+      <span id="autosave-label">Auto-saved</span>
     </div>
+    <button class="export-btn" onclick="openExportModal()">
+      <i class="fas fa-file-csv"></i> Export CSV
+    </button>
+    <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
+      <i class="fas fa-database"></i> Backup / Restore
+    </button>
   </div>
 </div>
 
 <!-- SIDEBAR 2 — PORTFOLIO -->
-<div class="port-sidebar" id="portfolio-sidebar">
-  <div class="port-sidebar-toggle" onclick="togglePortfolioSidebar()" title="Toggle sidebar">
-    <i class="fas fa-chevron-left" id="portfolio-toggle-icon"></i>
-  </div>
+<div class="port-sidebar">
   <div class="port-brand">
-    <div class="port-brand-title">
-      <i class="fas fa-gem" style="flex-shrink:0"></i>
-      <span class="nav-label"> Portfolio<span style="opacity:0.65"> OS</span></span>
-    </div>
-    <div class="port-brand-sub">Physical &amp; Digital Assets of Chris Mcguinness</div>
+    <div class="port-brand-title"><i class="fas fa-gem"></i> Portfolio OS</div>
+    <div class="port-brand-sub">Physical &amp; Digital Assets of </div>
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3">Overview</div>
   <div class="port-nav-item active" id="port-nav-overview" onclick="switchView('port-overview',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div>
-    <span class="nav-label">Summary</span>
+    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div>Summary
   </div>
   <div class="port-nav-item" id="port-nav-table" onclick="switchView('port-table',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-table" style="color:#a78bfa"></i></div>
-    <span class="nav-label">Holdings Table</span>
+    <div class="nav-icon"><i class="fas fa-table" style="color:#a78bfa"></i></div>Holdings Table
   </div>
   <div class="port-nav-item" id="port-nav-analytics" onclick="switchView('port-analytics',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-chart-bar" style="color:#a78bfa"></i></div>
-    <span class="nav-label">Port. Analytics</span>
+    <div class="nav-icon"><i class="fas fa-chart-bar" style="color:#a78bfa"></i></div>Port. Analytics
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3;margin-top:4px">By Asset</div>
+  <!-- Sidebar dots now use the correct per-asset CSS var -->
   <div class="port-nav-item" id="port-nav-gold" onclick="filterPortAsset('Gold')">
-    <div class="nav-icon"><i class="fas fa-coins" style="color:var(--c-gold)"></i></div>
-    <span class="nav-label">Gold</span>
+    <div class="nav-icon"><i class="fas fa-circle asset-gold" style="font-size:0.55rem"></i></div>Gold
   </div>
   <div class="port-nav-item" id="port-nav-silver" onclick="filterPortAsset('Silver')">
-    <div class="nav-icon"><i class="fas fa-medal" style="color:var(--c-silver)"></i></div>
-    <span class="nav-label">Silver</span>
+    <div class="nav-icon"><i class="fas fa-circle asset-silver" style="font-size:0.55rem"></i></div>Silver
   </div>
-  <div class="port-nav-item" id="port-nav-realestate" onclick="filterPortAsset('RealEstate')">
-    <div class="nav-icon"><i class="fas fa-home" style="color:var(--c-realestate)"></i></div>
-    <span class="nav-label">Real Estate</span>
+  <div class="port-nav-item" id="port-nav-land" onclick="filterPortAsset('Land')">
+    <div class="nav-icon"><i class="fas fa-circle asset-land" style="font-size:0.55rem"></i></div>Land
   </div>
   <div class="port-nav-item" id="port-nav-mf" onclick="filterPortAsset('MutualFund')">
-    <div class="nav-icon"><i class="fas fa-chart-pie" style="color:var(--c-mf)"></i></div>
-    <span class="nav-label">Mutual Funds</span>
+    <div class="nav-icon"><i class="fas fa-circle asset-mf" style="font-size:0.55rem"></i></div>Mutual Funds
   </div>
   <div class="port-nav-item" id="port-nav-bonds" onclick="filterPortAsset('Bonds')">
-    <div class="nav-icon"><i class="fas fa-file-invoice-dollar" style="color:var(--c-bonds)"></i></div>
-    <span class="nav-label">Bonds</span>
-  </div>
-  <div class="port-nav-item" id="port-nav-stocks" onclick="filterPortAsset('Stocks')">
-    <div class="nav-icon"><i class="fas fa-chart-line" style="color:var(--c-stocks)"></i></div>
-    <span class="nav-label">Stocks</span>
-  </div>
-  <div class="port-nav-item" id="port-nav-crypto" onclick="filterPortAsset('Crypto')">
-    <div class="nav-icon"><i class="fab fa-bitcoin" style="color:var(--c-crypto)"></i></div>
-    <span class="nav-label">Crypto</span>
+    <div class="nav-icon"><i class="fas fa-circle asset-bonds" style="font-size:0.55rem"></i></div>Bonds
   </div>
   <div class="port-nav-item" id="port-nav-all" onclick="filterPortAsset('all')">
-    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa"></i></div>
-    <span class="nav-label">All Assets</span>
+    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem"></i></div>All Assets
   </div>
 
   <div class="port-filter-box">
@@ -1075,7 +795,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
       <option value="all">All Years</option>
     </select>
     <button class="btn-port-add" onclick="openPortModal()">
-      <i class="fas fa-plus"></i><span class="nav-label"> New Asset Entry</span>
+      <i class="fas fa-plus"></i> New Asset Entry
+    </button>
+    <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
+    <button class="btn-port-add" onclick="document.getElementById('excel-upload').click()">
+      <i class="fas fa-file-import"></i> Import Excel
     </button>
   </div>
 </div>
@@ -1140,42 +864,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
           <div class="kpi-value" id="kpi-credit-outstanding" style="color:#f97316">₹0</div>
           <div class="kpi-sub" id="kpi-credit-sub">total balance due</div>
         </div>
-      </div>
-
-      <!-- GAMIFICATION STRIP -->
-      <div class="gamification-strip">
-        <div class="game-card">
-          <div class="game-card-icon">🔥</div>
-          <div class="game-card-label">Saving Streak</div>
-          <div class="game-card-value" id="game-streak">0</div>
-          <div class="game-card-sub" id="game-streak-sub">days under budget</div>
-        </div>
-        <div class="game-card" onclick="document.getElementById('badge-showcase').style.display=document.getElementById('badge-showcase').style.display==='none'?'block':'none';renderBadgeCollection()" style="cursor:pointer">
-          <div class="game-card-icon">🏆</div>
-          <div class="game-card-label">Achievements</div>
-          <div class="game-card-value" id="game-badges-count">0/8</div>
-          <div class="game-card-sub">badges unlocked</div>
-        </div>
-        <div class="game-card">
-          <div class="game-card-icon">📈</div>
-          <div class="game-card-label">Milestone Progress</div>
-          <div class="progress-ring-wrap" style="width:60px;height:60px;margin:8px auto 0">
-            <svg width="60" height="60">
-              <circle class="progress-ring-bg" cx="30" cy="30" r="24"></circle>
-              <circle class="progress-ring-fill" id="milestone-ring" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
-            </svg>
-            <div class="progress-ring-text" id="milestone-pct" style="font-size:0.9rem">0%</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BADGE SHOWCASE -->
-      <div id="badge-showcase" style="display:none;margin-bottom:1.3rem">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="panel-title" style="margin-bottom:0">🏆 Achievement Badges</div>
-          <button onclick="document.getElementById('badge-showcase').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem">✕</button>
-        </div>
-        <div class="badge-collection" id="badge-collection"></div>
       </div>
 
       <div class="glass-panel" style="margin-bottom:1.3rem">
@@ -1465,7 +1153,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
             <thead>
               <tr>
                 <th onclick="sortPortTable('assetType')">Asset <span class="sort-arrow">↕</span></th>
-                <th onclick="sortPortTable('subType')">Sub-Type <span class="sort-arrow">↕</span></th>
                 <th onclick="sortPortTable('date')">Date <span class="sort-arrow">↕</span></th>
                 <th onclick="sortPortTable('quantity')" style="text-align:right">Qty <span class="sort-arrow">↕</span></th>
                 <th>Unit</th>
@@ -1691,22 +1378,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <div class="modal-row">
       <div class="input-group">
         <label>Asset Type</label>
-        <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Real Estate / MF / Bonds / Stocks / Crypto" oninput="updatePortUnit()">
+        <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Land / Bonds / MF…" oninput="updatePortUnit()">
       </div>
-      <div class="input-group">
-        <label>Sub-Type</label>
-        <input type="text" id="p-subType" class="input-field port-focus" placeholder="e.g. Coins, Jewellery, Land, House, Stock Name...">
-      </div>
-    </div>
-
-    <div class="modal-row">
       <div class="input-group">
         <label>Date of Purchase</label>
         <input type="date" id="p-date" class="input-field port-focus">
-      </div>
-      <div class="input-group" style="opacity:0;pointer-events:none">
-        <label>&nbsp;</label>
-        <input type="text" class="input-field" disabled>
       </div>
     </div>
 
@@ -1862,7 +1538,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 <!-- MODAL: Export CSV -->
 <div class="modal-overlay" id="export-modal">
   <div class="modal-box export-modal-box">
-    <div class="modal-title">Export</div>
+    <div class="modal-title">Export CSV</div>
     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Select what you want to export and optionally filter by date range.</p>
 
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.2rem">
@@ -1904,14 +1580,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-top:1.4rem;flex-direction:column">
-      <button onclick="runPDFExport()" class="btn-add" style="justify-content:center;background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 4px 14px rgba(239,68,68,0.3)">
-        <i class="fas fa-file-pdf"></i> Export PDF Report
-      </button>
-      <button onclick="runExport()" class="btn-add" style="justify-content:center">
+    <div style="display:flex;gap:8px;margin-top:1.4rem">
+      <button onclick="runExport()" class="btn-add" style="flex:1;justify-content:center">
         <i class="fas fa-download"></i> Download CSV
       </button>
-      <button onclick="document.getElementById('export-modal').style.display='none'" class="btn-secondary" style="justify-content:center">Cancel</button>
+      <button onclick="document.getElementById('export-modal').style.display='none'" class="btn-secondary">Cancel</button>
     </div>
   </div>
 </div>
@@ -1951,46 +1624,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   </div>
 </div>
 
-<!-- CUSTOM ALERTS MODAL -->
-<div class="modal-overlay" id="alerts-modal">
-  <div class="modal-box" style="max-width:580px;max-height:none;overflow-y:visible">
-    <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
-    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
-    
-    <div class="alert-rule-list" id="active-alerts-list" style="margin-bottom:1rem"></div>
-
-    <div style="border-top:1px solid var(--glass-border);padding-top:1rem">
-      <div class="panel-title" style="font-size:0.7rem;margin-bottom:0.8rem">➕ Create New Alert</div>
-      <div class="alert-builder-row">
-        <select class="alert-builder-select" id="alert-field" onchange="checkAlertCategory()">
-          <option value="balance">Net Balance</option>
-          <option value="category">Category Spend</option>
-          <option value="networth">Net Worth</option>
-          <option value="emi">EMI Due</option>
-        </select>
-        <select class="alert-builder-select" id="alert-operator">
-          <option value="gt">is greater than</option>
-          <option value="lt">is less than</option>
-          <option value="eq">equals</option>
-        </select>
-        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount" onkeypress="if(event.key==='Enter') addCustomAlert()">
-      </div>
-      <div id="alert-category-row" style="display:none;margin-top:8px">
-        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0" onkeypress="if(event.key==='Enter') addCustomAlert()">
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:1.4rem">
-      <button onclick="closeAlertsModal()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-check"></i> Save & Close</button>
-    </div>
-  </div>
-</div>
-
-<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
@@ -2002,13 +1636,12 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 // ══════════════════════════════════════════════════════════════════════════════
 const ASSET_COLOR = {
   'Gold':       '#f59e0b',   // amber
-  'Silver':     '#94a3b8',   // slate-400
-  'RealEstate': '#34d399',   // emerald
+  'Silver':     '#94a3b8',   // slate-400  (previously clashed with land)
+  'Land':       '#34d399',   // emerald
   'MutualFund': '#6366f1',   // indigo
   'Bonds':      '#f472b6',   // pink
   'Stocks':     '#38bdf8',   // sky
-  'Crypto':     '#a78bfa',   // violet
-  'Other':      '#64748b',   // slate fallback
+  'Other':      '#a78bfa',   // violet fallback
 };
 // Alpha version for bar/area fills
 function assetColorA(type, alpha = 0.7) {
@@ -2026,7 +1659,7 @@ function assetColor(type) {
 // ─── ASSET TYPE DETECTION ───────────────────────────────────────────────────
 function isQtyBased(assetType) {
   const t = normalizeAssetType(assetType);
-  return t !== 'RealEstate' && t !== 'MutualFund' && t !== 'Bonds' && t !== 'Stocks' && t !== 'Crypto';
+  return t !== 'Land' && t !== 'MutualFund' && t !== 'Bonds';
 }
 
 let db = JSON.parse(localStorage.getItem('fos_db_v3')) || [
@@ -2076,9 +1709,9 @@ let creditDb = JSON.parse(localStorage.getItem('fos_credit_v1')) || [
   {id:206, lenderName:"IDFC Bank",      type:"Laon",    principalAmount:1,      outstandingBalance:104478, interestRate:15, monthlyEmi:4613.00, dueDate:"3rd",  tenureMonths:48, balanceTenure:28, startDate:"2024-08-03", endDate:"2028-07-03", status:"Active", remarks:"Expense"},
   {id:207, lenderName:"ICICI",          type:"Laon",    principalAmount:500000, outstandingBalance:152914, interestRate:14, monthlyEmi:13732.00,dueDate:"5th",  tenureMonths:60, balanceTenure:13, startDate:"2023-05-05", endDate:"2027-04-05", status:"Active", remarks:"Expense"},
   {id:208, lenderName:"Incred",         type:"Loan",    principalAmount:244224, outstandingBalance:217088, interestRate:18, monthlyEmi:6784.00, dueDate:"5th",  tenureMonths:36, balanceTenure:33, startDate:"2026-01-05", endDate:"2028-12-05", status:"Active", remarks:"PL"},
-  {id:209, lenderName:"Acharapakkam Real Estate", type:"Assets", principalAmount:171750, outstandingBalance:51750, interestRate:0, monthlyEmi:3000.00,dueDate:"1st",  tenureMonths:60, balanceTenure:0,  startDate:"2022-04-01", endDate:"2027-04-01", status:"Active", remarks:"Investment"},
-  {id:210, lenderName:"Ponneri Real Estate",   type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-01-01", status:"Active", remarks:"Investment"},
-  {id:211, lenderName:"Poneeri Real Estate 2", type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-08-01", status:"Active", remarks:"Investment"},
+  {id:209, lenderName:"Acharapakkam land", type:"Assets", principalAmount:171750, outstandingBalance:51750, interestRate:0, monthlyEmi:3000.00,dueDate:"1st",  tenureMonths:60, balanceTenure:0,  startDate:"2022-04-01", endDate:"2027-04-01", status:"Active", remarks:"Investment"},
+  {id:210, lenderName:"Ponneri land",   type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-01-01", status:"Active", remarks:"Investment"},
+  {id:211, lenderName:"Poneeri land 2", type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-08-01", status:"Active", remarks:"Investment"},
 ];
 
 let budgets = JSON.parse(localStorage.getItem('fos_budgets')) || {
@@ -2122,17 +1755,16 @@ function normalizeAssetType(type) {
   if (!t) return '';
   if (t.includes('gold')) return 'Gold';
   if (t.includes('silver')) return 'Silver';
-  if (t.includes('land') || t.includes('property') || t.includes('plot') || t.includes('real estate') || t.includes('realestate')) return 'RealEstate';
+  if (t.includes('land') || t.includes('property') || t.includes('plot')) return 'Land';
   if (t.includes('bond')) return 'Bonds';
   if (t.includes('mutual') || t === 'mf' || t.includes('mutual fund')) return 'MutualFund';
   if (t.includes('stock') || t.includes('equity')) return 'Stocks';
-  if (t.includes('crypto') || t.includes('bitcoin') || t.includes('btc') || t.includes('eth') || t.includes('ethereum')) return 'Crypto';
   return String(type).trim();
 }
 
 function assetTypeLabel(type) {
   const k = normalizeAssetType(type);
-  const map = { Gold:'Gold', Silver:'Silver', RealEstate:'Real Estate', MutualFund:'Mutual Funds', Bonds:'Bonds', Stocks:'Stocks', Crypto:'Crypto' };
+  const map = { Gold:'Gold', Silver:'Silver', Land:'Land', MutualFund:'Mutual Funds', Bonds:'Bonds', Stocks:'Stocks' };
   return map[k] || (String(type ?? '').trim() || 'Other');
 }
 
@@ -2420,7 +2052,7 @@ function applyPortFilters() {
 function filterPortAsset(type) {
   portAssetFilter = type;
   document.querySelectorAll('.port-nav-item').forEach(el => el.classList.remove('active'));
-  const idMap = { Gold:'port-nav-gold', Silver:'port-nav-silver', RealEstate:'port-nav-realestate', MutualFund:'port-nav-mf', Bonds:'port-nav-bonds', Stocks:'port-nav-stocks', Crypto:'port-nav-crypto', all:'port-nav-all' };
+  const idMap = { Gold:'port-nav-gold', Silver:'port-nav-silver', Land:'port-nav-land', MutualFund:'port-nav-mf', Bonds:'port-nav-bonds', all:'port-nav-all' };
   const navEl = document.getElementById(idMap[type]);
   if (navEl) navEl.classList.add('active');
   switchView('port-table', null, 'portfolio');
@@ -2576,33 +2208,20 @@ function renderDashboard() {
 
   renderBudgetAlerts(data);
 
-  // Cash flow bar — 3D gradient fills
+  // Cash flow bar
   destroyChart('dash');
-  const dashCtx = document.getElementById('dashChart').getContext('2d');
-  const dashColors   = ['#34d399','#fbbf24','#f472b6','#60a5fa'];
-  const dashGrads = dashColors.map(hex => {
-    const g = dashCtx.createLinearGradient(0, 0, 0, 260);
-    g.addColorStop(0,   hex + 'ee'); g.addColorStop(0.5, hex + 'bb'); g.addColorStop(1, hex + '55');
-    return g;
-  });
-  charts['dash'] = new Chart(dashCtx, {
+  charts['dash'] = new Chart(document.getElementById('dashChart').getContext('2d'), {
     type: 'bar',
     data: {
       labels: ['Income','Investments','Expenses','Loans'],
       datasets: [{
         data: [totalInc, totalInv, totalExp, totalLoan],
-        backgroundColor: dashGrads,
-        borderColor: dashColors,
-        borderWidth: 1, borderRadius: 8, barThickness: 44
+        backgroundColor: ['rgba(52,211,153,0.7)','rgba(251,191,36,0.7)','rgba(244,114,182,0.7)','rgba(96,165,250,0.7)'],
+        borderColor: ['#34d399','#fbbf24','#f472b6','#60a5fa'],
+        borderWidth: 1, borderRadius: 7, barThickness: 40
       }]
     },
-    options: {
-      ...cOpts(false),
-      scales: {
-        x: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'}} },
-        y: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}
-      }
-    }
+    options: cOpts(false)
   });
 
   // Spending donut
@@ -2645,22 +2264,19 @@ function renderDashboard() {
   const avgRoiVals   = avgRoiKeys.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
   destroyChart('dash-roi-bar');
   if (avgRoiKeys.length > 0) {
-    const roiCtx = document.getElementById('dash-roi-bar').getContext('2d');
-    charts['dash-roi-bar'] = new Chart(roiCtx, {
+    charts['dash-roi-bar'] = new Chart(document.getElementById('dash-roi-bar').getContext('2d'), {
       type: 'bar',
       data: {
         labels: avgRoiLabels,
         datasets: [{
           data: avgRoiVals,
-          backgroundColor: avgRoiKeys.map(k => {
-            const g = roiCtx.createLinearGradient(0,0,0,200);
-            const hex = assetColor(k); g.addColorStop(0,hex+'ee'); g.addColorStop(1,hex+'44'); return g;
-          }),
-          borderColor: avgRoiKeys.map(k => assetColor(k)),
-          borderWidth: 1, borderRadius: 7
+          backgroundColor: avgRoiKeys.map(k => assetColorA(k, 0.75)),
+          borderColor:     avgRoiKeys.map(k => assetColor(k)),
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
-      options: { ...cOpts(false), scales: { y: { grid:{color:chartGridColor()}, ticks:{color:chartTextColor(), callback:v=>v+'%'} }, x:{ticks:{color:chartTextColor()}} } }
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
     });
   }
 
@@ -2679,18 +2295,7 @@ function renderDashboard() {
   renderSparklines();
   renderEmiStrip();
   updateBudgetBadge();
-  updateGameStats();
-  checkAlerts();
-  renderWeeklyRadar();
-  renderHealthRadar();
 }
-
-// ── CHECK ALERTS ───────────────────────────────────────────────────────────
-function checkAlerts() {
-  // Placeholder for custom alert checking functionality
-  // This can be extended to check custom alert rules and trigger notifications
-}
-
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
 function renderBudgetAlerts(data) {
@@ -2856,7 +2461,7 @@ function renderSparklines() {
       trendEl.textContent = 'No prior data';
     }
 
-    // Draw sparkline — 3D depth glow
+    // Draw sparkline
     destroyChart('spark-' + key);
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
@@ -2867,25 +2472,27 @@ function renderSparklines() {
         datasets: [{
           data: vals,
           borderColor: color,
-          borderWidth: 2.5,
+          borderWidth: 2,
           pointRadius: 0,
-          pointHoverRadius: 4,
+          pointHoverRadius: 3,
           fill: true,
           backgroundColor: (ctx2) => {
-            const g = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 52);
-            g.addColorStop(0,   color + 'aa');
-            g.addColorStop(0.5, color + '44');
-            g.addColorStop(1,   color + '00');
+            const g = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 48);
+            g.addColorStop(0, color + '55');
+            g.addColorStop(1, color + '00');
             return g;
           },
-          tension: 0.45
+          tension: 0.4
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend:{display:false}, tooltip:{ callbacks:{label:c=>' '+fmt(c.raw)} } },
-        scales: { x:{display:false}, y:{display:false,beginAtZero:true} },
-        animation: { duration: 700, easing: 'easeOutQuart' }
+        plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => ' '+fmt(c.raw) } } },
+        scales: {
+          x: { display:false },
+          y: { display:false, beginAtZero:true }
+        },
+        animation: { duration: 600 }
       }
     });
   });
@@ -3000,7 +2607,7 @@ function renderPortTable() {
   tbody.innerHTML = '';
 
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><i class="fas fa-gem"></i><p>No portfolio entries for the selected filter</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state"><i class="fas fa-gem"></i><p>No portfolio entries for the selected filter</p></div></td></tr>`;
     document.getElementById('port-summary-panel').style.display = 'none';
     return;
   }
@@ -3025,7 +2632,6 @@ function renderPortTable() {
           ${assetTypeLabel(e.assetType)}
         </span>
       </td>
-      <td style="color:var(--text-muted);font-size:0.8rem">${e.subType || '-'}</td>
       <td style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:0.72rem">${e.date}</td>
       <td style="text-align:right;font-family:'DM Mono',monospace">${e.quantity}</td>
       <td style="color:var(--text-muted);font-size:0.75rem">${e.unit}</td>
@@ -3147,25 +2753,23 @@ function renderPortOverview() {
   const typeColors = typeKeys.map(k => assetColor(k));
   const typeColorsA = typeKeys.map(k => assetColorA(k, 0.75));
 
-  // Value breakdown bar — 3D
+  // Value breakdown bar
   destroyChart('port-value-bar');
   if (typeKeys.length > 0) {
-    const pvCtx = document.getElementById('port-value-bar').getContext('2d');
-    charts['port-value-bar'] = new Chart(pvCtx, {
+    charts['port-value-bar'] = new Chart(document.getElementById('port-value-bar').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           label: 'Current Value',
           data: typeKeys.map(k => byTypeVal[k]),
-          backgroundColor: typeKeys.map(k => {
-            const g = pvCtx.createLinearGradient(0,0,0,220);
-            const hex = assetColor(k); g.addColorStop(0,hex+'ee'); g.addColorStop(1,hex+'33'); return g;
-          }),
-          borderColor: typeColors, borderWidth: 1, borderRadius: 8
+          backgroundColor: typeColorsA,
+          borderColor: typeColors,
+          borderWidth: 1,
+          borderRadius: 7
         }]
       },
-      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
     });
   }
 
@@ -3179,37 +2783,38 @@ function renderPortOverview() {
   const avgRoiVals = typeKeys.map(k => +(roiMap[k] / cntMap[k]).toFixed(1));
   destroyChart('port-roi-chart');
   if (typeKeys.length > 0) {
-    const roiCtx2 = document.getElementById('port-roi-chart').getContext('2d');
-    charts['port-roi-chart'] = new Chart(roiCtx2, {
+    charts['port-roi-chart'] = new Chart(document.getElementById('port-roi-chart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           data: avgRoiVals,
-          backgroundColor: typeKeys.map(k => { const g=roiCtx2.createLinearGradient(0,0,0,180); const h=assetColor(k); g.addColorStop(0,h+'ee'); g.addColorStop(1,h+'33'); return g; }),
-          borderColor: typeColors, borderWidth: 1, borderRadius: 6
+          backgroundColor: typeColorsA,
+          borderColor: typeColors,
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
-      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor(),callback:v=>v+'%'}}, x:{ticks:{color:chartTextColor()}} } }
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
     });
   }
 
   // Gain/Loss bar
   destroyChart('port-gain-chart');
   if (typeKeys.length > 0) {
-    const gainCtx = document.getElementById('port-gain-chart').getContext('2d');
-    charts['port-gain-chart'] = new Chart(gainCtx, {
+    charts['port-gain-chart'] = new Chart(document.getElementById('port-gain-chart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           data: typeKeys.map(k => gainMap[k]),
-          backgroundColor: typeKeys.map(k => { const g=gainCtx.createLinearGradient(0,0,0,180); const isPos=gainMap[k]>=0; const h=isPos?assetColor(k):'#ef4444'; g.addColorStop(0,h+'dd'); g.addColorStop(1,h+'33'); return g; }),
-          borderColor: typeKeys.map(k => gainMap[k]>=0 ? assetColor(k) : '#ef4444'),
-          borderWidth: 1, borderRadius: 6
+          backgroundColor: typeKeys.map(k => gainMap[k] >= 0 ? assetColorA(k, 0.7) : 'rgba(239,68,68,0.7)'),
+          borderColor:     typeKeys.map(k => gainMap[k] >= 0 ? assetColor(k) : '#ef4444'),
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
-      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
+      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
     });
   }
 
@@ -3270,40 +2875,28 @@ function renderPortAnalytics() {
       pointRadius: 6,
       pointHoverRadius: 8
     }))},
-    options: { 
-      ...cOpts(true), 
-      plugins: {
-        ...cOpts(true).plugins,
-        tooltip: {
-          ...cOpts(true).plugins.tooltip,
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: Invested ₹${ctx.parsed.x.toLocaleString('en-IN')}, ROI ${ctx.parsed.y}%`
-          }
-        }
-      },
-      scales: {
-        x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
-      }
-    }
+    options: { ...cOpts(true), scales: {
+      x: { title:{ display:true, text:'Total Invested (₹)', color:'#64748b' }, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+      y: { title:{ display:true, text:'ROI %', color:'#64748b' }, ticks:{ color:'#64748b', callback:v=>v+'%' }, grid:{color:'rgba(255,255,255,0.04)'} }
+    }}
   });
 
   // 3. Waterfall — positive bars use asset colour, negative use red
   const wfSorted = [...data].sort((a,b) => b.gainLoss - a.gainLoss);
   destroyChart('port-waterfall');
-  const wfCtx = document.getElementById('port-waterfall').getContext('2d');
-  charts['port-waterfall'] = new Chart(wfCtx, {
+  charts['port-waterfall'] = new Chart(document.getElementById('port-waterfall').getContext('2d'), {
     type: 'bar',
     data: {
       labels: wfSorted.map(e => assetTypeLabel(e.assetType) + ' ' + e.date.slice(5)),
       datasets: [{
         data: wfSorted.map(e => +e.gainLoss.toFixed(0)),
-        backgroundColor: wfSorted.map(e => { const g=wfCtx.createLinearGradient(0,0,0,200); const h=e.gainLoss>=0?assetColor(e.assetType):'#ef4444'; g.addColorStop(0,h+'dd'); g.addColorStop(1,h+'33'); return g; }),
-        borderColor: wfSorted.map(e => e.gainLoss>=0 ? assetColor(e.assetType) : '#ef4444'),
-        borderWidth: 1, borderRadius: 5
+        backgroundColor: wfSorted.map(e => e.gainLoss >= 0 ? assetColorA(e.assetType, 0.75) : 'rgba(239,68,68,0.7)'),
+        borderColor:     wfSorted.map(e => e.gainLoss >= 0 ? assetColor(e.assetType) : '#ef4444'),
+        borderWidth: 1,
+        borderRadius: 5
       }]
     },
-    options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor(),maxTicksLimit:8,maxRotation:45}} } }
+    options: { ...cOpts(false), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b',maxTicksLimit:8,maxRotation:45} } } }
   });
 
   // 4. Invested vs Value grouped bar — asset colour for invested, lighter tint for current value
@@ -3317,17 +2910,16 @@ function renderPortAnalytics() {
   const cvKeys   = Object.keys(cvByType);
   const cvLabels = cvKeys.map(k => assetTypeLabel(k));
   destroyChart('port-compare-bar');
-  const cmpCtx = document.getElementById('port-compare-bar').getContext('2d');
-  charts['port-compare-bar'] = new Chart(cmpCtx, {
+  charts['port-compare-bar'] = new Chart(document.getElementById('port-compare-bar').getContext('2d'), {
     type: 'bar',
     data: {
       labels: cvLabels,
       datasets: [
-        { label:'Total Invested', data:cvKeys.map(k=>cvByType[k].inv), backgroundColor:cvKeys.map(k=>{const g=cmpCtx.createLinearGradient(0,0,0,200);const h=assetColor(k);g.addColorStop(0,h+'88');g.addColorStop(1,h+'22');return g;}), borderColor:cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 },
-        { label:'Current Value',  data:cvKeys.map(k=>cvByType[k].val), backgroundColor:cvKeys.map(k=>{const g=cmpCtx.createLinearGradient(0,0,0,200);const h=assetColor(k);g.addColorStop(0,h+'ee');g.addColorStop(1,h+'55');return g;}), borderColor:cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 }
+        { label:'Total Invested', data:cvKeys.map(k=>cvByType[k].inv), backgroundColor: cvKeys.map(k=>assetColorA(k,0.45)), borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 },
+        { label:'Current Value',  data:cvKeys.map(k=>cvByType[k].val), backgroundColor: cvKeys.map(k=>assetColorA(k,0.8)),  borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 }
       ]
     },
-    options: { ...cOpts(true), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
+    options: { ...cOpts(true), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
   });
 
   // 5. Profit% donut
@@ -3377,22 +2969,17 @@ function renderAnalytics() {
   const tS = tI.map((v,i) => v - tE[i]);
 
   destroyChart('trend');
-  const trendCtx = document.getElementById('chart-trend').getContext('2d');
-  const trendGradOut = trendCtx.createLinearGradient(0,0,0,280);
-  trendGradOut.addColorStop(0,'rgba(99,102,241,0.85)'); trendGradOut.addColorStop(1,'rgba(99,102,241,0.25)');
-  const trendGradInc = trendCtx.createLinearGradient(0,0,0,280);
-  trendGradInc.addColorStop(0,'rgba(52,211,153,0.55)'); trendGradInc.addColorStop(1,'rgba(52,211,153,0.10)');
-  charts['trend'] = new Chart(trendCtx, {
+  charts['trend'] = new Chart(document.getElementById('chart-trend').getContext('2d'), {
     type: 'bar',
     data: {
       labels: trendData.map(m => m.label),
       datasets: [
-        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.10)', borderWidth:2.5, tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#34d399', pointBorderColor:'rgba(52,211,153,0.3)', pointBorderWidth:3 },
-        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:trendGradOut, borderColor:'#6366f1', borderWidth:1, borderRadius:6 },
-        { type:'bar',  label:'Income',        data:tI, backgroundColor:trendGradInc, borderColor:'#34d399', borderWidth:1, borderRadius:6 }
+        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.08)', borderWidth:2, tension:0.4, fill:true, pointRadius:3, pointBackgroundColor:'#34d399' },
+        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:'rgba(99,102,241,0.5)', borderColor:'#6366f1', borderWidth:1, borderRadius:4 },
+        { type:'bar',  label:'Income',        data:tI, backgroundColor:'rgba(52,211,153,0.2)', borderColor:'#34d399', borderWidth:1, borderRadius:4 }
       ]
     },
-    options: { ...cOpts(true), scales: { y:{stacked:false,grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
+    options: { ...cOpts(true), scales: { y: { stacked:false, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
   });
 
   const data = getFilteredData();
@@ -3404,41 +2991,20 @@ function renderAnalytics() {
       { label:'Expense',  pointBackgroundColor:'#f472b6', pointRadius:5, data:sp.filter(p=>p.t==='Expense').map(p=>({x:p.x,y:p.y})) },
       { label:'Loan/EMI', pointBackgroundColor:'#60a5fa', pointRadius:5, data:sp.filter(p=>p.t==='Loan').map(p=>({x:p.x,y:p.y})) }
     ]},
-    options: { 
-      ...cOpts(true), 
-      plugins: {
-        ...cOpts(true).plugins,
-        tooltip: {
-          ...cOpts(true).plugins.tooltip,
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: Day ${ctx.parsed.x}, ₹${ctx.parsed.y.toLocaleString('en-IN')}`
-          }
-        }
-      },
-      scales: {
-        x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y: { title:{display:true,text:'Amount (₹)',color:'#64748b'}, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} }
-      }
-    }
+    options: { ...cOpts(true), scales: {
+      x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+      y: { ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} }
+    }}
   });
 
-  const hBar = (canvasId, type, hexColors, chartKey) => {
+  const hBar = (canvasId, type, colors, chartKey) => {
     const g = groupData(type, data);
     destroyChart(chartKey);
     if (Object.keys(g).length > 0) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return; // Canvas doesn't exist
-      const hCtx = canvas.getContext('2d');
-      // Ensure canvas has width before creating gradient
-      const canvasWidth = canvas.offsetWidth || canvas.clientWidth || 400;
-      const hGrads = hexColors.map(hex => {
-        const gr = hCtx.createLinearGradient(0,0,canvasWidth,0);
-        gr.addColorStop(0, hex); gr.addColorStop(1, hex.replace('0.7','0.25')); return gr;
-      });
-      charts[chartKey] = new Chart(hCtx, {
+      charts[chartKey] = new Chart(document.getElementById(canvasId).getContext('2d'), {
         type: 'bar',
-        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:hGrads, borderColor:hexColors.map(h=>h.replace('0.7','1')), borderWidth:1, borderRadius:5, borderSkipped:false }] },
-        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
+        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:colors, borderRadius:5, borderSkipped:false }] },
+        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#94a3b8'}} } }
       });
     }
   };
@@ -3504,13 +3070,11 @@ function renderNetWorth() {
   sortedM.forEach(ym => {
     const [y,m] = ym.split('-').map(Number);
     const items = db.filter(d => d.date.slice(0,7) === ym);
-    const monthA = items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
-    const monthL = items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
-    cumA += monthA;
-    cumL += monthL;
+    cumA += items.filter(d => d.type==='Income'||d.type==='Investment').reduce((a,b)=>a+b.amount,0);
+    cumL += items.filter(d => d.type==='Loan').reduce((a,b)=>a+b.amount,0);
     const nw = cumA - cumL;
     nwL.push(MONTHS[m-1]+' '+String(y).slice(2));
-    nwD.push(nw); aD.push(monthA); lD.push(monthL);
+    nwD.push(nw); aD.push(cumA); lD.push(cumL);
     deltaD.push(nw - prevNW);
     prevNW = nw;
   });
@@ -3547,56 +3111,52 @@ function renderNetWorth() {
 
   // Net Worth Trajectory chart
   destroyChart('networth');
-  const nwCtx = document.getElementById('chart-networth').getContext('2d');
-  const nwGrad = nwCtx.createLinearGradient(0,0,0,280);
-  nwGrad.addColorStop(0,'rgba(167,139,250,0.40)'); nwGrad.addColorStop(0.6,'rgba(167,139,250,0.12)'); nwGrad.addColorStop(1,'rgba(167,139,250,0.01)');
-  charts['networth'] = new Chart(nwCtx, {
+  charts['networth'] = new Chart(document.getElementById('chart-networth').getContext('2d'), {
     type: 'line',
     data: { labels:nwL, datasets:[{
       label:'Net Worth', data:nwD,
-      borderColor:'#a78bfa', backgroundColor:nwGrad,
-      fill:true, tension:0.4, borderWidth:3,
-      pointRadius:5, pointBackgroundColor:'#a78bfa',
-      pointBorderColor:'rgba(167,139,250,0.4)', pointBorderWidth:3,
-      pointHoverRadius:8, pointHoverBorderWidth:2
+      borderColor:'#a78bfa',
+      backgroundColor: (ctx) => {
+        const g = ctx.chart.ctx.createLinearGradient(0,0,0,280);
+        g.addColorStop(0,'rgba(167,139,250,0.25)'); g.addColorStop(1,'rgba(167,139,250,0.01)');
+        return g;
+      },
+      fill:true, tension:0.4, borderWidth:2.5, pointRadius:4,
+      pointBackgroundColor:'#a78bfa', pointBorderColor:'rgba(167,139,250,0.3)', pointBorderWidth:3
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 
   // Assets vs Liabilities chart
   destroyChart('nwbreak');
-  const nwbCtx = document.getElementById('chart-nw-breakdown').getContext('2d');
-  const nwbGradA = nwbCtx.createLinearGradient(0,0,0,240); nwbGradA.addColorStop(0,'rgba(52,211,153,0.85)'); nwbGradA.addColorStop(1,'rgba(52,211,153,0.20)');
-  const nwbGradL = nwbCtx.createLinearGradient(0,0,0,240); nwbGradL.addColorStop(0,'rgba(96,165,250,0.85)'); nwbGradL.addColorStop(1,'rgba(96,165,250,0.20)');
-  charts['nwbreak'] = new Chart(nwbCtx, {
+  charts['nwbreak'] = new Chart(document.getElementById('chart-nw-breakdown').getContext('2d'), {
     type: 'bar',
     data: { labels:nwL, datasets:[
-      { label:'Assets',      data:aD, backgroundColor:nwbGradA, borderColor:'#34d399', borderWidth:1, borderRadius:5 },
-      { label:'Liabilities', data:lD, backgroundColor:nwbGradL, borderColor:'#60a5fa', borderWidth:1, borderRadius:5 }
+      { label:'Assets',      data:aD, backgroundColor:'rgba(52,211,153,0.5)',  borderColor:'#34d399', borderWidth:1, borderRadius:4 },
+      { label:'Liabilities', data:lD, backgroundColor:'rgba(96,165,250,0.5)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4 }
     ]},
     options: { ...cOpts(true), scales: {
-      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 
   // Monthly Delta chart
   destroyChart('nwdelta');
-  const nwdCtx = document.getElementById('chart-nw-delta').getContext('2d');
-  charts['nwdelta'] = new Chart(nwdCtx, {
+  charts['nwdelta'] = new Chart(document.getElementById('chart-nw-delta').getContext('2d'), {
     type: 'bar',
     data: { labels:nwL, datasets:[{
       label:'Monthly Change', data:deltaD,
-      backgroundColor: deltaD.map(v => { const g=nwdCtx.createLinearGradient(0,0,0,200); if(v>=0){g.addColorStop(0,'rgba(52,211,153,0.90)');g.addColorStop(1,'rgba(52,211,153,0.20)');}else{g.addColorStop(0,'rgba(239,68,68,0.90)');g.addColorStop(1,'rgba(239,68,68,0.20)');} return g; }),
-      borderColor: deltaD.map(v => v>=0?'#34d399':'#ef4444'),
-      borderWidth:1, borderRadius:6
+      backgroundColor: deltaD.map(v => v>=0 ? 'rgba(52,211,153,0.6)' : 'rgba(239,68,68,0.6)'),
+      borderColor:     deltaD.map(v => v>=0 ? '#34d399' : '#ef4444'),
+      borderWidth:1, borderRadius:5
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
+      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
     }}
   });
 }
@@ -3610,359 +3170,22 @@ function groupData(type, data) {
   (data||db).filter(x => x.type===type).forEach(i => { const k = i.sub||'General'; g[k] = (g[k]||0) + Number(i.amount); });
   return g;
 }
-
-// ══════════════════════════════════════════════════════════════════════════
-// 3D PREMIUM CHART ENGINE
-// ══════════════════════════════════════════════════════════════════════════
-
-// ── 3D Bar Plugin: draws a top face + right side face for depth ────────────
-const plugin3DBar = {
-  id: 'plugin3DBar',
-  afterDatasetsDraw(chart) {
-    const { ctx } = chart;
-    chart.data.datasets.forEach((dataset, di) => {
-      if (dataset.type === 'line' || dataset.type === 'scatter') return;
-      const meta = chart.getDatasetMeta(di);
-      if (!meta || meta.type !== 'bar') return;
-      meta.data.forEach((bar, i) => {
-        const val = dataset.data[i];
-        if (!val && val !== 0) return;
-        const { x, y, width, height, base } = bar.getProps(['x','y','width','height','base'], true);
-        if (height === 0) return;
-        const isHorizontal = chart.options.indexAxis === 'y';
-        const depth  = isHorizontal ? Math.max(4, Math.abs(height) * 0.06) : Math.max(4, width * 0.18);
-        const depthY = isHorizontal ? Math.max(4, width  * 0.18) : Math.max(3, depth * 0.55);
-
-        // Resolve bar colour
-        const rawColor = Array.isArray(dataset.borderColor)
-          ? dataset.borderColor[i] : dataset.borderColor;
-        const solidColor = rawColor || '#6366f1';
-
-        ctx.save();
-
-        if (!isHorizontal) {
-          // ── TOP FACE (horizontal parallelogram) ──
-          ctx.beginPath();
-          ctx.moveTo(x - width/2,       y);
-          ctx.lineTo(x - width/2 + depth, y - depthY);
-          ctx.lineTo(x + width/2 + depth, y - depthY);
-          ctx.lineTo(x + width/2,         y);
-          ctx.closePath();
-          const topGrad = ctx.createLinearGradient(x - width/2, y - depthY, x + width/2 + depth, y);
-          topGrad.addColorStop(0, solidColor + 'ff');
-          topGrad.addColorStop(1, solidColor + 'bb');
-          ctx.fillStyle = topGrad;
-          ctx.fill();
-
-          // ── RIGHT SIDE FACE ──
-          ctx.beginPath();
-          ctx.moveTo(x + width/2,         y);
-          ctx.lineTo(x + width/2 + depth, y - depthY);
-          ctx.lineTo(x + width/2 + depth, base - depthY);
-          ctx.lineTo(x + width/2,         base);
-          ctx.closePath();
-          const sideGrad = ctx.createLinearGradient(x + width/2, 0, x + width/2 + depth, 0);
-          sideGrad.addColorStop(0, solidColor + '88');
-          sideGrad.addColorStop(1, solidColor + '33');
-          ctx.fillStyle = sideGrad;
-          ctx.fill();
-        } else {
-          // Horizontal bars — right face on top, bottom face below
-          const bx = val >= 0 ? x : base;
-          const bw = Math.abs(x - base);
-          // TOP face
-          ctx.beginPath();
-          ctx.moveTo(bx,      y - height/2);
-          ctx.lineTo(bx,      y - height/2 - depthY);
-          ctx.lineTo(bx + bw, y - height/2 - depthY);
-          ctx.lineTo(bx + bw, y - height/2);
-          ctx.closePath();
-          const topGrad2 = ctx.createLinearGradient(bx, y - height/2 - depthY, bx + bw, y - height/2);
-          topGrad2.addColorStop(0, solidColor + 'cc');
-          topGrad2.addColorStop(1, solidColor + '77');
-          ctx.fillStyle = topGrad2;
-          ctx.fill();
-          // RIGHT face
-          ctx.beginPath();
-          ctx.moveTo(bx + bw, y - height/2);
-          ctx.lineTo(bx + bw, y - height/2 - depthY);
-          ctx.lineTo(bx + bw + depth, y - height/2 - depthY);
-          ctx.lineTo(bx + bw + depth, y - height/2);
-          ctx.closePath();
-          const sideGrad2 = ctx.createLinearGradient(bx + bw, 0, bx + bw + depth, 0);
-          sideGrad2.addColorStop(0, solidColor + '88');
-          sideGrad2.addColorStop(1, solidColor + '22');
-          ctx.fillStyle = sideGrad2;
-          ctx.fill();
-        }
-
-        ctx.restore();
-      });
-    });
-  }
-};
-Chart.register(plugin3DBar);
-
-// ── 3D Line/Area plugin: adds layered glow shadow below the line ───────────
-const plugin3DLine = {
-  id: 'plugin3DLine',
-  beforeDatasetsDraw(chart) {
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-    chart.data.datasets.forEach((dataset, di) => {
-      if (dataset.type !== 'line' && chart.config.type !== 'line') return;
-      if (dataset.pointRadius === 0 && !dataset.fill) return; // sparklines skip
-      const meta = chart.getDatasetMeta(di);
-      if (!meta || meta.type !== 'line') return;
-      const rawColor = dataset.borderColor || '#6366f1';
-      // Draw 3 shadow layers offset downward for depth
-      [12, 7, 3].forEach((offset, li) => {
-        const alpha = [0.07, 0.12, 0.18][li];
-        ctx.save();
-        ctx.translate(offset * 0.4, offset);
-        ctx.globalAlpha = alpha;
-        meta.dataset.draw(ctx);
-        ctx.restore();
-      });
-    });
-  }
-};
-Chart.register(plugin3DLine);
-
-// ── 3D Donut plugin: inner bevel ring + outer drop shadow ─────────────────
-const plugin3DDonut = {
-  id: 'plugin3DDonut',
-  afterDraw(chart) {
-    if (chart.config.type !== 'doughnut' && chart.config.type !== 'pie') return;
-    const { ctx, chartArea } = chart;
-    if (!chartArea) return;
-    const cx = (chartArea.left + chartArea.right)  / 2;
-    const cy = (chartArea.top  + chartArea.bottom) / 2;
-    const meta = chart.getDatasetMeta(0);
-    if (!meta || !meta.data.length) return;
-    const outerR = meta.data[0]?.outerRadius || 0;
-    const innerR = meta.data[0]?.innerRadius || 0;
-    if (!outerR) return;
-
-    // Outer drop-shadow ring
-    ctx.save();
-    const shadowGrad = ctx.createRadialGradient(cx + 6, cy + 10, innerR * 0.9, cx, cy, outerR + 12);
-    shadowGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    shadowGrad.addColorStop(0.7, 'rgba(0,0,0,0.18)');
-    shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = shadowGrad;
-    ctx.beginPath();
-    ctx.arc(cx + 4, cy + 7, outerR + 8, 0, Math.PI * 2);
-    ctx.arc(cx, cy, outerR - 2, 0, Math.PI * 2, true);
-    ctx.fill();
-    ctx.restore();
-
-    // Inner bevel highlight
-    ctx.save();
-    const bevelGrad = ctx.createLinearGradient(cx - innerR, cy - innerR, cx + innerR, cy + innerR);
-    bevelGrad.addColorStop(0,   'rgba(255,255,255,0.18)');
-    bevelGrad.addColorStop(0.5, 'rgba(255,255,255,0.04)');
-    bevelGrad.addColorStop(1,   'rgba(0,0,0,0.12)');
-    ctx.strokeStyle = bevelGrad;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerR + 1, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-
-    // Outer bevel highlight arc (top-left)
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerR - 1, Math.PI * 1.1, Math.PI * 1.9);
-    ctx.stroke();
-    ctx.restore();
-  }
-};
-Chart.register(plugin3DDonut);
-
-// ── Chart panel glow: CSS shadow on canvas wrappers ───────────────────────
-const style3D = document.createElement('style');
-style3D.textContent = `
-  canvas {
-    filter: drop-shadow(0 4px 18px rgba(99,102,241,0.13));
-  }
-  .glass-panel canvas, .spark-card canvas {
-    filter: drop-shadow(0 2px 10px rgba(99,102,241,0.10));
-  }
-`;
-document.head.appendChild(style3D);
-
-// Global Chart.js styling — premium 3D-ready defaults
-Chart.defaults.font.family = 'DM Sans';
-Chart.defaults.font.weight = '600';
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(8,11,26,0.97)';
-Chart.defaults.plugins.tooltip.padding = 14;
-Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,0.45)';
-Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 12;
-Chart.defaults.plugins.tooltip.titleFont = {family:'DM Sans',size:12,weight:'700'};
-Chart.defaults.plugins.tooltip.bodyFont  = {family:'DM Mono',size:11};
-Chart.defaults.plugins.tooltip.caretSize = 6;
-Chart.defaults.elements.bar.borderRadius = 6;
-Chart.defaults.elements.bar.borderSkipped = false;
-// Bar shadow via borderWidth top face
-Chart.defaults.elements.bar.borderWidth = 0;
-
-function destroyChart(key) { 
-  try {
-    if (charts[key]) { 
-      charts[key].destroy(); 
-      delete charts[key]; 
-    } 
-  } catch(e) {
-    console.warn(`Error destroying chart ${key}:`, e);
-    delete charts[key];
-  }
-}
-function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#e2e8f0'; }
-function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'; }
-function donutBorderColor() { return document.body.classList.contains('light-mode') ? 'rgba(255,255,255,0.9)' : 'rgba(7,9,26,0.9)'; }
-
-// ── 3D gradient bar background helper ─────────────────────────────────────
-function make3DBarColor(ctx, hex, alpha1, alpha2) {
-  const canvas = ctx.canvas;
-  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  grad.addColorStop(0,   hex + Math.round(alpha1*255).toString(16).padStart(2,'0'));
-  grad.addColorStop(0.5, hex + Math.round((alpha1+alpha2)/2*255).toString(16).padStart(2,'0'));
-  grad.addColorStop(1,   hex + Math.round(alpha2*255).toString(16).padStart(2,'0'));
-  return grad;
-}
-
-// ── Shared chart options factory ───────────────────────────────────────────
+function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
+function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#ffffff'; }
+function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.04)'; }
 function cOpts(legend) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 800, easing: 'easeOutQuart' },
-    plugins: {
-      legend: {
-        display: !!legend,
-        labels: {
-          color: chartTextColor(),
-          boxWidth: 11,
-          font: { family:'DM Sans', size:11, weight:'600' },
-          padding: 14,
-          usePointStyle: true,
-          pointStyle: 'circle'
-        }
-      },
-      tooltip: {
-        backgroundColor: 'rgba(8,11,26,0.97)',
-        padding: 14,
-        borderColor: 'rgba(99,102,241,0.45)',
-        borderWidth: 1,
-        titleFont: { family:'DM Sans', size:12, weight:'700' },
-        bodyFont:  { family:'DM Mono', size:11 },
-        callbacks: { 
-          label: ctx => {
-            // Handle different chart data structures
-            const value = ctx.raw !== undefined ? ctx.raw : 
-                         (ctx.parsed && ctx.parsed.y !== undefined) ? ctx.parsed.y : 
-                         ctx.parsed;
-            const numValue = Number(value);
-            if (isNaN(numValue)) return '  N/A';
-            return '  ₹' + numValue.toLocaleString('en-IN');
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { color: chartGridColor(), drawBorder: false },
-        ticks: { color: chartTextColor(), font: { weight:'600', family:'DM Sans' } }
-      },
-      y: {
-        grid: { color: chartGridColor(), drawBorder: false },
-        ticks: { color: chartTextColor(), font: { weight:'600', family:'DM Sans' } }
-      }
-    }
-  };
+  return { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:!!legend, labels:{ color:'#94a3b8', boxWidth:11, font:{ family:'DM Sans', size:11 } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } };
 }
-
-// ── 3D Donut/Pie factory ───────────────────────────────────────────────────
 function makeDonut(id, labels, data, colors) {
-  const canvas = document.getElementById(id);
-  if (!canvas) {
-    console.warn(`Canvas ${id} not found`);
-    return null;
-  }
-  const ctx = canvas.getContext('2d');
-  const w = canvas.offsetWidth || canvas.clientWidth || 300;
-
-  // Multi-stop gradient per slice for 3D depth
-  const gradColors = colors.map((hex, i) => {
-    const g = ctx.createLinearGradient(-w/2, -w/2, w/2, w/2);
-    g.addColorStop(0,   hex + 'ff');
-    g.addColorStop(0.4, hex + 'dd');
-    g.addColorStop(1,   hex + '88');
-    return g;
-  });
-
-  return new Chart(ctx, {
+  return new Chart(document.getElementById(id).getContext('2d'), {
     type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        backgroundColor: gradColors,
-        borderWidth: 3,
-        borderColor: donutBorderColor(),
-        hoverOffset: 14,
-        hoverBorderWidth: 0,
-        hoverBorderColor: 'rgba(255,255,255,0.3)',
-        spacing: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '65%',
-      animation: { animateRotate: true, animateScale: true, duration: 900, easing: 'easeOutBack' },
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: {
-            color: chartTextColor(),
-            boxWidth: 10,
-            font: { size:10, family:'DM Sans', weight:'600' },
-            padding: 10,
-            usePointStyle: true,
-            pointStyle: 'circle'
-          }
-        },
-        tooltip: {
-          backgroundColor: 'rgba(8,11,26,0.97)',
-          padding: 14,
-          borderColor: 'rgba(99,102,241,0.45)',
-          borderWidth: 1,
-          titleFont: { family:'DM Sans', size:12, weight:'700' },
-          bodyFont:  { family:'DM Mono', size:11 },
-          callbacks: { 
-            label: ctx => {
-              const value = ctx.raw !== undefined ? ctx.raw : 
-                           (ctx.parsed !== undefined) ? ctx.parsed : 0;
-              const numValue = Number(value);
-              if (isNaN(numValue)) return '  N/A';
-              return '  ₹' + numValue.toLocaleString('en-IN');
-            }
-          }
-        }
-      }
-    }
+    data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:5 }] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'right', labels:{ color:'#94a3b8', boxWidth:9, font:{ size:10, family:'DM Sans' } } }, tooltip:{ callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } } } }
   });
 }
-
 function renderDonut(id, labels, data, colors, key) {
   destroyChart(key);
-  const chart = makeDonut(id, labels, data, colors);
-  if (chart) charts[key] = chart;
+  charts[key] = makeDonut(id, labels, data, colors);
 }
 
 // ── FINANCE ENTRY MODAL ────────────────────────────────────────────────────
@@ -4065,7 +3288,7 @@ function openPortModal() {
   document.getElementById('p-unit-hint').textContent = '(grams)';
   document.getElementById('port-save-btn').textContent = 'Save Asset';
   document.getElementById('port-delete-btn').style.display = 'none';
-  ['p-assetType','p-subType','p-qty','p-unit','p-buyPrice','p-currPrice','p-notes'].forEach(id => document.getElementById(id).value = '');
+  ['p-assetType','p-qty','p-unit','p-buyPrice','p-currPrice','p-notes'].forEach(id => document.getElementById(id).value = '');
   calcPortPreview();
   document.getElementById('port-modal').style.display = 'flex';
 }
@@ -4077,7 +3300,6 @@ function editPortEntry(id) {
   editingPortId = id;
   document.getElementById('port-modal-title').textContent = 'Edit Portfolio Asset';
   document.getElementById('p-assetType').value = entry.assetType;
-  document.getElementById('p-subType').value = entry.subType || '';
   document.getElementById('p-date').value = entry.date;
   document.getElementById('p-qty').value = entry.quantity;
   document.getElementById('p-unit').value = entry.unit;
@@ -4100,7 +3322,6 @@ function deleteCurrentPortEntry() {
 
 function savePortEntry() {
   const assetType    = normalizeAssetType(document.getElementById('p-assetType').value.trim());
-  const subType      = document.getElementById('p-subType').value.trim();
   const date         = document.getElementById('p-date').value;
   const quantity     = parseFloat(document.getElementById('p-qty').value);
   const unit         = document.getElementById('p-unit').value.trim() || 'units';
@@ -4113,9 +3334,9 @@ function savePortEntry() {
 
   if (editingPortId) {
     const idx = portDb.findIndex(x => x.id === editingPortId);
-    if (idx >= 0) portDb[idx] = { ...portDb[idx], assetType, subType, date, quantity, unit, purchasePrice, currentPrice, notes };
+    if (idx >= 0) portDb[idx] = { ...portDb[idx], assetType, date, quantity, unit, purchasePrice, currentPrice, notes };
   } else {
-    portDb.push({ id:Date.now(), assetType, subType, date, quantity, unit, purchasePrice, currentPrice, notes });
+    portDb.push({ id:Date.now(), assetType, date, quantity, unit, purchasePrice, currentPrice, notes });
   }
 
   scheduleSave();
@@ -4158,7 +3379,6 @@ function saveBudgets() {
     if (val && Number(val) > 0) budgets[sub] = Number(val); else delete budgets[sub];
   });
   localStorage.setItem('fos_budgets', JSON.stringify(budgets));
-  scheduleSave(); // Trigger autosave for Google Drive sync
   document.getElementById('budget-modal').style.display = 'none';
   if (activeView === 'dashboard') renderDashboard();
 }
@@ -4510,411 +3730,51 @@ function runExport() {
   document.getElementById('export-modal').style.display='none';
 }
 
-// ── PDF EXPORT WITH CHARTS AND TABLES ─────────────────────────────────────
-async function runPDFExport() {
-  const wantTransactions = document.getElementById('exp-transactions').checked;
-  const wantLoans        = document.getElementById('exp-loans').checked;
-  const wantCredit       = document.getElementById('exp-credit').checked;
-  const wantInvestments  = document.getElementById('exp-investments').checked;
-  const wantHoldings     = document.getElementById('exp-holdings').checked;
-  const wantAssets       = document.getElementById('exp-assets').checked;
-  const dateFrom         = document.getElementById('exp-date-from').value;
-  const dateTo           = document.getElementById('exp-date-to').value;
-
-  function inRange(dateStr) {
-    if (!dateFrom && !dateTo) return true;
-    const d = new Date(dateStr);
-    if (dateFrom && d < new Date(dateFrom)) return false;
-    if (dateTo   && d > new Date(dateTo))   return false;
-    return true;
-  }
-
-  if (!wantTransactions && !wantLoans && !wantCredit && !wantInvestments && !wantHoldings && !wantAssets) {
-    alert('Please select at least one export type.');
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  let yPos = 20;
-  const pageWidth = doc.internal.pageSize.width;
-  const pageHeight = doc.internal.pageSize.height;
-  const margin = 14;
-  const maxWidth = pageWidth - (margin * 2);
-
-  // Helper to check if we need a new page
-  function checkNewPage(neededSpace = 40) {
-    if (yPos + neededSpace > pageHeight - 20) {
-      doc.addPage();
-      yPos = 20;
-      return true;
-    }
-    return false;
-  }
-
-  // Title Page
-  doc.setFillColor(99, 102, 241);
-  doc.rect(0, 0, pageWidth, 60, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(28);
-  doc.setFont('helvetica', 'bold');
-  doc.text('FinanceOS Report', pageWidth / 2, 30, { align: 'center' });
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  doc.text(dateStr, pageWidth / 2, 45, { align: 'center' });
-  
-  if (dateFrom || dateTo) {
-    const rangeText = `Date Range: ${dateFrom || 'Beginning'} to ${dateTo || 'Today'}`;
-    doc.text(rangeText, pageWidth / 2, 52, { align: 'center' });
-  }
-
-  yPos = 75;
-  doc.setTextColor(0, 0, 0);
-
-  // Executive Summary
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(99, 102, 241);
-  doc.text('Executive Summary', margin, yPos);
-  yPos += 10;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
-
-  const totalIncome = db.filter(r => r.type === 'Income' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0);
-  const totalExpenses = db.filter(r => r.type === 'Expense' && inRange(r.date)).reduce((sum, r) => sum + r.amount, 0);
-  const netBalance = totalIncome - totalExpenses;
-
-  const summaryData = [
-    ['Total Income', `₹${totalIncome.toLocaleString()}`],
-    ['Total Expenses', `₹${totalExpenses.toLocaleString()}`],
-    ['Net Balance', `₹${netBalance.toLocaleString()}`]
-  ];
-
-  doc.autoTable({
-    startY: yPos,
-    head: [['Metric', 'Value']],
-    body: summaryData,
-    theme: 'striped',
-    headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold' },
-    margin: { left: margin, right: margin },
-    styles: { fontSize: 10, cellPadding: 5 }
-  });
-
-  yPos = doc.lastAutoTable.finalY + 15;
-
-  // TRANSACTIONS SECTION
-  if (wantTransactions) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(99, 102, 241);
-    doc.text('Transactions', margin, yPos);
-    yPos += 8;
-
-    const transactions = db.filter(r => r.type !== 'Loan' && r.type !== 'Investment' && inRange(r.date));
-    
-    if (transactions.length > 0) {
-      // Create chart for income vs expenses
-      const incomeByMonth = {};
-      const expenseByMonth = {};
-      
-      transactions.forEach(r => {
-        const monthKey = r.date.substring(0, 7); // YYYY-MM
-        if (r.type === 'Income') {
-          incomeByMonth[monthKey] = (incomeByMonth[monthKey] || 0) + r.amount;
-        } else {
-          expenseByMonth[monthKey] = (expenseByMonth[monthKey] || 0) + r.amount;
-        }
-      });
-
-      const tableData = transactions.slice(0, 50).map(r => [
-        r.name,
-        r.sub || '',
-        r.type,
-        `₹${r.amount.toLocaleString()}`,
-        r.date
-      ]);
-
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(80, 80, 80);
-      doc.text(`Showing ${Math.min(transactions.length, 50)} of ${transactions.length} transactions`, margin, yPos);
-      yPos += 5;
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Name', 'Category', 'Type', 'Amount', 'Date']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin },
-        columnStyles: {
-          3: { halign: 'right', fontStyle: 'bold' }
-        }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No transactions in selected date range', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // LOANS & EMI SECTION
-  if (wantLoans) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(96, 165, 250);
-    doc.text('Loans & EMI', margin, yPos);
-    yPos += 8;
-
-    const loans = db.filter(r => r.type === 'Loan' && inRange(r.date));
-    
-    if (loans.length > 0) {
-      const tableData = loans.map(r => [
-        r.name,
-        r.sub || '',
-        `₹${r.amount.toLocaleString()}`,
-        r.date,
-        r.recurring ? 'Yes' : 'No'
-      ]);
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Loan Name', 'Category', 'Amount', 'Date', 'Recurring']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [96, 165, 250], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No loans in selected date range', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // CREDIT TRACKER SECTION
-  if (wantCredit) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(249, 115, 22);
-    doc.text('Credit Tracker', margin, yPos);
-    yPos += 8;
-
-    if (creditDb.length > 0) {
-      const tableData = creditDb.map(c => [
-        c.lenderName,
-        c.type,
-        `₹${c.principalAmount.toLocaleString()}`,
-        `₹${c.outstandingBalance.toLocaleString()}`,
-        `${c.interestRate}%`,
-        `₹${c.monthlyEmi.toLocaleString()}`,
-        c.status
-      ]);
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Lender', 'Type', 'Principal', 'Outstanding', 'Rate', 'EMI', 'Status']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [249, 115, 22], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-        styles: { fontSize: 7, cellPadding: 2 },
-        margin: { left: margin, right: margin },
-        columnStyles: {
-          2: { halign: 'right' },
-          3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right' }
-        }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No credit records', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // INVESTMENTS SECTION
-  if (wantInvestments) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(251, 191, 36);
-    doc.text('Investments', margin, yPos);
-    yPos += 8;
-
-    const investments = db.filter(r => r.type === 'Investment' && inRange(r.date));
-    
-    if (investments.length > 0) {
-      const tableData = investments.map(r => [
-        r.name,
-        r.sub || '',
-        `₹${r.amount.toLocaleString()}`,
-        r.date
-      ]);
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Investment Name', 'Category', 'Amount', 'Date']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [251, 191, 36], textColor: 0, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8, cellPadding: 3 },
-        margin: { left: margin, right: margin },
-        columnStyles: {
-          2: { halign: 'right', fontStyle: 'bold' }
-        }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No investments in selected date range', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // PORTFOLIO HOLDINGS SECTION
-  if (wantHoldings) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(167, 139, 250);
-    doc.text('Portfolio Holdings', margin, yPos);
-    yPos += 8;
-
-    const holdings = portDb.filter(e => inRange(e.date));
-    
-    if (holdings.length > 0) {
-      const tableData = holdings.map(e => {
-        const c = portCalc(e);
-        return [
-          e.assetType,
-          `${e.quantity} ${e.unit}`,
-          `₹${e.purchasePrice.toLocaleString()}`,
-          `₹${e.currentPrice.toLocaleString()}`,
-          `₹${c.currentValue.toLocaleString()}`,
-          `₹${c.gainLoss.toLocaleString()}`,
-          `${c.roi.toFixed(1)}%`
-        ];
-      });
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Asset Type', 'Quantity', 'Buy Price', 'Current', 'Value', 'Gain/Loss', 'ROI']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [167, 139, 250], textColor: 255, fontStyle: 'bold', fontSize: 8 },
-        styles: { fontSize: 7, cellPadding: 2 },
-        margin: { left: margin, right: margin },
-        columnStyles: {
-          2: { halign: 'right' },
-          3: { halign: 'right' },
-          4: { halign: 'right' },
-          5: { halign: 'right' },
-          6: { halign: 'right' }
-        }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No holdings in selected date range', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // ALL ASSETS SUMMARY SECTION
-  if (wantAssets) {
-    checkNewPage(60);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(52, 211, 153);
-    doc.text('Assets Summary', margin, yPos);
-    yPos += 8;
-
-    const byType = {};
-    portDb.forEach(e => {
-      const c = portCalc(e);
-      const k = normalizeAssetType(e.assetType);
-      if (!byType[k]) byType[k] = { inv: 0, val: 0, gain: 0, qty: 0, roi: [] };
-      byType[k].inv += c.totalInvestment;
-      byType[k].val += c.currentValue;
-      byType[k].gain += c.gainLoss;
-      byType[k].qty += e.quantity;
-      byType[k].roi.push(c.roi);
-    });
-
-    if (Object.keys(byType).length > 0) {
-      const tableData = Object.entries(byType).map(([k, v]) => {
-        const avgRoi = v.roi.length ? (v.roi.reduce((a, b) => a + b, 0) / v.roi.length) : 0;
-        return [
-          assetTypeLabel(k),
-          `₹${v.inv.toLocaleString()}`,
-          `₹${v.val.toLocaleString()}`,
-          `₹${v.gain.toLocaleString()}`,
-          `${avgRoi.toFixed(1)}%`
-        ];
-      });
-
-      doc.autoTable({
-        startY: yPos,
-        head: [['Asset Type', 'Total Invested', 'Current Value', 'Gain/Loss', 'Avg ROI']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [52, 211, 153], textColor: 0, fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 9, cellPadding: 4 },
-        margin: { left: margin, right: margin },
-        columnStyles: {
-          1: { halign: 'right' },
-          2: { halign: 'right' },
-          3: { halign: 'right', fontStyle: 'bold' },
-          4: { halign: 'right' }
-        }
-      });
-
-      yPos = doc.lastAutoTable.finalY + 12;
-    } else {
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text('No asset data available', margin, yPos);
-      yPos += 10;
-    }
-  }
-
-  // Footer on last page
-  checkNewPage(30);
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  doc.text('Generated by FinanceOS - Personal Finance Dashboard', pageWidth / 2, pageHeight - 10, { align: 'center' });
-
-  // Save the PDF
-  const date = new Date().toISOString().split('T')[0];
-  doc.save(`FinanceOS_Report_${date}.pdf`);
-  
-  document.getElementById('export-modal').style.display = 'none';
+// ── EXCEL IMPORT ───────────────────────────────────────────────────────────
+function importExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type:'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json  = XLSX.utils.sheet_to_json(sheet);
+    const newEntries = json.map(row => ({
+      id: Date.now() + Math.random(),
+      assetType: normalizeAssetType(row["Investment Type"] || ''),
+      date: formatExcelDate(row["Date"]),
+      quantity: Number(row["Quantity gms"] || 0),
+      unit: "grams",
+      purchasePrice: Number(row["Purchase Price per/g"] || 0),
+      currentPrice:  Number(row["Current Price per/g"]  || 0),
+      notes: row["Buyer"] || ""
+    }));
+    portDb = [...portDb, ...newEntries];
+    scheduleSave();
+    buildPortDropdowns();
+    applyPortFilters();
+    alert("✅ Excel Imported Successfully");
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-// ── EXCEL IMPORT ───────────────────────────────────────────────────────────
+function formatExcelDate(value) {
+  if (!value) return new Date().toISOString().split('T')[0];
+  if (typeof value === "string") return convertTextDate(value);
+  const date = new Date((value - 25569) * 86400 * 1000);
+  return date.toISOString().split('T')[0];
+}
+
+function convertTextDate(text) {
+  const months = { Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12" };
+  const parts = text.split("-");
+  if (parts.length !== 2) return new Date().toISOString().split('T')[0];
+  const day   = parts[0].padStart(2,"0");
+  const month = months[parts[1]] || "01";
+  const year  = new Date().getFullYear();
+  return `${year}-${month}-${day}`;
+}
 
 // ── MOBILE DRAWER ──────────────────────────────────────────────────────────
 function openMobileDrawer() {
@@ -5100,229 +3960,6 @@ function searchJumpTo(type, id) {
   switchView(view, navEl, group);
 }
 
-// ── RADAR CHARTS ────────────────────────────────────────────────────────────
-function renderWeeklyRadar() {
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const spendByDay = {Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0};
-  
-  db.filter(r => r.type === 'Expense').forEach(entry => {
-    const date = new Date(entry.date);
-    const dayName = days[date.getDay() === 0 ? 6 : date.getDay() - 1]; // Convert Sunday=0 to index 6
-    spendByDay[dayName] += entry.amount;
-  });
-
-  const data = days.map(d => spendByDay[d]);
-  destroyChart('radar-weekly');
-  const rwCtx = document.getElementById('radar-weekly').getContext('2d');
-  const rwGrad = rwCtx.createLinearGradient(0,0,0,220);
-  rwGrad.addColorStop(0,'rgba(244,114,182,0.90)'); rwGrad.addColorStop(0.5,'rgba(244,114,182,0.55)'); rwGrad.addColorStop(1,'rgba(244,114,182,0.15)');
-  charts['radar-weekly'] = new Chart(rwCtx, {
-    type: 'bar',
-    data: {
-      labels: days,
-      datasets: [{
-        label: 'Spending', data,
-        backgroundColor: rwGrad, borderColor: '#f472b6', borderWidth: 2, borderRadius: 9, borderSkipped: false
-      }, {
-        label: 'Trend', data, type: 'line',
-        backgroundColor: 'transparent', borderColor: '#a78bfa', borderWidth: 3,
-        pointBackgroundColor: '#a78bfa', pointBorderColor: '#fff', pointBorderWidth: 2,
-        pointRadius: 5, pointHoverRadius: 8, tension: 0.45
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero:true, grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{size:10,family:'DM Sans',weight:'600'},callback:v=>'₹'+(v/1000).toFixed(0)+'k'} },
-        x: { grid:{display:false,drawBorder:false}, ticks:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'}} }
-      },
-      plugins: {
-        legend:{ display:true, position:'top', labels:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'},usePointStyle:true,padding:15} },
-        tooltip:{ backgroundColor:'rgba(8,11,26,0.97)',padding:12,borderColor:'rgba(244,114,182,0.3)',borderWidth:1,titleFont:{family:'DM Sans',size:12,weight:'600'},bodyFont:{family:'DM Mono',size:11},callbacks:{label:ctx=>' ₹'+Number(ctx.raw).toLocaleString('en-IN')} }
-      },
-      animation:{ duration:800, easing:'easeOutQuart' }
-    }
-  });
-}
-
-function renderHealthRadar() {
-  const totalInc = sumType('Income', db);
-  const totalExp = sumType('Expense', db);
-  const totalInv = sumType('Investment', db);
-  const totalLoan = sumType('Loan', db);
-  
-  // Calculate 5 financial health metrics (0-100 scale)
-  const savingsRate = totalInc > 0 ? Math.min(((totalInc - totalExp) / totalInc) * 100, 100) : 0;
-  const debtToIncome = totalInc > 0 ? Math.max(100 - (totalLoan / totalInc) * 100, 0) : 0;
-  const emergencyFund = Math.min((totalInv / (totalExp * 6)) * 100, 100); // 6 months expenses
-  const investmentDiversity = portDb.length > 0 ? Math.min((new Set(portDb.map(p => normalizeAssetType(p.assetType))).size / 5) * 100, 100) : 0;
-  
-  // Budget adherence
-  let budgetScore = 100;
-  if (Object.keys(budgets).length > 0) {
-    const data = getFilteredData();
-    let overCount = 0;
-    Object.entries(budgets).forEach(([cat, limit]) => {
-      const spent = data.filter(x => x.sub === cat || x.name === cat).reduce((a, b) => a + b.amount, 0);
-      if (spent > limit) overCount++;
-    });
-    budgetScore = Math.max(100 - (overCount / Object.keys(budgets).length) * 100, 0);
-  }
-
-  const scores = [savingsRate, debtToIncome, emergencyFund, investmentDiversity, budgetScore];
-  const labels = ['Savings Rate', 'Debt-to-Income', 'Emergency Fund', 'Investment Diversity', 'Budget Adherence'];
-
-  destroyChart('radar-health');
-  const rhCtx = document.getElementById('radar-health').getContext('2d');
-  const rhGrad = rhCtx.createLinearGradient(0,0,0,220);
-  rhGrad.addColorStop(0,'rgba(52,211,153,0.90)'); rhGrad.addColorStop(0.5,'rgba(52,211,153,0.55)'); rhGrad.addColorStop(1,'rgba(52,211,153,0.15)');
-  charts['radar-health'] = new Chart(rhCtx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Score', data: scores,
-        backgroundColor: rhGrad, borderColor: '#34d399', borderWidth: 2, borderRadius: 9, borderSkipped: false
-      }, {
-        label: 'Trend', data: scores, type: 'line',
-        backgroundColor: 'transparent', borderColor: '#60a5fa', borderWidth: 3,
-        pointBackgroundColor: '#60a5fa', pointBorderColor: '#fff', pointBorderWidth: 2,
-        pointRadius: 5, pointHoverRadius: 8, tension: 0.45
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero:true, max:100, grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),stepSize:20,font:{size:10,family:'DM Sans',weight:'600'},callback:v=>v+'/100'} },
-        x: { grid:{display:false,drawBorder:false}, ticks:{color:chartTextColor(),font:{size:10,family:'DM Sans',weight:'600'}} }
-      },
-      plugins: {
-        legend:{ display:true, position:'top', labels:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'},usePointStyle:true,padding:15} },
-        tooltip:{ backgroundColor:'rgba(8,11,26,0.97)',padding:12,borderColor:'rgba(52,211,153,0.3)',borderWidth:1,titleFont:{family:'DM Sans',size:12,weight:'600'},bodyFont:{family:'DM Mono',size:11},callbacks:{label:ctx=>' '+ctx.raw.toFixed(0)+'/100'} }
-      },
-      animation:{ duration:800, easing:'easeOutQuart' }
-    }
-  });
-}
-
-// ── PWA SERVICE WORKER ──────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    self.addEventListener('install', e => self.skipWaiting());
-    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-    self.addEventListener('fetch', e => {
-      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-    });
-  `;
-  const blob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
-}
-
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-// ── GAMIFICATION SYSTEM ─────────────────────────────────────────────────────
-const BADGES = [
-  {id:'first-save',name:'First Steps',desc:'Added your first transaction',emoji:'🎯',condition:()=>db.length>0},
-  {id:'week-budget',name:'Budget Warrior',desc:'Stayed under budget for 7 days',emoji:'🛡️',condition:()=>gameStats.streak>=7},
-  {id:'month-budget',name:'Budget Master',desc:'Stayed under budget for 30 days',emoji:'👑',condition:()=>gameStats.streak>=30},
-  {id:'first-invest',name:'Investor',desc:'Made your first investment',emoji:'💰',condition:()=>db.filter(r=>r.type==='Investment').length>0},
-  {id:'networth-10l',name:'10L Club',desc:'Reached ₹10 Lakh net worth',emoji:'💎',condition:()=>gameStats.networth>=1000000},
-  {id:'networth-50l',name:'50L Club',desc:'Reached ₹50 Lakh net worth',emoji:'🏆',condition:()=>gameStats.networth>=5000000},
-  {id:'tracker-30',name:'Consistency King',desc:'Logged data for 30 days straight',emoji:'📊',condition:()=>gameStats.trackingDays>=30},
-  {id:'debt-free',name:'Debt Free',desc:'Zero outstanding loans',emoji:'🎉',condition:()=>sumType('Loan',db)===0},
-];
-
-let gameStats = JSON.parse(localStorage.getItem('fos_game_stats')) || {
-  streak:0,lastCheck:null,badges:[],networth:0,trackingDays:0,lastActivity:null
-};
-
-function updateGameStats() {
-  const totalInc=sumType('Income',db),totalInv=sumType('Investment',db),totalLoan=sumType('Loan',db);
-  gameStats.networth = totalInc+totalInv-totalLoan;
-
-  const today = new Date().toISOString().split('T')[0];
-  if (gameStats.lastActivity !== today) {
-    const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
-    if (gameStats.lastActivity===yesterday) gameStats.trackingDays++;
-    else gameStats.trackingDays = gameStats.lastActivity ? 1 : 1;
-    gameStats.lastActivity = today;
-  }
-
-  const fM=document.getElementById('filter-month').value, fY=document.getElementById('filter-year').value;
-  if (fM!=='all'||fY!=='all') {
-    const data=getFilteredData();
-    let allUnder=true;
-    Object.entries(budgets).forEach(([cat,limit])=>{
-      const spent=data.filter(x=>x.sub===cat||x.name===cat).reduce((a,b)=>a+b.amount,0);
-      if(spent>limit) allUnder=false;
-    });
-    if(allUnder && gameStats.lastCheck!==today) {
-      gameStats.streak++;
-      gameStats.lastCheck=today;
-    }
-  }
-
-  BADGES.forEach(badge=>{
-    if(!gameStats.badges.includes(badge.id)&&badge.condition()){
-      gameStats.badges.push(badge.id);
-      showBadgeUnlock(badge);
-    }
-  });
-
-  localStorage.setItem('fos_game_stats',JSON.stringify(gameStats));
-  renderGameStats();
-}
-
-function renderGameStats() {
-  document.getElementById('game-streak').textContent=gameStats.streak;
-  document.getElementById('game-streak-sub').textContent=gameStats.streak===1?'day under budget':'days under budget';
-  document.getElementById('game-badges-count').textContent=`${gameStats.badges.length}/${BADGES.length}`;
-
-  const targets=[500000,1000000,2500000,5000000,10000000];
-  const nextTarget=targets.find(t=>t>gameStats.networth);
-  if(nextTarget){
-    const prevTarget=targets[targets.indexOf(nextTarget)-1]||0;
-    const pct=Math.min(Math.max(((gameStats.networth-prevTarget)/(nextTarget-prevTarget))*100,0),100);
-    document.getElementById('milestone-pct').textContent=Math.round(pct)+'%';
-    const ring=document.getElementById('milestone-ring');
-    ring.style.strokeDashoffset=150.8-(pct/100*150.8);
-  }
-}
-
-function renderBadgeCollection() {
-  document.getElementById('badge-collection').innerHTML=BADGES.map(b=>{
-    const unlocked=gameStats.badges.includes(b.id);
-    return `<div class="achievement-badge ${unlocked?'':'locked'}"><span>${b.emoji}</span> <strong>${b.name}</strong> — ${b.desc}</div>`;
-  }).join('');
-}
-
-function showBadgeUnlock(badge) {
-  fireConfetti();
-}
-
-function fireConfetti() {
-  const canvas=document.getElementById('confetti-canvas'),ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-  const particles=[],colors=['#6366f1','#a78bfa','#34d399','#fbbf24','#f472b6'];
-  for(let i=0;i<80;i++){
-    particles.push({x:Math.random()*canvas.width,y:-10,vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,
-      color:colors[Math.floor(Math.random()*colors.length)],size:Math.random()*8+4});
-  }
-  const animate=()=>{
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{p.y+=p.vy;p.x+=p.vx;p.vy+=0.1;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size);});
-    if(particles.some(p=>p.y<canvas.height))requestAnimationFrame(animate);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
-  };
-  animate();
-}
-
-
 // ── TAGS ───────────────────────────────────────────────────────────────────
 let currentTagFilter = null;
 let pendingRestoreData = null;
@@ -5505,9 +4142,6 @@ window.onload = () => {
   // Close backup modal on overlay click
   const bkModal = document.getElementById('backup-modal');
   if (bkModal) bkModal.addEventListener('click', e => { if (e.target === bkModal) bkModal.style.display = 'none'; });
-  // Close alerts modal on overlay click
-  const alertsModal = document.getElementById('alerts-modal');
-  if (alertsModal) alertsModal.addEventListener('click', e => { if (e.target === alertsModal) alertsModal.style.display = 'none'; });
 
   // Auto-reconnect Google Drive if the user previously connected.
   // We wait up to 3 seconds for the GIS (Google Identity Services) library
@@ -5526,357 +4160,7 @@ window.onload = () => {
     };
     setTimeout(() => tryReconnect(6), 300);
   }
-
-  // Initialize drag and drop for dashboard sections
-  setTimeout(() => initDragAndDrop(), 1000);
 };
-
-// ══════════════════════════════════════════════════════════════════════════════
-// DRAG AND DROP FUNCTIONALITY - FREE VERTICAL STACKING
-// ══════════════════════════════════════════════════════════════════════════════
-
-function initDragAndDrop() {
-  const LAYOUT_KEY = 'fos_dashboard_layout_v3';
-  
-  // Get or create unique ID for an element
-  function getElementId(element, viewId, index) {
-    if (!element.dataset.dragId) {
-      // Use deterministic ID without timestamp for consistent default layouts
-      element.dataset.dragId = `${viewId}-section-${index}`;
-    }
-    return element.dataset.dragId;
-  }
-  
-  // Save layout for a view
-  function saveLayout(viewId, container) {
-    const sections = container.querySelectorAll('.draggable-section');
-    const order = Array.from(sections).map(s => s.dataset.dragId);
-    
-    const allLayouts = JSON.parse(localStorage.getItem(LAYOUT_KEY) || '{}');
-    allLayouts[viewId] = order;
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(allLayouts));
-  }
-  
-  // Load and apply saved layout
-  function loadLayout(viewId, container) {
-    const allLayouts = JSON.parse(localStorage.getItem(LAYOUT_KEY) || '{}');
-    const savedOrder = allLayouts[viewId];
-    
-    if (!savedOrder || savedOrder.length === 0) return;
-    
-    const sections = Array.from(container.querySelectorAll('.draggable-section'));
-    const sectionMap = {};
-    
-    sections.forEach(section => {
-      if (section.dataset.dragId) {
-        sectionMap[section.dataset.dragId] = section;
-      }
-    });
-    
-    // Reorder based on saved layout
-    savedOrder.forEach(id => {
-      if (sectionMap[id]) {
-        container.appendChild(sectionMap[id]);
-      }
-    });
-  }
-  
-  // Wrap sections to make them draggable
-  function wrapSectionsInView(viewId) {
-    const view = document.getElementById(viewId);
-    if (!view) return null;
-    
-    // Check if already wrapped
-    if (view.dataset.wrapped === 'true') return view;
-    
-    const children = Array.from(view.children);
-    let sectionIndex = 0;
-    
-    children.forEach(child => {
-      // Skip if already wrapped
-      if (child.classList.contains('draggable-section')) return;
-      
-      // Skip non-draggable elements
-      if (child.id === 'tag-filter-bar' || 
-          child.classList.contains('filter-controls') ||
-          child.tagName === 'STYLE' ||
-          child.tagName === 'SCRIPT') {
-        return;
-      }
-      
-      // Check if this is a major section that should be draggable
-      const isDraggable = 
-        child.classList.contains('glass-panel') || 
-        child.classList.contains('radar-row') ||
-        child.classList.contains('charts-row') ||
-        child.classList.contains('charts-3col') ||
-        child.classList.contains('sparkline-row') ||
-        child.classList.contains('kpi-grid') ||
-        child.classList.contains('nw-milestone-strip') ||
-        child.id === 'emi-reminder-strip' ||
-        child.id === 'budget-alerts-container' ||
-        (child.hasAttribute('style') && (
-          child.style.display === 'grid' ||
-          child.style.marginBottom ||
-          child.getAttribute('style').includes('grid')
-        ));
-      
-      if (isDraggable) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'draggable-section';
-        getElementId(wrapper, viewId, sectionIndex++);
-        
-        child.parentNode.insertBefore(wrapper, child);
-        wrapper.appendChild(child);
-      }
-    });
-    
-    view.dataset.wrapped = 'true';
-    return view;
-  }
-  
-  // Setup drag and drop for a view
-  function setupDragDrop(viewId) {
-    const view = wrapSectionsInView(viewId);
-    if (!view) return;
-    
-    const sections = view.querySelectorAll('.draggable-section');
-    let draggedElement = null;
-    
-    sections.forEach(section => {
-      section.setAttribute('draggable', 'true');
-      
-      section.addEventListener('dragstart', function(e) {
-        draggedElement = this;
-        this.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', this.innerHTML);
-        
-        // Make this slightly transparent
-        setTimeout(() => {
-          this.style.opacity = '0.4';
-        }, 0);
-      });
-      
-      section.addEventListener('dragend', function(e) {
-        this.style.opacity = '';
-        this.classList.remove('dragging');
-        
-        // Remove all drag-over classes
-        sections.forEach(s => s.classList.remove('drag-over'));
-        
-        // Save the new layout
-        saveLayout(viewId, view);
-      });
-      
-      section.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        
-        if (this === draggedElement) return;
-        
-        // Get bounding rectangle
-        const rect = this.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-        
-        // Determine if we should insert before or after
-        const insertBefore = e.clientY < midY;
-        
-        if (insertBefore) {
-          view.insertBefore(draggedElement, this);
-        } else {
-          view.insertBefore(draggedElement, this.nextSibling);
-        }
-      });
-      
-      section.addEventListener('dragenter', function(e) {
-        e.preventDefault();
-        if (this !== draggedElement) {
-          this.classList.add('drag-over');
-        }
-      });
-      
-      section.addEventListener('dragleave', function(e) {
-        this.classList.remove('drag-over');
-      });
-      
-      section.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-    
-    // Load saved layout
-    loadLayout(viewId, view);
-  }
-  
-  // Set default layouts for all views (based on user preferences)
-  function setDefaultLayouts() {
-    const allLayouts = JSON.parse(localStorage.getItem(LAYOUT_KEY) || '{}');
-    
-    // Only set defaults if no layout exists for a view OR if user wants to reset
-    // Note: The sections are indexed based on their order in the HTML
-    // Dashboard sections in HTML order:
-    // 0: KPI Grid
-    // 1: Gamification Strip  
-    // 2: Badge Showcase
-    // 3: Radar Row (Weekly Spending + Financial Health)
-    // 4: Portfolio Snapshot
-    // 5: Budget Alerts
-    // 6: EMI Reminder
-    // 7: Sparkline Row
-    // 8: Cash Flow + Spending Mix
-    // 9: Portfolio charts (3col)
-    // 10: Credit Overview title
-    // 11: Credit charts (3col)
-    
-    if (!allLayouts['view-dashboard']) {
-      // Desired order based on images: Keep KPI at top, then gamification, then portfolio snapshot,
-      // budget alerts, emi reminders, sparklines, radar charts, cash flow charts, portfolio charts, credit overview
-      allLayouts['view-dashboard'] = [
-        'view-dashboard-section-0',   // KPI Grid (stays at top)
-        'view-dashboard-section-1',   // Gamification Strip  
-        'view-dashboard-section-2',   // Badge Showcase
-        'view-dashboard-section-4',   // Portfolio Snapshot
-        'view-dashboard-section-5',   // Budget Alerts
-        'view-dashboard-section-6',   // EMI Reminder
-        'view-dashboard-section-7',   // Sparkline Row (Income/Expense/Loan/Investment trends)
-        'view-dashboard-section-3',   // Radar Row (Weekly Spending Pattern + Financial Health Score)
-        'view-dashboard-section-8',   // Cash Flow Snapshot + Spending Mix
-        'view-dashboard-section-9',   // Portfolio by Asset Type + ROI % + Top 3 Holdings
-        'view-dashboard-section-10',  // Credit Overview section title
-        'view-dashboard-section-11'   // Credit charts (Outstanding + EMI + Summary)
-      ];
-    }
-    
-    if (!allLayouts['view-credit']) {
-      // Credit Tracker sections in HTML order:
-      // 0: KPI Strip (Total Principal, Outstanding, EMI, Active Accounts, Avg Rate)
-      // 1: Credit Register table
-      // 2: Charts Row (Outstanding by Lender + Loan Type Mix)
-      
-      // Desired order based on image 4: KPI at top, charts next, then table
-      allLayouts['view-credit'] = [
-        'view-credit-section-0',  // KPI cards (stays at top)
-        'view-credit-section-2',  // Outstanding Balance by Lender + Loan Type Mix charts
-        'view-credit-section-1'   // Credit Register table
-      ];
-    }
-    
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(allLayouts));
-  }
-  
-  // Initialize all views
-  function initAllViews() {
-    // Set default layouts first (only if not already set)
-    setDefaultLayouts();
-    
-    setupDragDrop('view-dashboard');
-    setupDragDrop('view-analytics');
-    setupDragDrop('view-portfolio');
-    setupDragDrop('view-credit');
-  }
-  
-  // Initial setup
-  initAllViews();
-  
-  // Re-setup when switching tabs (but avoid re-wrapping)
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        const target = mutation.target;
-        if (target.classList.contains('view-section') && 
-            target.style.display !== 'none') {
-          setTimeout(() => {
-            const viewId = target.id;
-            if (viewId && !target.dataset.wrapped) {
-              setupDragDrop(viewId);
-            }
-          }, 200);
-        }
-      }
-    });
-  });
-  
-  // Observe all view sections
-  document.querySelectorAll('.view-section').forEach(view => {
-    observer.observe(view, { attributes: true, attributeFilter: ['style'] });
-  });
-}
-// ── SIDEBAR TOGGLE FUNCTIONS ────────────────────────────────────────────────
-function toggleFinanceSidebar() {
-  const sidebar = document.getElementById('finance-sidebar');
-  const icon = document.getElementById('finance-toggle-icon');
-  sidebar.classList.toggle('collapsed');
-  
-  if(sidebar.classList.contains('collapsed')) {
-    icon.className = 'fas fa-chevron-right';
-  } else {
-    icon.className = 'fas fa-chevron-left';
-  }
-  
-  // Save state to localStorage
-  localStorage.setItem('fos_finance_sidebar_collapsed', sidebar.classList.contains('collapsed'));
-  
-  // Trigger chart resize after animation completes
-  setTimeout(() => {
-    Object.values(charts).forEach(chart => {
-      if(chart && typeof chart.resize === 'function') {
-        chart.resize();
-      }
-    });
-    // Re-render current view to fix layout
-    if(activeView === 'dashboard') renderDashboard();
-    else if(activeView === 'analytics') renderAnalytics();
-  }, 350);
-}
-
-function togglePortfolioSidebar() {
-  const sidebar = document.getElementById('portfolio-sidebar');
-  const icon = document.getElementById('portfolio-toggle-icon');
-  sidebar.classList.toggle('collapsed');
-  
-  if(sidebar.classList.contains('collapsed')) {
-    icon.className = 'fas fa-chevron-right';
-  } else {
-    icon.className = 'fas fa-chevron-left';
-  }
-  
-  // Save state to localStorage
-  localStorage.setItem('fos_portfolio_sidebar_collapsed', sidebar.classList.contains('collapsed'));
-  
-  // Trigger chart resize after animation completes
-  setTimeout(() => {
-    Object.values(charts).forEach(chart => {
-      if(chart && typeof chart.resize === 'function') {
-        chart.resize();
-      }
-    });
-    // Re-render current view to fix layout
-    if(activeView === 'port-overview') renderPortOverview();
-    else if(activeView === 'port-analytics') renderPortAnalytics();
-  }, 350);
-}
-
-// Restore sidebar states on page load
-function restoreSidebarStates() {
-  const financeCollapsed = localStorage.getItem('fos_finance_sidebar_collapsed') === 'true';
-  const portfolioCollapsed = localStorage.getItem('fos_portfolio_sidebar_collapsed') === 'true';
-  
-  if(financeCollapsed) {
-    document.getElementById('finance-sidebar').classList.add('collapsed');
-    document.getElementById('finance-toggle-icon').className = 'fas fa-chevron-right';
-  }
-  
-  if(portfolioCollapsed) {
-    document.getElementById('portfolio-sidebar').classList.add('collapsed');
-    document.getElementById('portfolio-toggle-icon').className = 'fas fa-chevron-right';
-  }
-}
-
-// Call restore on page load
-restoreSidebarStates();
-
 </script>
 </body>
 </html>
