@@ -3839,7 +3839,17 @@ function cOpts(legend) {
         borderWidth: 1,
         titleFont: { family:'DM Sans', size:12, weight:'700' },
         bodyFont:  { family:'DM Mono', size:11 },
-        callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+        callbacks: { 
+          label: ctx => {
+            // Handle different chart data structures
+            const value = ctx.raw !== undefined ? ctx.raw : 
+                         (ctx.parsed && ctx.parsed.y !== undefined) ? ctx.parsed.y : 
+                         ctx.parsed;
+            const numValue = Number(value);
+            if (isNaN(numValue)) return '  N/A';
+            return '  ₹' + numValue.toLocaleString('en-IN');
+          }
+        }
       }
     },
     scales: {
@@ -3909,7 +3919,15 @@ function makeDonut(id, labels, data, colors) {
           borderWidth: 1,
           titleFont: { family:'DM Sans', size:12, weight:'700' },
           bodyFont:  { family:'DM Mono', size:11 },
-          callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+          callbacks: { 
+            label: ctx => {
+              const value = ctx.raw !== undefined ? ctx.raw : 
+                           (ctx.parsed !== undefined) ? ctx.parsed : 0;
+              const numValue = Number(value);
+              if (isNaN(numValue)) return '  N/A';
+              return '  ₹' + numValue.toLocaleString('en-IN');
+            }
+          }
         }
       }
     }
