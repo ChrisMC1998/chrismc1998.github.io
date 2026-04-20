@@ -433,14 +433,6 @@ tr:last-child td { border-bottom:none; }
 .export-check-label { font-size:0.82rem; font-weight:500; }
 .export-date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
 
-/* ── GOOGLE DRIVE STATUS ── */
-.gdrive-status { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
-.gdrive-dot { width:6px; height:6px; border-radius:50%; background:#64748b; }
-.gdrive-dot.connected { background:#34d399; animation:pulse 2s infinite; }
-.gdrive-dot.error { background:#ef4444; }
-.gdrive-btn { padding:7px 10px; border-radius:9px; border:1px solid var(--glass-border); background:transparent; color:var(--text-mid); cursor:pointer; display:flex; align-items:center; gap:9px; font-size:0.78rem; font-weight:500; font-family:'DM Sans',sans-serif; transition:0.16s; }
-.gdrive-btn:hover { background:rgba(52,211,153,0.1); color:#34d399; border-color:rgba(52,211,153,0.3); }
-
 /* ── MOBILE HAMBURGER ── */
 .mobile-header { display:none; position:fixed; top:0; left:0; right:0; z-index:300; background:rgba(7,9,26,0.97); backdrop-filter:blur(16px); border-bottom:1px solid var(--glass-border); padding:0.75rem 1rem; align-items:center; justify-content:space-between; gap:10px; }
 .mobile-title { font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px; }
@@ -774,9 +766,9 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   .nav-item > *:not(.nav-icon), .port-nav-item > *:not(.nav-icon) { display:none; }
   .nav-icon { width:100%; text-align:center; font-size:1rem; opacity:0.9; }
   .sidebar-footer { align-items:center; gap:6px; }
-  .autosave-indicator span, .gdrive-status span, .export-btn span { display:none; }
-  .autosave-indicator, .gdrive-status { justify-content:center; padding:6px 0; }
-  .export-btn, .gdrive-btn { justify-content:center; padding:8px; width:100%; }
+  .autosave-indicator span, .export-btn span { display:none; }
+  .autosave-indicator { justify-content:center; padding:6px 0; }
+  .export-btn { justify-content:center; padding:8px; width:100%; }
   .kpi-grid { grid-template-columns:repeat(3,1fr) !important; }
   .sparkline-row { grid-template-columns:repeat(2,1fr) !important; }
   /* Budget responsive for medium screens */
@@ -868,7 +860,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 }
 </style>
 
-<script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
 
@@ -917,8 +908,8 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="drawer-item" onclick="filterPortAsset('all');closeMobileDrawer()"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem;width:16px;text-align:center"></i> All Assets</div>
 
   <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--glass-border);display:flex;flex-direction:column;gap:8px">
-    <button class="gdrive-btn" style="width:100%;justify-content:center" onclick="connectGoogleDrive()"><i class="fab fa-google-drive"></i> Connect Drive</button>
     <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export</button>
+    <button class="export-btn" style="width:100%;justify-content:center;color:var(--c-inc);border-color:rgba(52,211,153,0.25)" onclick="openBackupModal();closeMobileDrawer()"><i class="fas fa-database"></i> Backup</button>
   </div>
 </div>
 <div class="sidebar" id="finance-sidebar">
@@ -975,13 +966,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="sidebar-footer" style="margin-top:auto">
     <!-- Expanded footer -->
     <div class="sidebar-footer-expanded">
-      <div class="gdrive-status">
-        <div class="gdrive-dot" id="gdrive-dot"></div>
-        <span id="gdrive-label">Google Drive</span>
-      </div>
-      <button class="gdrive-btn" onclick="connectGoogleDrive()" id="gdrive-btn">
-        <i class="fab fa-google-drive"></i> Connect Drive
-      </button>
       <div class="autosave-indicator">
         <div class="autosave-dot" id="autosave-dot"></div>
         <span id="autosave-label">Auto-saved</span>
@@ -995,7 +979,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     </div>
     <!-- Collapsed footer: icon-only -->
     <div class="sidebar-footer-collapsed">
-      <div class="collapsed-icon-btn" onclick="connectGoogleDrive()" title="Google Drive"><i class="fab fa-google-drive"></i></div>
       <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export"><i class="fas fa-file-csv"></i></div>
       <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
     </div>
@@ -1993,8 +1976,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -2087,22 +2068,8 @@ let budgets = JSON.parse(localStorage.getItem('fos_budgets')) || {
   "Food":8000, "Transport":5000, "Subscriptions":1500, "Personal Loan":15000, "Auto Loan":10000
 };
 
-// ── GOOGLE DRIVE CONFIG ─────────────────────────────────────────────────────
-const GDRIVE_FOLDER_ID = '1r92Po_8aLUo3QQGtkYKQC1o5Ct5EhiyU';
-const GDRIVE_CLIENT_ID = '522409616559-te1m0dg72s3b0tuf7trqrnlfcrt1rf8p.apps.googleusercontent.com';
-const GDRIVE_SCOPES    = 'https://www.googleapis.com/auth/drive.file';
-let gdriveConnected = false;
-let gdriveTokenClient = null;
-let gdriveAccessToken = null;
-let gdriveFileIds = { db: null, portDb: null, creditDb: null };
-
-// Persist connection state across page reloads
-const GDRIVE_CONNECTED_KEY = 'fos_gdrive_connected';
-const GDRIVE_EMAIL_KEY     = 'fos_gdrive_email';
-
-function connectDrive() {
-  connectGoogleDrive();
-}
+// ── DATA STORAGE ────────────────────────────────────────────────────────────
+// All data stored in localStorage only
 
 let charts = {};
 let currentListFilter = 'all';
@@ -2148,7 +2115,7 @@ function normalizePortRecord(record) {
   return { ...record, assetType: normalizeAssetType(record.assetType) };
 }
 
-// ── AUTO-SAVE (localStorage + optional Google Drive) ───────────────────────
+// ── AUTO-SAVE (localStorage only) ──────────────────────────────────────────
 function scheduleSave() {
   pendingSave = true;
   document.getElementById('autosave-dot').classList.add('saving');
@@ -2164,231 +2131,9 @@ function doAutoSave() {
   document.getElementById('autosave-dot').classList.remove('saving');
   const ts = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   document.getElementById('autosave-label').textContent = 'Saved ' + ts;
-  if (gdriveConnected) saveToGoogleDrive();
 }
 setInterval(doAutoSave, 5000);
 
-// ── GOOGLE DRIVE ────────────────────────────────────────────────────────────
-function connectGoogleDrive() {
-  if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
-    alert('⚠️ Google Drive integration requires a Google OAuth Client ID.\n\nTo set this up:\n1. Go to console.cloud.google.com\n2. Create a project → Enable Drive API\n3. Create OAuth 2.0 credentials\n4. Replace YOUR_GOOGLE_CLIENT_ID in the code\n\nFor now, data is safely saved in your browser (localStorage).');
-    return;
-  }
-  try {
-    gdriveTokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GDRIVE_CLIENT_ID,
-      scope: GDRIVE_SCOPES,
-      callback: (tokenResponse) => {
-        if (tokenResponse.error) { setDriveStatus('error', 'Auth failed'); return; }
-        gdriveAccessToken = tokenResponse.access_token;
-        gdriveConnected = true;
-        // Persist connection flag so we auto-reconnect on next page load
-        localStorage.setItem(GDRIVE_CONNECTED_KEY, '1');
-        setDriveStatus('connected', 'Drive connected');
-        const btn = document.getElementById('gdrive-btn');
-        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
-        loadFromGoogleDrive();
-        // Schedule a silent token refresh before the 1-hour expiry
-        setTimeout(silentTokenRefresh, 55 * 60 * 1000);
-      }
-    });
-    gdriveTokenClient.requestAccessToken();
-  } catch(e) {
-    setDriveStatus('error', 'Drive unavailable');
-  }
-}
-
-// Silent re-auth: re-requests a fresh token without showing a popup.
-// Called automatically on page load (if the user previously connected)
-// and every 55 minutes to keep the session alive.
-function silentTokenRefresh() {
-  if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
-  try {
-    console.log('Attempting silent Google Drive token refresh...');
-    const client = google.accounts.oauth2.initTokenClient({
-      client_id: GDRIVE_CLIENT_ID,
-      scope: GDRIVE_SCOPES,
-      prompt: '',   // empty string = no consent screen if already granted
-      callback: (tokenResponse) => {
-        if (tokenResponse.error) {
-          console.error('Silent refresh failed:', tokenResponse.error);
-          // Silent refresh failed — clear flag so user can manually reconnect
-          localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-          gdriveConnected = false;
-          gdriveAccessToken = null;
-          setDriveStatus('error', 'Session expired');
-          const btn = document.getElementById('gdrive-btn');
-          if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
-          return;
-        }
-        console.log('Silent token refresh successful');
-        gdriveAccessToken = tokenResponse.access_token;
-        gdriveConnected = true;
-        localStorage.setItem(GDRIVE_CONNECTED_KEY, '1');
-        setDriveStatus('connected', 'Drive connected');
-        const btn = document.getElementById('gdrive-btn');
-        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Drive ✓';
-        // Load data after successful refresh
-        loadFromGoogleDrive();
-        // Schedule next refresh
-        setTimeout(silentTokenRefresh, 55 * 60 * 1000);
-      }
-    });
-    client.requestAccessToken({ prompt: '' });
-  } catch(e) {
-    console.error('Silent refresh error:', e);
-    // GIS library not ready yet — retry after 3 seconds
-    if (e.message && e.message.includes('google is not defined')) {
-      console.log('Google library not loaded, retrying in 3s...');
-      setTimeout(silentTokenRefresh, 3000);
-    } else {
-      // Other error - clear connection state
-      localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-      setDriveStatus('error', 'Connection failed');
-    }
-  }
-}
-
-function disconnectGoogleDrive() {
-  localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-  gdriveConnected = false;
-  gdriveAccessToken = null;
-  setDriveStatus('', 'Google Drive');
-  const btn = document.getElementById('gdrive-btn');
-  if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Connect Drive';
-}
-
-function setDriveStatus(state, label) {
-  const dot = document.getElementById('gdrive-dot');
-  dot.className = 'gdrive-dot' + (state === 'connected' ? ' connected' : state === 'error' ? ' error' : '');
-  document.getElementById('gdrive-label').textContent = label;
-}
-
-async function gdriveRequest(method, url, body, token) {
-  const headers = { 'Authorization': 'Bearer ' + token };
-  if (body && typeof body === 'string') headers['Content-Type'] = 'application/json';
-  const resp = await fetch(url, { method, headers, body: body || undefined });
-  return resp.json();
-}
-
-async function saveToGoogleDrive() {
-  const token = gdriveAccessToken;
-  if (!token) return;
-  const payload = { db, portDb, creditDb, budgets };
-  const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-  const meta = { name: 'financeos_data.json', parents: [GDRIVE_FOLDER_ID] };
-
-  try {
-    if (gdriveFileIds.main) {
-      // Update existing file
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify({name:'financeos_data.json'})], {type:'application/json'}));
-      form.append('file', blob);
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdriveFileIds.main}?uploadType=multipart`, {
-        method:'PATCH', headers:{'Authorization':'Bearer '+token}, body:form
-      });
-    } else {
-      // Search for existing file first
-      const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='financeos_data.json'+and+'${GDRIVE_FOLDER_ID}'+in+parents&fields=files(id)`, {
-        headers:{'Authorization':'Bearer '+token}
-      });
-      const searchData = await search.json();
-      if (searchData.files && searchData.files.length > 0) {
-        gdriveFileIds.main = searchData.files[0].id;
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify({name:'financeos_data.json'})], {type:'application/json'}));
-        form.append('file', blob);
-        await fetch(`https://www.googleapis.com/upload/drive/v3/files/${gdriveFileIds.main}?uploadType=multipart`, {
-          method:'PATCH', headers:{'Authorization':'Bearer '+token}, body:form
-        });
-      } else {
-        // Create new file
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
-        form.append('file', blob);
-        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-          method:'POST', headers:{'Authorization':'Bearer '+token}, body:form
-        });
-        const data = await res.json();
-        gdriveFileIds.main = data.id;
-      }
-    }
-    setDriveStatus('connected', 'Drive synced ✓');
-  } catch(e) {
-    setDriveStatus('error', 'Sync failed');
-  }
-}
-
-async function loadFromGoogleDrive() {
-  const token = gdriveAccessToken;
-  if (!token) {
-    console.warn('No Google Drive access token available');
-    setDriveStatus('error', 'Not authenticated');
-    return;
-  }
-  try {
-    console.log('Loading data from Google Drive...');
-    const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='financeos_data.json'+and+'${GDRIVE_FOLDER_ID}'+in+parents&fields=files(id)`, {
-      headers:{'Authorization':'Bearer '+token}
-    });
-    
-    if (!search.ok) {
-      console.error('Google Drive search failed:', search.status, search.statusText);
-      if (search.status === 401) {
-        // Token expired - clear and prompt re-auth
-        localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-        gdriveConnected = false;
-        gdriveAccessToken = null;
-        setDriveStatus('error', 'Session expired');
-        const btn = document.getElementById('gdrive-btn');
-        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
-        return;
-      }
-      throw new Error(`Search failed: ${search.status}`);
-    }
-    
-    const searchData = await search.json();
-    console.log('Google Drive search result:', searchData);
-    
-    if (!searchData.files || searchData.files.length === 0) {
-      console.log('No existing file found - creating new one');
-      setDriveStatus('connected', 'Drive ready (new)');
-      saveToGoogleDrive(); // push current local data up
-      return;
-    }
-    
-    gdriveFileIds.main = searchData.files[0].id;
-    console.log('Loading file:', gdriveFileIds.main);
-    
-    const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${gdriveFileIds.main}?alt=media`, {
-      headers:{'Authorization':'Bearer '+token}
-    });
-    
-    if (!fileResp.ok) {
-      console.error('Google Drive file fetch failed:', fileResp.status, fileResp.statusText);
-      throw new Error(`File fetch failed: ${fileResp.status}`);
-    }
-    
-    const payload = await fileResp.json();
-    console.log('Loaded data from Google Drive');
-    
-    if (payload.db)       { db       = payload.db; localStorage.setItem('fos_db_v3', JSON.stringify(db)); }
-    if (payload.portDb)   { portDb   = payload.portDb.map(normalizePortRecord); localStorage.setItem('fos_port_v3', JSON.stringify(portDb)); }
-    if (payload.creditDb) { creditDb = payload.creditDb; localStorage.setItem('fos_credit_v1', JSON.stringify(creditDb)); }
-    if (payload.budgets)  { budgets  = payload.budgets; localStorage.setItem('fos_budgets', JSON.stringify(budgets)); }
-    setDriveStatus('connected', 'Drive loaded ✓');
-    buildFilterDropdowns(); buildPortDropdowns(); renderDashboard();
-  } catch(e) {
-    console.error('Google Drive load error:', e);
-    setDriveStatus('error', 'Load failed');
-    // Clear connection state on repeated failures
-    localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-    gdriveConnected = false;
-    gdriveAccessToken = null;
-    const btn = document.getElementById('gdrive-btn');
-    if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
-  }
-}
 
 // ── PORTFOLIO CALC ─────────────────────────────────────────────────────────
 function portCalc(e) {
@@ -4284,7 +4029,7 @@ function saveBudgets() {
     
     localStorage.setItem('fos_budgets', JSON.stringify(budgets));
     console.log('Budgets saved to localStorage:', budgets);
-    scheduleSave(); // Trigger autosave for Google Drive sync
+    scheduleSave(); // Trigger autosave
     document.getElementById('budget-modal').style.display = 'none';
     if (activeView === 'dashboard') renderDashboard();
   } catch(error) {
@@ -5638,33 +5383,6 @@ window.onload = () => {
   // Close alerts modal on overlay click
   const alertsModal = document.getElementById('alerts-modal');
   if (alertsModal) alertsModal.addEventListener('click', e => { if (e.target === alertsModal) alertsModal.style.display = 'none'; });
-
-  // Auto-reconnect Google Drive if the user previously connected.
-  // We wait up to 3 seconds for the GIS (Google Identity Services) library
-  // to finish loading before attempting the silent refresh.
-  if (localStorage.getItem(GDRIVE_CONNECTED_KEY)) {
-    console.log('Google Drive was previously connected, attempting auto-reconnect...');
-    setDriveStatus('connected', 'Reconnecting…');
-    const tryReconnect = (attempts) => {
-      if (typeof google !== 'undefined' && google.accounts) {
-        console.log('Google API loaded, attempting silent token refresh...');
-        silentTokenRefresh();
-      } else if (attempts > 0) {
-        console.log(`Google API not ready, ${attempts} attempts remaining...`);
-        setTimeout(() => tryReconnect(attempts - 1), 500);
-      } else {
-        // GIS library failed to load — clear connection and reset status
-        console.error('Google API failed to load after all attempts');
-        localStorage.removeItem(GDRIVE_CONNECTED_KEY);
-        setDriveStatus('error', 'API not loaded');
-        const btn = document.getElementById('gdrive-btn');
-        if (btn) btn.innerHTML = '<i class="fab fa-google-drive"></i> Reconnect';
-      }
-    };
-    setTimeout(() => tryReconnect(6), 300);
-  } else {
-    console.log('Google Drive not previously connected');
-  }
 
   // Initialize drag and drop for dashboard sections
   setTimeout(() => initDragAndDrop(), 1000);
