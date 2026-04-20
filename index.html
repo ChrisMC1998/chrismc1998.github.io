@@ -44,6 +44,88 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
   width: var(--sidebar-w); background: rgba(8,11,26,0.98);
   border-right: 1px solid var(--glass-border);
   padding: 1.4rem 1rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
+  transition: width 0.3s ease, padding 0.3s ease;
+  position: relative;
+}
+.sidebar.collapsed {
+  width: 60px;
+  padding: 1.4rem 0.5rem;
+}
+.sidebar.collapsed .brand-title span,
+.sidebar.collapsed .welcome-msg,
+.sidebar.collapsed .nav-section-label,
+.sidebar.collapsed .nav-item span:not(.budget-badge),
+.sidebar.collapsed .autosave-indicator span,
+.sidebar.collapsed .export-btn span {
+  display: none;
+}
+/* Hide expanded-only elements when sidebar is collapsed */
+.sidebar.collapsed .sidebar-expanded-only {
+  display: none !important;
+}
+/* Show collapsed-only elements only when sidebar is collapsed */
+.sidebar-collapsed-only {
+  display: none;
+}
+.sidebar.collapsed .sidebar-collapsed-only {
+  display: flex;
+}
+/* Collapsed footer icon row */
+.collapsed-footer-icons {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.collapsed-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: 0.16s;
+}
+.collapsed-icon-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border-color: rgba(255,255,255,0.18);
+}
+.sidebar.collapsed .brand-title {
+  justify-content: center;
+}
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 9px;
+}
+.sidebar-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(8,11,26,0.98);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s;
+  color: var(--text-mid);
+  font-size: 0.7rem;
+}
+.sidebar-toggle:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: scale(1.1);
 }
 .brand-section { margin-bottom: 1.8rem; padding: 0 6px; }
 .brand-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 9px; letter-spacing: -0.5px; }
@@ -58,7 +140,7 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .nav-item:hover { background: rgba(255,255,255,0.04); color: white; }
 .nav-item.active { background: rgba(99,102,241,0.12); color: white; }
 .nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:55%; background:var(--accent); border-radius:2px; }
-.nav-icon { width: 16px; text-align: center; font-size: 0.82rem; opacity: 0.8; }
+.nav-icon { width: 16px; text-align: center; font-size: 0.88rem; opacity: 0.85; }
 .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
 .autosave-indicator { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
 .autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--c-inc); animation:pulse 2s infinite; }
@@ -106,6 +188,51 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
   border-right: 1px solid rgba(167,139,250,0.12);
   padding: 1.4rem 0.9rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
   position: relative;
+  transition: width 0.3s ease, padding 0.3s ease;
+}
+.port-sidebar.collapsed {
+  width: 60px;
+  padding: 1.4rem 0.5rem;
+}
+.port-sidebar.collapsed .port-brand-title span,
+.port-sidebar.collapsed .port-brand-sub,
+.port-sidebar.collapsed .nav-section-label,
+.port-sidebar.collapsed .port-nav-item span,
+.port-sidebar.collapsed .port-filter-box,
+.port-sidebar.collapsed .btn-port-add span {
+  display: none;
+}
+.port-sidebar.collapsed .port-brand-title {
+  justify-content: center;
+}
+.port-sidebar.collapsed .port-nav-item,
+.port-sidebar.collapsed .btn-port-add {
+  justify-content: center;
+  padding: 8px;
+}
+.port-sidebar-toggle {
+  position: absolute;
+  top: 1.4rem;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(12,10,30,0.98);
+  border: 1px solid rgba(167,139,250,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s;
+  color: #c4b5fd;
+  font-size: 0.7rem;
+}
+.port-sidebar-toggle:hover {
+  background: #a78bfa;
+  color: white;
+  border-color: #a78bfa;
+  transform: scale(1.1);
 }
 .port-sidebar::before {
   content:''; position:absolute; top:0; left:0; right:0; height:2px;
@@ -305,6 +432,8 @@ tr:last-child td { border-bottom:none; }
 
 /* ── EXPORT MODAL ── */
 .export-modal-box { background:#0c1020; width:520px; padding:1.8rem; border-radius:18px; border:1px solid rgba(99,102,241,0.28); box-shadow:0 0 60px rgba(99,102,241,0.12); max-height:92vh; overflow-y:auto; }
+/* ── ALERTS MODAL ── */
+.alerts-modal-box { overflow-y:visible !important; max-height:none !important; }
 .export-check-row { display:flex; align-items:center; gap:10px; padding:9px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:10px; cursor:pointer; transition:0.16s; }
 .export-check-row:hover { background:rgba(255,255,255,0.06); }
 .export-check-row input[type=checkbox] { accent-color:var(--accent); width:15px; height:15px; }
@@ -356,7 +485,7 @@ tr:last-child td { border-bottom:none; }
 .progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
 .progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
 .confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
-.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
+.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:0.7rem 0; max-height:220px; overflow-y:auto; padding-right:2px; }
 .alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
 .alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
 .alert-rule-card.active { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
@@ -798,7 +927,10 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <button class="export-btn" style="width:100%;justify-content:center" onclick="openExportModal();closeMobileDrawer()"><i class="fas fa-file-csv"></i> Export</button>
   </div>
 </div>
-<div class="sidebar">
+<div class="sidebar" id="finance-sidebar">
+  <div class="sidebar-toggle" onclick="toggleFinanceSidebar()" title="Toggle sidebar">
+    <i class="fas fa-chevron-left" id="finance-toggle-icon"></i>
+  </div>
   <div class="brand-section">
     <div class="brand-title"><i class="fas fa-cube" style="color:var(--accent)"></i>Finance<span>OS</span></div>
     <div class="welcome-msg">Welcome Chris Mcguinness</div>
@@ -840,30 +972,39 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   </div>
 
   <div class="sidebar-footer">
-    <div class="gdrive-status">
+    <div class="gdrive-status sidebar-expanded-only">
       <div class="gdrive-dot" id="gdrive-dot"></div>
       <span id="gdrive-label">Google Drive</span>
     </div>
-    <button class="gdrive-btn" onclick="connectGoogleDrive()" id="gdrive-btn">
+    <button class="gdrive-btn sidebar-expanded-only" onclick="connectGoogleDrive()" id="gdrive-btn">
       <i class="fab fa-google-drive"></i> Connect Drive
     </button>
     <div class="autosave-indicator">
       <div class="autosave-dot" id="autosave-dot"></div>
-      <span id="autosave-label">Auto-saved</span>
+      <span id="autosave-label" class="sidebar-expanded-only">Auto-saved</span>
     </div>
-    <button class="export-btn" onclick="openExportModal()">
+    <button class="export-btn sidebar-expanded-only" onclick="openExportModal()">
       <i class="fas fa-file-csv"></i> Export
     </button>
-    <button class="export-btn" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
+    <button class="export-btn sidebar-expanded-only" onclick="openBackupModal()" style="color:var(--c-inc);border-color:rgba(52,211,153,0.25)">
       <i class="fas fa-database"></i> Backup / Restore
     </button>
+    <!-- Collapsed icon-only footer actions -->
+    <div class="sidebar-collapsed-only collapsed-footer-icons">
+      <div class="collapsed-icon-btn" onclick="connectGoogleDrive()" title="Connect Google Drive"><i class="fab fa-google-drive"></i></div>
+      <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export CSV"><i class="fas fa-file-csv"></i></div>
+      <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup / Restore" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
+    </div>
   </div>
 </div>
 
 <!-- SIDEBAR 2 — PORTFOLIO -->
-<div class="port-sidebar">
+<div class="port-sidebar" id="portfolio-sidebar">
+  <div class="port-sidebar-toggle" onclick="togglePortfolioSidebar()" title="Toggle sidebar">
+    <i class="fas fa-chevron-left" id="portfolio-toggle-icon"></i>
+  </div>
   <div class="port-brand">
-    <div class="port-brand-title"><i class="fas fa-gem"></i> Portfolio OS</div>
+    <div class="port-brand-title"><i class="fas fa-gem"></i> Portfolio<span> OS</span></div>
     <div class="port-brand-sub">Physical &amp; Digital Assets of Chris Mcguinness</div>
   </div>
 
@@ -879,30 +1020,29 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3;margin-top:4px">By Asset</div>
-  <!-- Sidebar dots now use the correct per-asset CSS var -->
   <div class="port-nav-item" id="port-nav-gold" onclick="filterPortAsset('Gold')">
-    <div class="nav-icon"><i class="fas fa-circle asset-gold" style="font-size:0.55rem"></i></div>Gold
+    <div class="nav-icon"><i class="fas fa-coins asset-gold"></i></div><span>Gold</span>
   </div>
   <div class="port-nav-item" id="port-nav-silver" onclick="filterPortAsset('Silver')">
-    <div class="nav-icon"><i class="fas fa-circle asset-silver" style="font-size:0.55rem"></i></div>Silver
+    <div class="nav-icon"><i class="fas fa-medal asset-silver"></i></div><span>Silver</span>
   </div>
   <div class="port-nav-item" id="port-nav-realestate" onclick="filterPortAsset('RealEstate')">
-    <div class="nav-icon"><i class="fas fa-circle asset-realestate" style="font-size:0.55rem"></i></div>Real Estate
+    <div class="nav-icon"><i class="fas fa-home asset-realestate"></i></div><span>Real Estate</span>
   </div>
   <div class="port-nav-item" id="port-nav-mf" onclick="filterPortAsset('MutualFund')">
-    <div class="nav-icon"><i class="fas fa-circle asset-mf" style="font-size:0.55rem"></i></div>Mutual Funds
+    <div class="nav-icon"><i class="fas fa-chart-pie asset-mf"></i></div><span>Mutual Funds</span>
   </div>
   <div class="port-nav-item" id="port-nav-bonds" onclick="filterPortAsset('Bonds')">
-    <div class="nav-icon"><i class="fas fa-circle asset-bonds" style="font-size:0.55rem"></i></div>Bonds
+    <div class="nav-icon"><i class="fas fa-file-invoice-dollar asset-bonds"></i></div><span>Bonds</span>
   </div>
   <div class="port-nav-item" id="port-nav-stocks" onclick="filterPortAsset('Stocks')">
-    <div class="nav-icon"><i class="fas fa-circle asset-stocks" style="font-size:0.55rem"></i></div>Stocks
+    <div class="nav-icon"><i class="fas fa-chart-line asset-stocks"></i></div><span>Stocks</span>
   </div>
   <div class="port-nav-item" id="port-nav-crypto" onclick="filterPortAsset('Crypto')">
-    <div class="nav-icon"><i class="fas fa-circle asset-crypto" style="font-size:0.55rem"></i></div>Crypto
+    <div class="nav-icon"><i class="fab fa-bitcoin asset-crypto"></i></div><span>Crypto</span>
   </div>
   <div class="port-nav-item" id="port-nav-all" onclick="filterPortAsset('all')">
-    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem"></i></div>All Assets
+    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div><span>All Assets</span>
   </div>
 
   <div class="port-filter-box">
@@ -1799,7 +1939,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
 <!-- CUSTOM ALERTS MODAL -->
 <div class="modal-overlay" id="alerts-modal">
-  <div class="modal-box" style="max-width:580px">
+  <div class="modal-box alerts-modal-box" style="max-width:580px;overflow-y:visible;max-height:none">
     <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
     
@@ -5564,6 +5704,56 @@ function initDragAndDrop() {
     observer.observe(view, { attributes: true, attributeFilter: ['style'] });
   });
 }
+// ── SIDEBAR TOGGLE FUNCTIONS ────────────────────────────────────────────────
+function toggleFinanceSidebar() {
+  const sidebar = document.getElementById('finance-sidebar');
+  const icon = document.getElementById('finance-toggle-icon');
+  sidebar.classList.toggle('collapsed');
+  
+  if(sidebar.classList.contains('collapsed')) {
+    icon.className = 'fas fa-chevron-right';
+  } else {
+    icon.className = 'fas fa-chevron-left';
+  }
+  
+  // Save state to localStorage
+  localStorage.setItem('fos_finance_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+}
+
+function togglePortfolioSidebar() {
+  const sidebar = document.getElementById('portfolio-sidebar');
+  const icon = document.getElementById('portfolio-toggle-icon');
+  sidebar.classList.toggle('collapsed');
+  
+  if(sidebar.classList.contains('collapsed')) {
+    icon.className = 'fas fa-chevron-right';
+  } else {
+    icon.className = 'fas fa-chevron-left';
+  }
+  
+  // Save state to localStorage
+  localStorage.setItem('fos_portfolio_sidebar_collapsed', sidebar.classList.contains('collapsed'));
+}
+
+// Restore sidebar states on page load
+function restoreSidebarStates() {
+  const financeCollapsed = localStorage.getItem('fos_finance_sidebar_collapsed') === 'true';
+  const portfolioCollapsed = localStorage.getItem('fos_portfolio_sidebar_collapsed') === 'true';
+  
+  if(financeCollapsed) {
+    document.getElementById('finance-sidebar').classList.add('collapsed');
+    document.getElementById('finance-toggle-icon').className = 'fas fa-chevron-right';
+  }
+  
+  if(portfolioCollapsed) {
+    document.getElementById('portfolio-sidebar').classList.add('collapsed');
+    document.getElementById('portfolio-toggle-icon').className = 'fas fa-chevron-right';
+  }
+}
+
+// Call restore on page load
+restoreSidebarStates();
+
 </script>
 </body>
 </html>
