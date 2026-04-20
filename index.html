@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinanceOS - </title>
+<meta name="theme-color" content="#07091a">
+<meta name="description" content="Personal finance dashboard - track income, expenses, investments, loans and portfolio">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZU9TIiwic2hvcnRfbmFtZSI6IkZpbmFuY2VPUyIsInN0YXJ0X3VybCI6Ii4vIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA3MDkxYSIsInRoZW1lX2NvbG9yIjoiIzYzNjZmMSIsImRlc2NyaXB0aW9uIjoiUGVyc29uYWwgZmluYW5jZSBkYXNoYm9hcmQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyUyMzYzNjZmMScvJTNFJTNDdGV4dCB4PSc1MCUyNScgeT0nNjUlMjUnIGZvbnQtc2l6ZT0nNTAnIGZpbGw9J3doaXRlJyUzRSVFMiU4MiVCOSUzQy90ZXh0JTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
+<title>FinanceOS - Chris Mcguinness</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -331,6 +334,45 @@ tr:last-child td { border-bottom:none; }
 .drawer-item.port-active { background:rgba(167,139,250,0.14); color:#e2d9f3; }
 .drawer-close { margin-bottom:1rem; display:flex; justify-content:flex-end; }
 .drawer-close button { background:transparent; border:1px solid var(--glass-border); color:var(--text-mid); border-radius:8px; padding:6px 12px; cursor:pointer; font-size:0.82rem; }
+
+/* ══════════════════════════════════════════════
+   GAMIFICATION & CUSTOM ALERTS
+══════════════════════════════════════════════ */
+.gamification-strip { display:flex; gap:12px; margin-bottom:1.3rem; flex-wrap:wrap; }
+.game-card { flex:1; min-width:160px; background:linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(167,139,250,0.06) 100%); border:1px solid rgba(99,102,241,0.25); border-radius:13px; padding:1rem 1.2rem; position:relative; overflow:hidden; }
+.game-card::before { content:''; position:absolute; top:0; right:0; width:60px; height:60px; background:radial-gradient(circle, rgba(99,102,241,0.2), transparent); border-radius:50%; }
+.game-card-icon { font-size:1.8rem; margin-bottom:8px; }
+.game-card-label { font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
+.game-card-value { font-size:1.4rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
+.game-card-sub { font-size:0.68rem; color:var(--text-muted); margin-top:4px; }
+.badge-collection { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.achievement-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399; border-radius:20px; padding:4px 10px; font-size:0.7rem; font-weight:700; }
+.achievement-badge.locked { background:rgba(100,116,139,0.08); border-color:rgba(100,116,139,0.2); color:#64748b; opacity:0.5; }
+.progress-ring-wrap { position:relative; width:80px; height:80px; margin:0 auto; }
+.progress-ring-bg { fill:none; stroke:rgba(99,102,241,0.15); stroke-width:6; }
+.progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
+.progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
+.confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
+.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
+.alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
+.alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
+.alert-rule-card.active { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
+.alert-rule-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; background:rgba(99,102,241,0.12); color:#6366f1; }
+.alert-rule-card.active .alert-rule-icon { background:rgba(52,211,153,0.15); color:#34d399; }
+.alert-rule-info { flex:1; min-width:0; }
+.alert-rule-name { font-size:0.82rem; font-weight:600; color:var(--text-main); margin-bottom:2px; }
+.alert-rule-desc { font-size:0.68rem; color:var(--text-muted); }
+.alert-toggle { width:40px; height:22px; position:relative; }
+.alert-toggle input { opacity:0; width:0; height:0; }
+.alert-toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:22px; cursor:pointer; transition:0.2s; }
+.alert-toggle-slider:before { content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:white; border-radius:50%; transition:0.2s; }
+.alert-toggle input:checked + .alert-toggle-slider { background:#34d399; }
+.alert-toggle input:checked + .alert-toggle-slider:before { transform:translateX(18px); }
+.alert-builder-row { display:grid; grid-template-columns:1fr auto 1fr auto; gap:8px; align-items:center; margin-bottom:10px; }
+.alert-builder-select, .alert-builder-input { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); padding:7px 10px; border-radius:8px; font-size:0.8rem; font-family:'DM Sans',monospace; cursor:pointer; outline:none; }
+body.light-mode .game-card { background:linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(167,139,250,0.04) 100%); }
+body.light-mode .alert-rule-card { background:rgba(0,0,0,0.02); }
+body.light-mode .alert-builder-select, body.light-mode .alert-builder-input { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
 
 /* responsive handled below in IMPROVED MOBILE section */
 
@@ -666,6 +708,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="drawer-item" id="mob-analytics" onclick="mobNav('analytics','finance')"><i class="fas fa-chart-line" style="width:16px;text-align:center"></i> Analytics</div>
   <div class="drawer-item" id="mob-networth" onclick="mobNav('networth','finance')"><i class="fas fa-chart-area" style="width:16px;text-align:center"></i> Net Worth</div>
   <div class="drawer-item" onclick="openBudgetModal();closeMobileDrawer()"><i class="fas fa-sliders-h" style="width:16px;text-align:center"></i> Budgets</div>
+  <div class="drawer-item" onclick="openAlertsModal();closeMobileDrawer()"><i class="fas fa-bell" style="width:16px;text-align:center"></i> Custom Alerts</div>
 
   <div class="drawer-section-label" style="color:#7c6eb3">Portfolio</div>
   <div class="drawer-item" id="mob-port-overview" onclick="mobNav('port-overview','portfolio')"><i class="fas fa-layer-group" style="color:#a78bfa;width:16px;text-align:center"></i> Summary</div>
@@ -687,7 +730,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 <div class="sidebar">
   <div class="brand-section">
     <div class="brand-title"><i class="fas fa-cube" style="color:var(--accent)"></i>Finance<span>OS</span></div>
-    <div class="welcome-msg">Welcome </div>
+    <div class="welcome-msg">Welcome Chris Mcguinness</div>
   </div>
 
   <div class="nav-section-label">Main</div>
@@ -720,6 +763,10 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>Budgets
     <span id="budget-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
+  <div class="nav-item" onclick="openAlertsModal()">
+    <div class="nav-icon"><i class="fas fa-bell"></i></div>Custom Alerts
+    <span id="alerts-sidebar-badge" style="display:none" class="budget-badge"></span>
+  </div>
 
   <div class="sidebar-footer">
     <div class="gdrive-status">
@@ -746,7 +793,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 <div class="port-sidebar">
   <div class="port-brand">
     <div class="port-brand-title"><i class="fas fa-gem"></i> Portfolio OS</div>
-    <div class="port-brand-sub">Physical &amp; Digital Assets of </div>
+    <div class="port-brand-sub">Physical &amp; Digital Assets of Chris Mcguinness</div>
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3">Overview</div>
@@ -864,6 +911,42 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
           <div class="kpi-value" id="kpi-credit-outstanding" style="color:#f97316">₹0</div>
           <div class="kpi-sub" id="kpi-credit-sub">total balance due</div>
         </div>
+      </div>
+
+      <!-- GAMIFICATION STRIP -->
+      <div class="gamification-strip">
+        <div class="game-card">
+          <div class="game-card-icon">🔥</div>
+          <div class="game-card-label">Saving Streak</div>
+          <div class="game-card-value" id="game-streak">0</div>
+          <div class="game-card-sub" id="game-streak-sub">days under budget</div>
+        </div>
+        <div class="game-card" onclick="document.getElementById('badge-showcase').style.display=document.getElementById('badge-showcase').style.display==='none'?'block':'none';renderBadgeCollection()" style="cursor:pointer">
+          <div class="game-card-icon">🏆</div>
+          <div class="game-card-label">Achievements</div>
+          <div class="game-card-value" id="game-badges-count">0/8</div>
+          <div class="game-card-sub">badges unlocked</div>
+        </div>
+        <div class="game-card">
+          <div class="game-card-icon">📈</div>
+          <div class="game-card-label">Milestone Progress</div>
+          <div class="progress-ring-wrap" style="width:60px;height:60px;margin:8px auto 0">
+            <svg width="60" height="60">
+              <circle class="progress-ring-bg" cx="30" cy="30" r="24"></circle>
+              <circle class="progress-ring-fill" id="milestone-ring" cx="30" cy="30" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle>
+            </svg>
+            <div class="progress-ring-text" id="milestone-pct" style="font-size:0.9rem">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BADGE SHOWCASE -->
+      <div id="badge-showcase" style="display:none;margin-bottom:1.3rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="panel-title" style="margin-bottom:0">🏆 Achievement Badges</div>
+          <button onclick="document.getElementById('badge-showcase').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem">✕</button>
+        </div>
+        <div class="badge-collection" id="badge-collection"></div>
       </div>
 
       <div class="glass-panel" style="margin-bottom:1.3rem">
@@ -1624,6 +1707,45 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   </div>
 </div>
 
+<!-- CUSTOM ALERTS MODAL -->
+<div class="modal-overlay" id="alerts-modal">
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
+    
+    <div class="alert-rule-list" id="active-alerts-list"></div>
+
+    <div style="border-top:1px solid var(--glass-border);padding-top:1rem;margin-top:1rem">
+      <div class="panel-title" style="font-size:0.7rem;margin-bottom:0.8rem">➕ Create New Alert</div>
+      <div class="alert-builder-row">
+        <select class="alert-builder-select" id="alert-field">
+          <option value="balance">Net Balance</option>
+          <option value="category">Category Spend</option>
+          <option value="networth">Net Worth</option>
+          <option value="emi">EMI Due</option>
+        </select>
+        <select class="alert-builder-select" id="alert-operator">
+          <option value="gt">is greater than</option>
+          <option value="lt">is less than</option>
+          <option value="eq">equals</option>
+        </select>
+        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount">
+        <button onclick="addCustomAlert()" class="btn-add" style="padding:7px 12px;font-size:0.75rem;white-space:nowrap"><i class="fas fa-plus"></i> Add</button>
+      </div>
+      <div id="alert-category-row" style="display:none;margin-top:8px">
+        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:1.4rem">
+      <button onclick="saveAlerts()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-save"></i> Save</button>
+      <button onclick="document.getElementById('alerts-modal').style.display='none'" class="btn-secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -2295,6 +2417,8 @@ function renderDashboard() {
   renderSparklines();
   renderEmiStrip();
   updateBudgetBadge();
+  updateGameStats();
+  checkAlerts();
 }
 
 // ── BUDGET ALERTS ──────────────────────────────────────────────────────────
@@ -3960,6 +4084,229 @@ function searchJumpTo(type, id) {
   switchView(view, navEl, group);
 }
 
+// ── PWA SERVICE WORKER ──────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+// ── GAMIFICATION SYSTEM ─────────────────────────────────────────────────────
+const BADGES = [
+  {id:'first-save',name:'First Steps',desc:'Added your first transaction',emoji:'🎯',condition:()=>db.length>0},
+  {id:'week-budget',name:'Budget Warrior',desc:'Stayed under budget for 7 days',emoji:'🛡️',condition:()=>gameStats.streak>=7},
+  {id:'month-budget',name:'Budget Master',desc:'Stayed under budget for 30 days',emoji:'👑',condition:()=>gameStats.streak>=30},
+  {id:'first-invest',name:'Investor',desc:'Made your first investment',emoji:'💰',condition:()=>db.filter(r=>r.type==='Investment').length>0},
+  {id:'networth-10l',name:'10L Club',desc:'Reached ₹10 Lakh net worth',emoji:'💎',condition:()=>gameStats.networth>=1000000},
+  {id:'networth-50l',name:'50L Club',desc:'Reached ₹50 Lakh net worth',emoji:'🏆',condition:()=>gameStats.networth>=5000000},
+  {id:'tracker-30',name:'Consistency King',desc:'Logged data for 30 days straight',emoji:'📊',condition:()=>gameStats.trackingDays>=30},
+  {id:'debt-free',name:'Debt Free',desc:'Zero outstanding loans',emoji:'🎉',condition:()=>sumType('Loan',db)===0},
+];
+
+let gameStats = JSON.parse(localStorage.getItem('fos_game_stats')) || {
+  streak:0,lastCheck:null,badges:[],networth:0,trackingDays:0,lastActivity:null
+};
+
+function updateGameStats() {
+  const totalInc=sumType('Income',db),totalInv=sumType('Investment',db),totalLoan=sumType('Loan',db);
+  gameStats.networth = totalInc+totalInv-totalLoan;
+
+  const today = new Date().toISOString().split('T')[0];
+  if (gameStats.lastActivity !== today) {
+    const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+    if (gameStats.lastActivity===yesterday) gameStats.trackingDays++;
+    else gameStats.trackingDays = gameStats.lastActivity ? 1 : 1;
+    gameStats.lastActivity = today;
+  }
+
+  const fM=document.getElementById('filter-month').value, fY=document.getElementById('filter-year').value;
+  if (fM!=='all'||fY!=='all') {
+    const data=getFilteredData();
+    let allUnder=true;
+    Object.entries(budgets).forEach(([cat,limit])=>{
+      const spent=data.filter(x=>x.sub===cat||x.name===cat).reduce((a,b)=>a+b.amount,0);
+      if(spent>limit) allUnder=false;
+    });
+    if(allUnder && gameStats.lastCheck!==today) {
+      gameStats.streak++;
+      gameStats.lastCheck=today;
+    }
+  }
+
+  BADGES.forEach(badge=>{
+    if(!gameStats.badges.includes(badge.id)&&badge.condition()){
+      gameStats.badges.push(badge.id);
+      showBadgeUnlock(badge);
+    }
+  });
+
+  localStorage.setItem('fos_game_stats',JSON.stringify(gameStats));
+  renderGameStats();
+}
+
+function renderGameStats() {
+  document.getElementById('game-streak').textContent=gameStats.streak;
+  document.getElementById('game-streak-sub').textContent=gameStats.streak===1?'day under budget':'days under budget';
+  document.getElementById('game-badges-count').textContent=`${gameStats.badges.length}/${BADGES.length}`;
+
+  const targets=[500000,1000000,2500000,5000000,10000000];
+  const nextTarget=targets.find(t=>t>gameStats.networth);
+  if(nextTarget){
+    const prevTarget=targets[targets.indexOf(nextTarget)-1]||0;
+    const pct=Math.min(Math.max(((gameStats.networth-prevTarget)/(nextTarget-prevTarget))*100,0),100);
+    document.getElementById('milestone-pct').textContent=Math.round(pct)+'%';
+    const ring=document.getElementById('milestone-ring');
+    ring.style.strokeDashoffset=150.8-(pct/100*150.8);
+  }
+}
+
+function renderBadgeCollection() {
+  document.getElementById('badge-collection').innerHTML=BADGES.map(b=>{
+    const unlocked=gameStats.badges.includes(b.id);
+    return `<div class="achievement-badge ${unlocked?'':'locked'}"><span>${b.emoji}</span> <strong>${b.name}</strong> — ${b.desc}</div>`;
+  }).join('');
+}
+
+function showBadgeUnlock(badge) {
+  fireConfetti();
+}
+
+function fireConfetti() {
+  const canvas=document.getElementById('confetti-canvas'),ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const particles=[],colors=['#6366f1','#a78bfa','#34d399','#fbbf24','#f472b6'];
+  for(let i=0;i<80;i++){
+    particles.push({x:Math.random()*canvas.width,y:-10,vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,
+      color:colors[Math.floor(Math.random()*colors.length)],size:Math.random()*8+4});
+  }
+  const animate=()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{p.y+=p.vy;p.x+=p.vx;p.vy+=0.1;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size);});
+    if(particles.some(p=>p.y<canvas.height))requestAnimationFrame(animate);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  };
+  animate();
+}
+
+// ── CUSTOM ALERTS ───────────────────────────────────────────────────────────
+let customAlerts = JSON.parse(localStorage.getItem('fos_alerts'))||[];
+
+function openAlertsModal() {
+  renderAlertsList();
+  document.getElementById('alerts-modal').style.display='flex';
+  document.getElementById('alert-field').onchange=e=>{
+    document.getElementById('alert-category-row').style.display=e.target.value==='category'?'block':'none';
+  };
+}
+
+function renderAlertsList() {
+  const container=document.getElementById('active-alerts-list');
+  if(!customAlerts.length){
+    container.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.82rem"><i class="fas fa-bell-slash" style="font-size:1.6rem;opacity:0.3;display:block;margin-bottom:8px"></i>No active alerts yet</div>';
+    return;
+  }
+  const labels={balance:'Net Balance',category:'Category Spend',networth:'Net Worth',emi:'EMI Due',gt:'>',lt:'<',eq:'='};
+  container.innerHTML=customAlerts.map((alert,idx)=>{
+    const desc=alert.field==='category'?`${alert.category} ${labels[alert.operator]} ${fmt(alert.value)}`:`${labels[alert.field]} ${labels[alert.operator]} ${fmt(alert.value)}`;
+    return `<div class="alert-rule-card ${alert.active?'active':''}">
+      <div class="alert-rule-icon"><i class="fas fa-bell"></i></div>
+      <div class="alert-rule-info">
+        <div class="alert-rule-name">${labels[alert.field]}</div>
+        <div class="alert-rule-desc">${desc}</div>
+      </div>
+      <label class="alert-toggle">
+        <input type="checkbox" ${alert.active?'checked':''} onchange="toggleAlert(${idx},this.checked)">
+        <span class="alert-toggle-slider"></span>
+      </label>
+      <i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.85rem;margin-left:8px" onclick="deleteAlert(${idx})"></i>
+    </div>`;
+  }).join('');
+}
+
+function addCustomAlert() {
+  const field=document.getElementById('alert-field').value,operator=document.getElementById('alert-operator').value;
+  const value=Number(document.getElementById('alert-value').value),category=document.getElementById('alert-category').value.trim();
+  if(!value||(field==='category'&&!category)){alert('Please fill all fields');return;}
+  customAlerts.push({field,operator,value,category,active:true});
+  document.getElementById('alert-value').value='';
+  document.getElementById('alert-category').value='';
+  renderAlertsList();
+}
+
+function toggleAlert(idx,active) {
+  customAlerts[idx].active=active;
+  renderAlertsList();
+}
+
+function deleteAlert(idx) {
+  if(confirm('Delete this alert?')){
+    customAlerts.splice(idx,1);
+    renderAlertsList();
+  }
+}
+
+function saveAlerts() {
+  localStorage.setItem('fos_alerts',JSON.stringify(customAlerts));
+  checkAlerts();
+  document.getElementById('alerts-modal').style.display='none';
+}
+
+function checkAlerts() {
+  if(!('Notification' in window))return;
+  const activeAlerts=customAlerts.filter(a=>a.active);
+  if(!activeAlerts.length)return;
+
+  const totalInc=sumType('Income',db),totalInv=sumType('Investment',db),totalLoan=sumType('Loan',db);
+  const balance=totalInc-totalInv-totalLoan,networth=totalInc+totalInv-totalLoan;
+
+  activeAlerts.forEach(alert=>{
+    let currentValue;
+    if(alert.field==='balance')currentValue=balance;
+    else if(alert.field==='networth')currentValue=networth;
+    else if(alert.field==='category'){
+      currentValue=db.filter(x=>x.sub===alert.category||x.name===alert.category).reduce((a,b)=>a+b.amount,0);
+    }
+
+    let triggered=false;
+    if(alert.operator==='gt'&&currentValue>alert.value)triggered=true;
+    if(alert.operator==='lt'&&currentValue<alert.value)triggered=true;
+    if(alert.operator==='eq'&&currentValue===alert.value)triggered=true;
+
+    if(triggered&&Notification.permission==='granted'){
+      new Notification('FinanceOS Alert 🔔',{
+        body:`${alert.field==='category'?alert.category:alert.field}: ${fmt(currentValue)}`,
+        icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%236366f1\'/%3E%3Ctext x=\'50%25\' y=\'65%25\' font-size=\'50\' fill=\'white\'%3E₹%3C/text%3E%3C/svg%3E'
+      });
+    }
+  });
+
+  const badge=document.getElementById('alerts-sidebar-badge');
+  if(activeAlerts.length>0){
+    badge.textContent=activeAlerts.length;
+    badge.className='budget-badge warn';
+    badge.style.display='inline-flex';
+  }else{
+    badge.style.display='none';
+  }
+}
+
+if('Notification' in window && Notification.permission==='default'){
+  setTimeout(()=>{if(customAlerts.length>0)Notification.requestPermission();},3000);
+}
+
 // ── TAGS ───────────────────────────────────────────────────────────────────
 let currentTagFilter = null;
 let pendingRestoreData = null;
@@ -4142,6 +4489,9 @@ window.onload = () => {
   // Close backup modal on overlay click
   const bkModal = document.getElementById('backup-modal');
   if (bkModal) bkModal.addEventListener('click', e => { if (e.target === bkModal) bkModal.style.display = 'none'; });
+  // Close alerts modal on overlay click
+  const alertsModal = document.getElementById('alerts-modal');
+  if (alertsModal) alertsModal.addEventListener('click', e => { if (e.target === alertsModal) alertsModal.style.display = 'none'; });
 
   // Auto-reconnect Google Drive if the user previously connected.
   // We wait up to 3 seconds for the GIS (Google Identity Services) library
