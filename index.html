@@ -40,60 +40,52 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
 body { background: #07091a; color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
 
+/* ── SIDEBAR BASE ── */
 .sidebar {
   width: var(--sidebar-w); background: rgba(8,11,26,0.98);
   border-right: 1px solid var(--glass-border);
   padding: 1.4rem 1rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
   transition: width 0.3s ease, padding 0.3s ease;
   position: relative;
+  overflow: hidden;
 }
-/* ── COLLAPSED SIDEBAR — Finance ── */
+
+/* ── COLLAPSED: Finance sidebar ── */
 .sidebar.collapsed {
   width: 60px;
   padding: 1.4rem 0.5rem;
 }
-/* Hide all text labels and decorative elements */
+/* Kill ALL text/labels/sections when collapsed */
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .welcome-msg,
 .sidebar.collapsed .nav-section-label,
-.sidebar.collapsed .budget-badge {
+.sidebar.collapsed .brand-title .nav-label,
+.sidebar.collapsed .sidebar-footer-expanded {
   display: none !important;
 }
-/* Brand: icon only, centred */
-.sidebar.collapsed .brand-section {
-  padding: 0;
-}
-.sidebar.collapsed .brand-title {
-  justify-content: center;
-  font-size: 1.1rem;
-}
-/* Nav items: icon centred, no overflow text */
+/* Centre brand icon */
+.sidebar.collapsed .brand-section { padding: 0; text-align: center; }
+.sidebar.collapsed .brand-title { justify-content: center; font-size: 1.1rem; }
+/* Centre nav items, clip anything that overflows */
 .sidebar.collapsed .nav-item {
   justify-content: center;
-  padding: 9px;
+  padding: 10px 0;
+  width: 40px;
+  margin: 0 auto;
   overflow: hidden;
+  white-space: nowrap;
 }
-/* Footer: hide full footer, show icon strip */
-.sidebar.collapsed .sidebar-footer-expanded {
-  display: none;
-}
-.sidebar-footer-collapsed {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  width: 100%;
-}
-.sidebar.collapsed .sidebar-footer-collapsed {
-  display: flex;
-}
-/* Collapsed footer icon buttons */
+/* Hide badges too */
+.sidebar.collapsed .budget-badge { display: none !important; }
+/* Show collapsed footer icons */
+.sidebar-footer-expanded { display: flex; flex-direction: column; gap: 7px; }
+.sidebar-footer-collapsed { display: none; flex-direction: column; align-items: center; gap: 6px; }
+.sidebar.collapsed .sidebar-footer-collapsed { display: flex; }
 .collapsed-icon-btn {
   width: 36px; height: 36px; border-radius: 9px;
   border: 1px solid var(--glass-border); background: transparent;
   color: var(--text-mid); display: flex; align-items: center;
-  justify-content: center; cursor: pointer; font-size: 0.85rem;
-  transition: 0.16s;
+  justify-content: center; cursor: pointer; font-size: 0.85rem; transition: 0.16s;
 }
 .collapsed-icon-btn:hover { background: rgba(255,255,255,0.08); color: white; border-color: rgba(255,255,255,0.2); }
 .sidebar-toggle {
@@ -133,8 +125,9 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .nav-item:hover { background: rgba(255,255,255,0.04); color: white; }
 .nav-item.active { background: rgba(99,102,241,0.12); color: white; }
 .nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:3px; height:55%; background:var(--accent); border-radius:2px; }
-.nav-icon { width: 16px; text-align: center; font-size: 0.82rem; opacity: 0.8; }
-.sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 7px; }
+.nav-icon { width: 18px; min-width: 18px; text-align: center; font-size: 0.9rem; opacity: 0.85; flex-shrink: 0; }
+.nav-label { white-space: nowrap; overflow: hidden; transition: opacity 0.2s; }
+.sidebar-footer { margin-top: auto; }
 .autosave-indicator { display:flex; align-items:center; gap:7px; padding:7px 10px; font-size:0.72rem; color:var(--text-muted); }
 .autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--c-inc); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -182,8 +175,9 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
   padding: 1.4rem 0.9rem; display: flex; flex-direction: column; gap: 3px; flex-shrink: 0;
   position: relative;
   transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
 }
-/* ── COLLAPSED SIDEBAR — Portfolio ── */
+/* ── COLLAPSED: Portfolio sidebar ── */
 .port-sidebar.collapsed {
   width: 60px;
   padding: 1.4rem 0.5rem;
@@ -194,18 +188,22 @@ body { background: #07091a; color: var(--text-main); height: 100vh; display: fle
 .port-sidebar.collapsed .port-filter-box {
   display: none !important;
 }
-.port-sidebar.collapsed .port-brand-title {
-  justify-content: center;
-  font-size: 1rem;
-}
+.port-sidebar.collapsed .port-brand { padding: 0; text-align: center; }
+.port-sidebar.collapsed .port-brand-title { justify-content: center; }
 .port-sidebar.collapsed .port-nav-item {
   justify-content: center;
-  padding: 8px;
+  padding: 10px 0;
+  width: 40px;
+  margin: 0 auto;
   overflow: hidden;
+  white-space: nowrap;
 }
 .port-sidebar.collapsed .btn-port-add {
   justify-content: center;
-  padding: 8px;
+  padding: 8px 0;
+  width: 40px;
+  margin: 0 auto;
+  overflow: hidden;
 }
 .port-sidebar-toggle {
   position: absolute;
@@ -480,7 +478,7 @@ tr:last-child td { border-bottom:none; }
 .progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
 .progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
 .confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
-.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:0.7rem 0; max-height:200px; overflow-y:auto; padding-right:2px; }
+.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
 .alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
 .alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
 .alert-rule-card.active { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
@@ -927,47 +925,59 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <i class="fas fa-chevron-left" id="finance-toggle-icon"></i>
   </div>
   <div class="brand-section">
-    <div class="brand-title"><i class="fas fa-cube" style="color:var(--accent)"></i><span class="nav-label">Finance<span style="color:var(--accent)">OS</span></span></div>
+    <div class="brand-title">
+      <i class="fas fa-cube" style="color:var(--accent);flex-shrink:0"></i>
+      <span class="nav-label">Finance<span style="color:var(--accent)">OS</span></span>
+    </div>
     <div class="welcome-msg">Welcome Chris Mcguinness</div>
   </div>
 
   <div class="nav-section-label">Main</div>
   <div class="nav-item active" id="fin-nav-dashboard" onclick="switchView('dashboard',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div><span class="nav-label">Dashboard</span>
+    <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
+    <span class="nav-label">Dashboard</span>
   </div>
   <div class="nav-item" id="fin-nav-transactions" onclick="switchView('transactions',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-list"></i></div><span class="nav-label">Transactions</span>
+    <div class="nav-icon"><i class="fas fa-list"></i></div>
+    <span class="nav-label">Transactions</span>
   </div>
 
   <div class="nav-section-label">Finance</div>
   <div class="nav-item" id="fin-nav-loans" onclick="switchView('loans',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-landmark"></i></div><span class="nav-label">Loans &amp; EMI</span>
+    <div class="nav-icon"><i class="fas fa-landmark"></i></div>
+    <span class="nav-label">Loans &amp; EMI</span>
   </div>
   <div class="nav-item" id="fin-nav-investments" onclick="switchView('investments',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-coins"></i></div><span class="nav-label">Investments</span>
+    <div class="nav-icon"><i class="fas fa-coins"></i></div>
+    <span class="nav-label">Investments</span>
   </div>
   <div class="nav-item" id="fin-nav-credit" onclick="switchView('credit',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-credit-card" style="color:#f97316"></i></div><span class="nav-label">Credit Tracker</span>
+    <div class="nav-icon"><i class="fas fa-credit-card" style="color:#f97316"></i></div>
+    <span class="nav-label">Credit Tracker</span>
   </div>
 
   <div class="nav-section-label">Insights</div>
   <div class="nav-item" id="fin-nav-analytics" onclick="switchView('analytics',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-line"></i></div><span class="nav-label">Analytics</span>
+    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
+    <span class="nav-label">Analytics</span>
   </div>
   <div class="nav-item" id="fin-nav-networth" onclick="switchView('networth',this,'finance')">
-    <div class="nav-icon"><i class="fas fa-chart-area"></i></div><span class="nav-label">Net Worth</span>
+    <div class="nav-icon"><i class="fas fa-chart-area"></i></div>
+    <span class="nav-label">Net Worth</span>
   </div>
   <div class="nav-item" onclick="openBudgetModal()">
-    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div><span class="nav-label">Budgets</span>
+    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>
+    <span class="nav-label">Budgets</span>
     <span id="budget-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
   <div class="nav-item" onclick="openAlertsModal()">
-    <div class="nav-icon"><i class="fas fa-bell"></i></div><span class="nav-label">Custom Alerts</span>
+    <div class="nav-icon"><i class="fas fa-bell"></i></div>
+    <span class="nav-label">Custom Alerts</span>
     <span id="alerts-sidebar-badge" style="display:none" class="budget-badge"></span>
   </div>
 
-  <div class="sidebar-footer">
-    <!-- Expanded: full footer -->
+  <div class="sidebar-footer" style="margin-top:auto">
+    <!-- Expanded footer -->
     <div class="sidebar-footer-expanded">
       <div class="gdrive-status">
         <div class="gdrive-dot" id="gdrive-dot"></div>
@@ -987,11 +997,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
         <i class="fas fa-database"></i> Backup / Restore
       </button>
     </div>
-    <!-- Collapsed: icon-only footer -->
+    <!-- Collapsed footer: icon-only -->
     <div class="sidebar-footer-collapsed">
       <div class="collapsed-icon-btn" onclick="connectGoogleDrive()" title="Google Drive"><i class="fab fa-google-drive"></i></div>
-      <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export CSV"><i class="fas fa-file-csv"></i></div>
-      <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup / Restore" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
+      <div class="collapsed-icon-btn" onclick="openExportModal()" title="Export"><i class="fas fa-file-csv"></i></div>
+      <div class="collapsed-icon-btn" onclick="openBackupModal()" title="Backup" style="color:var(--c-inc)"><i class="fas fa-database"></i></div>
     </div>
   </div>
 </div>
@@ -1002,45 +1012,59 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <i class="fas fa-chevron-left" id="portfolio-toggle-icon"></i>
   </div>
   <div class="port-brand">
-    <div class="port-brand-title"><i class="fas fa-gem"></i><span class="nav-label"> Portfolio<span style="opacity:0.7"> OS</span></span></div>
+    <div class="port-brand-title">
+      <i class="fas fa-gem" style="flex-shrink:0"></i>
+      <span class="nav-label"> Portfolio<span style="opacity:0.65"> OS</span></span>
+    </div>
     <div class="port-brand-sub">Physical &amp; Digital Assets of Chris Mcguinness</div>
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3">Overview</div>
   <div class="port-nav-item active" id="port-nav-overview" onclick="switchView('port-overview',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div><span class="nav-label">Summary</span>
+    <div class="nav-icon"><i class="fas fa-layer-group" style="color:#a78bfa"></i></div>
+    <span class="nav-label">Summary</span>
   </div>
   <div class="port-nav-item" id="port-nav-table" onclick="switchView('port-table',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-table" style="color:#a78bfa"></i></div><span class="nav-label">Holdings Table</span>
+    <div class="nav-icon"><i class="fas fa-table" style="color:#a78bfa"></i></div>
+    <span class="nav-label">Holdings Table</span>
   </div>
   <div class="port-nav-item" id="port-nav-analytics" onclick="switchView('port-analytics',this,'portfolio')">
-    <div class="nav-icon"><i class="fas fa-chart-bar" style="color:#a78bfa"></i></div><span class="nav-label">Port. Analytics</span>
+    <div class="nav-icon"><i class="fas fa-chart-bar" style="color:#a78bfa"></i></div>
+    <span class="nav-label">Port. Analytics</span>
   </div>
 
   <div class="nav-section-label" style="color:#7c6eb3;margin-top:4px">By Asset</div>
   <div class="port-nav-item" id="port-nav-gold" onclick="filterPortAsset('Gold')">
-    <div class="nav-icon"><i class="fas fa-coins" style="color:var(--c-gold)"></i></div><span class="nav-label">Gold</span>
+    <div class="nav-icon"><i class="fas fa-coins" style="color:var(--c-gold)"></i></div>
+    <span class="nav-label">Gold</span>
   </div>
   <div class="port-nav-item" id="port-nav-silver" onclick="filterPortAsset('Silver')">
-    <div class="nav-icon"><i class="fas fa-medal" style="color:var(--c-silver)"></i></div><span class="nav-label">Silver</span>
+    <div class="nav-icon"><i class="fas fa-medal" style="color:var(--c-silver)"></i></div>
+    <span class="nav-label">Silver</span>
   </div>
   <div class="port-nav-item" id="port-nav-realestate" onclick="filterPortAsset('RealEstate')">
-    <div class="nav-icon"><i class="fas fa-home" style="color:var(--c-realestate)"></i></div><span class="nav-label">Real Estate</span>
+    <div class="nav-icon"><i class="fas fa-home" style="color:var(--c-realestate)"></i></div>
+    <span class="nav-label">Real Estate</span>
   </div>
   <div class="port-nav-item" id="port-nav-mf" onclick="filterPortAsset('MutualFund')">
-    <div class="nav-icon"><i class="fas fa-chart-pie" style="color:var(--c-mf)"></i></div><span class="nav-label">Mutual Funds</span>
+    <div class="nav-icon"><i class="fas fa-chart-pie" style="color:var(--c-mf)"></i></div>
+    <span class="nav-label">Mutual Funds</span>
   </div>
   <div class="port-nav-item" id="port-nav-bonds" onclick="filterPortAsset('Bonds')">
-    <div class="nav-icon"><i class="fas fa-file-invoice-dollar" style="color:var(--c-bonds)"></i></div><span class="nav-label">Bonds</span>
+    <div class="nav-icon"><i class="fas fa-file-invoice-dollar" style="color:var(--c-bonds)"></i></div>
+    <span class="nav-label">Bonds</span>
   </div>
   <div class="port-nav-item" id="port-nav-stocks" onclick="filterPortAsset('Stocks')">
-    <div class="nav-icon"><i class="fas fa-chart-line" style="color:var(--c-stocks)"></i></div><span class="nav-label">Stocks</span>
+    <div class="nav-icon"><i class="fas fa-chart-line" style="color:var(--c-stocks)"></i></div>
+    <span class="nav-label">Stocks</span>
   </div>
   <div class="port-nav-item" id="port-nav-crypto" onclick="filterPortAsset('Crypto')">
-    <div class="nav-icon"><i class="fab fa-bitcoin" style="color:var(--c-crypto)"></i></div><span class="nav-label">Crypto</span>
+    <div class="nav-icon"><i class="fab fa-bitcoin" style="color:var(--c-crypto)"></i></div>
+    <span class="nav-label">Crypto</span>
   </div>
   <div class="port-nav-item" id="port-nav-all" onclick="filterPortAsset('all')">
-    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa"></i></div><span class="nav-label">All Assets</span>
+    <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa"></i></div>
+    <span class="nav-label">All Assets</span>
   </div>
 
   <div class="port-filter-box">
@@ -1937,7 +1961,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
 <!-- CUSTOM ALERTS MODAL -->
 <div class="modal-overlay" id="alerts-modal">
-  <div class="modal-box" style="max-width:580px;overflow-y:visible;max-height:none">
+  <div class="modal-box" style="max-width:580px">
     <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
     
@@ -2562,20 +2586,33 @@ function renderDashboard() {
 
   renderBudgetAlerts(data);
 
-  // Cash flow bar
+  // Cash flow bar — 3D gradient fills
   destroyChart('dash');
-  charts['dash'] = new Chart(document.getElementById('dashChart').getContext('2d'), {
+  const dashCtx = document.getElementById('dashChart').getContext('2d');
+  const dashColors   = ['#34d399','#fbbf24','#f472b6','#60a5fa'];
+  const dashGrads = dashColors.map(hex => {
+    const g = dashCtx.createLinearGradient(0, 0, 0, 260);
+    g.addColorStop(0,   hex + 'ee'); g.addColorStop(0.5, hex + 'bb'); g.addColorStop(1, hex + '55');
+    return g;
+  });
+  charts['dash'] = new Chart(dashCtx, {
     type: 'bar',
     data: {
       labels: ['Income','Investments','Expenses','Loans'],
       datasets: [{
         data: [totalInc, totalInv, totalExp, totalLoan],
-        backgroundColor: ['rgba(52,211,153,0.7)','rgba(251,191,36,0.7)','rgba(244,114,182,0.7)','rgba(96,165,250,0.7)'],
-        borderColor: ['#34d399','#fbbf24','#f472b6','#60a5fa'],
-        borderWidth: 1, borderRadius: 7, barThickness: 40
+        backgroundColor: dashGrads,
+        borderColor: dashColors,
+        borderWidth: 1, borderRadius: 8, barThickness: 44
       }]
     },
-    options: cOpts(false)
+    options: {
+      ...cOpts(false),
+      scales: {
+        x: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'}} },
+        y: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}
+      }
+    }
   });
 
   // Spending donut
@@ -2618,19 +2655,22 @@ function renderDashboard() {
   const avgRoiVals   = avgRoiKeys.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
   destroyChart('dash-roi-bar');
   if (avgRoiKeys.length > 0) {
-    charts['dash-roi-bar'] = new Chart(document.getElementById('dash-roi-bar').getContext('2d'), {
+    const roiCtx = document.getElementById('dash-roi-bar').getContext('2d');
+    charts['dash-roi-bar'] = new Chart(roiCtx, {
       type: 'bar',
       data: {
         labels: avgRoiLabels,
         datasets: [{
           data: avgRoiVals,
-          backgroundColor: avgRoiKeys.map(k => assetColorA(k, 0.75)),
-          borderColor:     avgRoiKeys.map(k => assetColor(k)),
-          borderWidth: 1,
-          borderRadius: 6
+          backgroundColor: avgRoiKeys.map(k => {
+            const g = roiCtx.createLinearGradient(0,0,0,200);
+            const hex = assetColor(k); g.addColorStop(0,hex+'ee'); g.addColorStop(1,hex+'44'); return g;
+          }),
+          borderColor: avgRoiKeys.map(k => assetColor(k)),
+          borderWidth: 1, borderRadius: 7
         }]
       },
-      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
+      options: { ...cOpts(false), scales: { y: { grid:{color:chartGridColor()}, ticks:{color:chartTextColor(), callback:v=>v+'%'} }, x:{ticks:{color:chartTextColor()}} } }
     });
   }
 
@@ -2819,7 +2859,7 @@ function renderSparklines() {
       trendEl.textContent = 'No prior data';
     }
 
-    // Draw sparkline
+    // Draw sparkline — 3D depth glow
     destroyChart('spark-' + key);
     const ctx = document.getElementById(canvasId);
     if (!ctx) return;
@@ -2830,27 +2870,25 @@ function renderSparklines() {
         datasets: [{
           data: vals,
           borderColor: color,
-          borderWidth: 2,
+          borderWidth: 2.5,
           pointRadius: 0,
-          pointHoverRadius: 3,
+          pointHoverRadius: 4,
           fill: true,
           backgroundColor: (ctx2) => {
-            const g = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 48);
-            g.addColorStop(0, color + '55');
-            g.addColorStop(1, color + '00');
+            const g = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 52);
+            g.addColorStop(0,   color + 'aa');
+            g.addColorStop(0.5, color + '44');
+            g.addColorStop(1,   color + '00');
             return g;
           },
-          tension: 0.4
+          tension: 0.45
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => ' '+fmt(c.raw) } } },
-        scales: {
-          x: { display:false },
-          y: { display:false, beginAtZero:true }
-        },
-        animation: { duration: 600 }
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{label:c=>' '+fmt(c.raw)} } },
+        scales: { x:{display:false}, y:{display:false,beginAtZero:true} },
+        animation: { duration: 700, easing: 'easeOutQuart' }
       }
     });
   });
@@ -3111,23 +3149,25 @@ function renderPortOverview() {
   const typeColors = typeKeys.map(k => assetColor(k));
   const typeColorsA = typeKeys.map(k => assetColorA(k, 0.75));
 
-  // Value breakdown bar
+  // Value breakdown bar — 3D
   destroyChart('port-value-bar');
   if (typeKeys.length > 0) {
-    charts['port-value-bar'] = new Chart(document.getElementById('port-value-bar').getContext('2d'), {
+    const pvCtx = document.getElementById('port-value-bar').getContext('2d');
+    charts['port-value-bar'] = new Chart(pvCtx, {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           label: 'Current Value',
           data: typeKeys.map(k => byTypeVal[k]),
-          backgroundColor: typeColorsA,
-          borderColor: typeColors,
-          borderWidth: 1,
-          borderRadius: 7
+          backgroundColor: typeKeys.map(k => {
+            const g = pvCtx.createLinearGradient(0,0,0,220);
+            const hex = assetColor(k); g.addColorStop(0,hex+'ee'); g.addColorStop(1,hex+'33'); return g;
+          }),
+          borderColor: typeColors, borderWidth: 1, borderRadius: 8
         }]
       },
-      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
+      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
     });
   }
 
@@ -3141,38 +3181,37 @@ function renderPortOverview() {
   const avgRoiVals = typeKeys.map(k => +(roiMap[k] / cntMap[k]).toFixed(1));
   destroyChart('port-roi-chart');
   if (typeKeys.length > 0) {
-    charts['port-roi-chart'] = new Chart(document.getElementById('port-roi-chart').getContext('2d'), {
+    const roiCtx2 = document.getElementById('port-roi-chart').getContext('2d');
+    charts['port-roi-chart'] = new Chart(roiCtx2, {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           data: avgRoiVals,
-          backgroundColor: typeColorsA,
-          borderColor: typeColors,
-          borderWidth: 1,
-          borderRadius: 6
+          backgroundColor: typeKeys.map(k => { const g=roiCtx2.createLinearGradient(0,0,0,180); const h=assetColor(k); g.addColorStop(0,h+'ee'); g.addColorStop(1,h+'33'); return g; }),
+          borderColor: typeColors, borderWidth: 1, borderRadius: 6
         }]
       },
-      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b', callback: v => v+'%' } }, x: { ticks: { color:'#64748b' } } } }
+      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor(),callback:v=>v+'%'}}, x:{ticks:{color:chartTextColor()}} } }
     });
   }
 
   // Gain/Loss bar
   destroyChart('port-gain-chart');
   if (typeKeys.length > 0) {
-    charts['port-gain-chart'] = new Chart(document.getElementById('port-gain-chart').getContext('2d'), {
+    const gainCtx = document.getElementById('port-gain-chart').getContext('2d');
+    charts['port-gain-chart'] = new Chart(gainCtx, {
       type: 'bar',
       data: {
         labels: typeLabels,
         datasets: [{
           data: typeKeys.map(k => gainMap[k]),
-          backgroundColor: typeKeys.map(k => gainMap[k] >= 0 ? assetColorA(k, 0.7) : 'rgba(239,68,68,0.7)'),
-          borderColor:     typeKeys.map(k => gainMap[k] >= 0 ? assetColor(k) : '#ef4444'),
-          borderWidth: 1,
-          borderRadius: 6
+          backgroundColor: typeKeys.map(k => { const g=gainCtx.createLinearGradient(0,0,0,180); const isPos=gainMap[k]>=0; const h=isPos?assetColor(k):'#ef4444'; g.addColorStop(0,h+'dd'); g.addColorStop(1,h+'33'); return g; }),
+          borderColor: typeKeys.map(k => gainMap[k]>=0 ? assetColor(k) : '#ef4444'),
+          borderWidth: 1, borderRadius: 6
         }]
       },
-      options: { ...cOpts(false), scales: { y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#64748b' } }, x: { ticks: { color:'#64748b' } } } }
+      options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
     });
   }
 
@@ -3254,19 +3293,19 @@ function renderPortAnalytics() {
   // 3. Waterfall — positive bars use asset colour, negative use red
   const wfSorted = [...data].sort((a,b) => b.gainLoss - a.gainLoss);
   destroyChart('port-waterfall');
-  charts['port-waterfall'] = new Chart(document.getElementById('port-waterfall').getContext('2d'), {
+  const wfCtx = document.getElementById('port-waterfall').getContext('2d');
+  charts['port-waterfall'] = new Chart(wfCtx, {
     type: 'bar',
     data: {
       labels: wfSorted.map(e => assetTypeLabel(e.assetType) + ' ' + e.date.slice(5)),
       datasets: [{
         data: wfSorted.map(e => +e.gainLoss.toFixed(0)),
-        backgroundColor: wfSorted.map(e => e.gainLoss >= 0 ? assetColorA(e.assetType, 0.75) : 'rgba(239,68,68,0.7)'),
-        borderColor:     wfSorted.map(e => e.gainLoss >= 0 ? assetColor(e.assetType) : '#ef4444'),
-        borderWidth: 1,
-        borderRadius: 5
+        backgroundColor: wfSorted.map(e => { const g=wfCtx.createLinearGradient(0,0,0,200); const h=e.gainLoss>=0?assetColor(e.assetType):'#ef4444'; g.addColorStop(0,h+'dd'); g.addColorStop(1,h+'33'); return g; }),
+        borderColor: wfSorted.map(e => e.gainLoss>=0 ? assetColor(e.assetType) : '#ef4444'),
+        borderWidth: 1, borderRadius: 5
       }]
     },
-    options: { ...cOpts(false), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b',maxTicksLimit:8,maxRotation:45} } } }
+    options: { ...cOpts(false), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor(),maxTicksLimit:8,maxRotation:45}} } }
   });
 
   // 4. Invested vs Value grouped bar — asset colour for invested, lighter tint for current value
@@ -3280,16 +3319,17 @@ function renderPortAnalytics() {
   const cvKeys   = Object.keys(cvByType);
   const cvLabels = cvKeys.map(k => assetTypeLabel(k));
   destroyChart('port-compare-bar');
-  charts['port-compare-bar'] = new Chart(document.getElementById('port-compare-bar').getContext('2d'), {
+  const cmpCtx = document.getElementById('port-compare-bar').getContext('2d');
+  charts['port-compare-bar'] = new Chart(cmpCtx, {
     type: 'bar',
     data: {
       labels: cvLabels,
       datasets: [
-        { label:'Total Invested', data:cvKeys.map(k=>cvByType[k].inv), backgroundColor: cvKeys.map(k=>assetColorA(k,0.45)), borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 },
-        { label:'Current Value',  data:cvKeys.map(k=>cvByType[k].val), backgroundColor: cvKeys.map(k=>assetColorA(k,0.8)),  borderColor: cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 }
+        { label:'Total Invested', data:cvKeys.map(k=>cvByType[k].inv), backgroundColor:cvKeys.map(k=>{const g=cmpCtx.createLinearGradient(0,0,0,200);const h=assetColor(k);g.addColorStop(0,h+'88');g.addColorStop(1,h+'22');return g;}), borderColor:cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 },
+        { label:'Current Value',  data:cvKeys.map(k=>cvByType[k].val), backgroundColor:cvKeys.map(k=>{const g=cmpCtx.createLinearGradient(0,0,0,200);const h=assetColor(k);g.addColorStop(0,h+'ee');g.addColorStop(1,h+'55');return g;}), borderColor:cvKeys.map(k=>assetColor(k)), borderWidth:1, borderRadius:5 }
       ]
     },
-    options: { ...cOpts(true), scales: { y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
+    options: { ...cOpts(true), scales: { y:{grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
   });
 
   // 5. Profit% donut
@@ -3339,17 +3379,22 @@ function renderAnalytics() {
   const tS = tI.map((v,i) => v - tE[i]);
 
   destroyChart('trend');
-  charts['trend'] = new Chart(document.getElementById('chart-trend').getContext('2d'), {
+  const trendCtx = document.getElementById('chart-trend').getContext('2d');
+  const trendGradOut = trendCtx.createLinearGradient(0,0,0,280);
+  trendGradOut.addColorStop(0,'rgba(99,102,241,0.85)'); trendGradOut.addColorStop(1,'rgba(99,102,241,0.25)');
+  const trendGradInc = trendCtx.createLinearGradient(0,0,0,280);
+  trendGradInc.addColorStop(0,'rgba(52,211,153,0.55)'); trendGradInc.addColorStop(1,'rgba(52,211,153,0.10)');
+  charts['trend'] = new Chart(trendCtx, {
     type: 'bar',
     data: {
       labels: trendData.map(m => m.label),
       datasets: [
-        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.08)', borderWidth:2, tension:0.4, fill:true, pointRadius:3, pointBackgroundColor:'#34d399' },
-        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:'rgba(99,102,241,0.5)', borderColor:'#6366f1', borderWidth:1, borderRadius:4 },
-        { type:'bar',  label:'Income',        data:tI, backgroundColor:'rgba(52,211,153,0.2)', borderColor:'#34d399', borderWidth:1, borderRadius:4 }
+        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.10)', borderWidth:2.5, tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#34d399', pointBorderColor:'rgba(52,211,153,0.3)', pointBorderWidth:3 },
+        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:trendGradOut, borderColor:'#6366f1', borderWidth:1, borderRadius:6 },
+        { type:'bar',  label:'Income',        data:tI, backgroundColor:trendGradInc, borderColor:'#34d399', borderWidth:1, borderRadius:6 }
       ]
     },
-    options: { ...cOpts(true), scales: { y: { stacked:false, grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} }, x: { ticks:{color:'#64748b'} } } }
+    options: { ...cOpts(true), scales: { y:{stacked:false,grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
   });
 
   const data = getFilteredData();
@@ -3379,14 +3424,19 @@ function renderAnalytics() {
     }
   });
 
-  const hBar = (canvasId, type, colors, chartKey) => {
+  const hBar = (canvasId, type, hexColors, chartKey) => {
     const g = groupData(type, data);
     destroyChart(chartKey);
     if (Object.keys(g).length > 0) {
-      charts[chartKey] = new Chart(document.getElementById(canvasId).getContext('2d'), {
+      const hCtx = document.getElementById(canvasId).getContext('2d');
+      const hGrads = hexColors.map(hex => {
+        const gr = hCtx.createLinearGradient(0,0,hCtx.canvas.width,0);
+        gr.addColorStop(0, hex); gr.addColorStop(1, hex.replace('0.7','0.25')); return gr;
+      });
+      charts[chartKey] = new Chart(hCtx, {
         type: 'bar',
-        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:colors, borderRadius:5, borderSkipped:false }] },
-        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:'#64748b'},grid:{color:'rgba(255,255,255,0.04)'}}, y:{ticks:{color:'#94a3b8',autoSkip:false}} } }
+        data: { labels:Object.keys(g), datasets:[{ data:Object.values(g), backgroundColor:hGrads, borderColor:hexColors.map(h=>h.replace('0.7','1').replace('rgba','rgb').replace(/,[^,)]+\)$/,')')), borderWidth:1, borderRadius:5, borderSkipped:false }] },
+        options: { ...cOpts(false), indexAxis:'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
       });
     }
   };
@@ -3495,52 +3545,56 @@ function renderNetWorth() {
 
   // Net Worth Trajectory chart
   destroyChart('networth');
-  charts['networth'] = new Chart(document.getElementById('chart-networth').getContext('2d'), {
+  const nwCtx = document.getElementById('chart-networth').getContext('2d');
+  const nwGrad = nwCtx.createLinearGradient(0,0,0,280);
+  nwGrad.addColorStop(0,'rgba(167,139,250,0.40)'); nwGrad.addColorStop(0.6,'rgba(167,139,250,0.12)'); nwGrad.addColorStop(1,'rgba(167,139,250,0.01)');
+  charts['networth'] = new Chart(nwCtx, {
     type: 'line',
     data: { labels:nwL, datasets:[{
       label:'Net Worth', data:nwD,
-      borderColor:'#a78bfa',
-      backgroundColor: (ctx) => {
-        const g = ctx.chart.ctx.createLinearGradient(0,0,0,280);
-        g.addColorStop(0,'rgba(167,139,250,0.25)'); g.addColorStop(1,'rgba(167,139,250,0.01)');
-        return g;
-      },
-      fill:true, tension:0.4, borderWidth:2.5, pointRadius:4,
-      pointBackgroundColor:'#a78bfa', pointBorderColor:'rgba(167,139,250,0.3)', pointBorderWidth:3
+      borderColor:'#a78bfa', backgroundColor:nwGrad,
+      fill:true, tension:0.4, borderWidth:3,
+      pointRadius:5, pointBackgroundColor:'#a78bfa',
+      pointBorderColor:'rgba(167,139,250,0.4)', pointBorderWidth:3,
+      pointHoverRadius:8, pointHoverBorderWidth:2
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
     }}
   });
 
   // Assets vs Liabilities chart
   destroyChart('nwbreak');
-  charts['nwbreak'] = new Chart(document.getElementById('chart-nw-breakdown').getContext('2d'), {
+  const nwbCtx = document.getElementById('chart-nw-breakdown').getContext('2d');
+  const nwbGradA = nwbCtx.createLinearGradient(0,0,0,240); nwbGradA.addColorStop(0,'rgba(52,211,153,0.85)'); nwbGradA.addColorStop(1,'rgba(52,211,153,0.20)');
+  const nwbGradL = nwbCtx.createLinearGradient(0,0,0,240); nwbGradL.addColorStop(0,'rgba(96,165,250,0.85)'); nwbGradL.addColorStop(1,'rgba(96,165,250,0.20)');
+  charts['nwbreak'] = new Chart(nwbCtx, {
     type: 'bar',
     data: { labels:nwL, datasets:[
-      { label:'Assets',      data:aD, backgroundColor:'rgba(52,211,153,0.5)',  borderColor:'#34d399', borderWidth:1, borderRadius:4 },
-      { label:'Liabilities', data:lD, backgroundColor:'rgba(96,165,250,0.5)', borderColor:'#60a5fa', borderWidth:1, borderRadius:4 }
+      { label:'Assets',      data:aD, backgroundColor:nwbGradA, borderColor:'#34d399', borderWidth:1, borderRadius:5 },
+      { label:'Liabilities', data:lD, backgroundColor:nwbGradL, borderColor:'#60a5fa', borderWidth:1, borderRadius:5 }
     ]},
     options: { ...cOpts(true), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
     }}
   });
 
   // Monthly Delta chart
   destroyChart('nwdelta');
-  charts['nwdelta'] = new Chart(document.getElementById('chart-nw-delta').getContext('2d'), {
+  const nwdCtx = document.getElementById('chart-nw-delta').getContext('2d');
+  charts['nwdelta'] = new Chart(nwdCtx, {
     type: 'bar',
     data: { labels:nwL, datasets:[{
       label:'Monthly Change', data:deltaD,
-      backgroundColor: deltaD.map(v => v>=0 ? 'rgba(52,211,153,0.6)' : 'rgba(239,68,68,0.6)'),
-      borderColor:     deltaD.map(v => v>=0 ? '#34d399' : '#ef4444'),
-      borderWidth:1, borderRadius:5
+      backgroundColor: deltaD.map(v => { const g=nwdCtx.createLinearGradient(0,0,0,200); if(v>=0){g.addColorStop(0,'rgba(52,211,153,0.90)');g.addColorStop(1,'rgba(52,211,153,0.20)');}else{g.addColorStop(0,'rgba(239,68,68,0.90)');g.addColorStop(1,'rgba(239,68,68,0.20)');} return g; }),
+      borderColor: deltaD.map(v => v>=0?'#34d399':'#ef4444'),
+      borderWidth:1, borderRadius:6
     }]},
     options: { ...cOpts(false), scales: {
-      y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}, callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
-      x:{ ticks:{color:chartTextColor(),font:{weight:'bold',family:'DM Sans'}} }
+      y:{ grid:{color:chartGridColor()}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')} },
+      x:{ ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'}} }
     }}
   });
 }
@@ -3555,124 +3609,321 @@ function groupData(type, data) {
   return g;
 }
 
-// ── CHART GRADIENTS ────────────────────────────────────────────────────────
-function createGradient(ctx, color1, color2) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  gradient.addColorStop(0, color1);
-  gradient.addColorStop(1, color2);
-  return gradient;
-}
+// ══════════════════════════════════════════════════════════════════════════
+// 3D PREMIUM CHART ENGINE
+// ══════════════════════════════════════════════════════════════════════════
 
-function createRadialGradient(ctx, innerColor, outerColor) {
-  const gradient = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
-  gradient.addColorStop(0, innerColor);
-  gradient.addColorStop(1, outerColor);
-  return gradient;
-}
+// ── 3D Bar Plugin: draws a top face + right side face for depth ────────────
+const plugin3DBar = {
+  id: 'plugin3DBar',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    chart.data.datasets.forEach((dataset, di) => {
+      if (dataset.type === 'line' || dataset.type === 'scatter') return;
+      const meta = chart.getDatasetMeta(di);
+      if (!meta || meta.type !== 'bar') return;
+      meta.data.forEach((bar, i) => {
+        const val = dataset.data[i];
+        if (!val && val !== 0) return;
+        const { x, y, width, height, base } = bar.getProps(['x','y','width','height','base'], true);
+        if (height === 0) return;
+        const isHorizontal = chart.options.indexAxis === 'y';
+        const depth  = isHorizontal ? Math.max(4, Math.abs(height) * 0.06) : Math.max(4, width * 0.18);
+        const depthY = isHorizontal ? Math.max(4, width  * 0.18) : Math.max(3, depth * 0.55);
 
-// Global Chart.js styling for modern neumorphic look
+        // Resolve bar colour
+        const rawColor = Array.isArray(dataset.borderColor)
+          ? dataset.borderColor[i] : dataset.borderColor;
+        const solidColor = rawColor || '#6366f1';
+
+        ctx.save();
+
+        if (!isHorizontal) {
+          // ── TOP FACE (horizontal parallelogram) ──
+          ctx.beginPath();
+          ctx.moveTo(x - width/2,       y);
+          ctx.lineTo(x - width/2 + depth, y - depthY);
+          ctx.lineTo(x + width/2 + depth, y - depthY);
+          ctx.lineTo(x + width/2,         y);
+          ctx.closePath();
+          const topGrad = ctx.createLinearGradient(x - width/2, y - depthY, x + width/2 + depth, y);
+          topGrad.addColorStop(0, solidColor + 'ff');
+          topGrad.addColorStop(1, solidColor + 'bb');
+          ctx.fillStyle = topGrad;
+          ctx.fill();
+
+          // ── RIGHT SIDE FACE ──
+          ctx.beginPath();
+          ctx.moveTo(x + width/2,         y);
+          ctx.lineTo(x + width/2 + depth, y - depthY);
+          ctx.lineTo(x + width/2 + depth, base - depthY);
+          ctx.lineTo(x + width/2,         base);
+          ctx.closePath();
+          const sideGrad = ctx.createLinearGradient(x + width/2, 0, x + width/2 + depth, 0);
+          sideGrad.addColorStop(0, solidColor + '88');
+          sideGrad.addColorStop(1, solidColor + '33');
+          ctx.fillStyle = sideGrad;
+          ctx.fill();
+        } else {
+          // Horizontal bars — right face on top, bottom face below
+          const bx = val >= 0 ? x : base;
+          const bw = Math.abs(x - base);
+          // TOP face
+          ctx.beginPath();
+          ctx.moveTo(bx,      y - height/2);
+          ctx.lineTo(bx,      y - height/2 - depthY);
+          ctx.lineTo(bx + bw, y - height/2 - depthY);
+          ctx.lineTo(bx + bw, y - height/2);
+          ctx.closePath();
+          const topGrad2 = ctx.createLinearGradient(bx, y - height/2 - depthY, bx + bw, y - height/2);
+          topGrad2.addColorStop(0, solidColor + 'cc');
+          topGrad2.addColorStop(1, solidColor + '77');
+          ctx.fillStyle = topGrad2;
+          ctx.fill();
+          // RIGHT face
+          ctx.beginPath();
+          ctx.moveTo(bx + bw, y - height/2);
+          ctx.lineTo(bx + bw, y - height/2 - depthY);
+          ctx.lineTo(bx + bw + depth, y - height/2 - depthY);
+          ctx.lineTo(bx + bw + depth, y - height/2);
+          ctx.closePath();
+          const sideGrad2 = ctx.createLinearGradient(bx + bw, 0, bx + bw + depth, 0);
+          sideGrad2.addColorStop(0, solidColor + '88');
+          sideGrad2.addColorStop(1, solidColor + '22');
+          ctx.fillStyle = sideGrad2;
+          ctx.fill();
+        }
+
+        ctx.restore();
+      });
+    });
+  }
+};
+Chart.register(plugin3DBar);
+
+// ── 3D Line/Area plugin: adds layered glow shadow below the line ───────────
+const plugin3DLine = {
+  id: 'plugin3DLine',
+  beforeDatasetsDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    chart.data.datasets.forEach((dataset, di) => {
+      if (dataset.type !== 'line' && chart.config.type !== 'line') return;
+      if (dataset.pointRadius === 0 && !dataset.fill) return; // sparklines skip
+      const meta = chart.getDatasetMeta(di);
+      if (!meta || meta.type !== 'line') return;
+      const rawColor = dataset.borderColor || '#6366f1';
+      // Draw 3 shadow layers offset downward for depth
+      [12, 7, 3].forEach((offset, li) => {
+        const alpha = [0.07, 0.12, 0.18][li];
+        ctx.save();
+        ctx.translate(offset * 0.4, offset);
+        ctx.globalAlpha = alpha;
+        meta.dataset.draw(ctx);
+        ctx.restore();
+      });
+    });
+  }
+};
+Chart.register(plugin3DLine);
+
+// ── 3D Donut plugin: inner bevel ring + outer drop shadow ─────────────────
+const plugin3DDonut = {
+  id: 'plugin3DDonut',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut' && chart.config.type !== 'pie') return;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    const cx = (chartArea.left + chartArea.right)  / 2;
+    const cy = (chartArea.top  + chartArea.bottom) / 2;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data.length) return;
+    const outerR = meta.data[0]?.outerRadius || 0;
+    const innerR = meta.data[0]?.innerRadius || 0;
+    if (!outerR) return;
+
+    // Outer drop-shadow ring
+    ctx.save();
+    const shadowGrad = ctx.createRadialGradient(cx + 6, cy + 10, innerR * 0.9, cx, cy, outerR + 12);
+    shadowGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    shadowGrad.addColorStop(0.7, 'rgba(0,0,0,0.18)');
+    shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shadowGrad;
+    ctx.beginPath();
+    ctx.arc(cx + 4, cy + 7, outerR + 8, 0, Math.PI * 2);
+    ctx.arc(cx, cy, outerR - 2, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+
+    // Inner bevel highlight
+    ctx.save();
+    const bevelGrad = ctx.createLinearGradient(cx - innerR, cy - innerR, cx + innerR, cy + innerR);
+    bevelGrad.addColorStop(0,   'rgba(255,255,255,0.18)');
+    bevelGrad.addColorStop(0.5, 'rgba(255,255,255,0.04)');
+    bevelGrad.addColorStop(1,   'rgba(0,0,0,0.12)');
+    ctx.strokeStyle = bevelGrad;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR + 1, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Outer bevel highlight arc (top-left)
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR - 1, Math.PI * 1.1, Math.PI * 1.9);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+Chart.register(plugin3DDonut);
+
+// ── Chart panel glow: CSS shadow on canvas wrappers ───────────────────────
+const style3D = document.createElement('style');
+style3D.textContent = `
+  canvas {
+    filter: drop-shadow(0 4px 18px rgba(99,102,241,0.13));
+  }
+  .glass-panel canvas, .spark-card canvas {
+    filter: drop-shadow(0 2px 10px rgba(99,102,241,0.10));
+  }
+`;
+document.head.appendChild(style3D);
+
+// Global Chart.js styling — premium 3D-ready defaults
 Chart.defaults.font.family = 'DM Sans';
 Chart.defaults.font.weight = '600';
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.95)';
-Chart.defaults.plugins.tooltip.padding = 12;
-Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,0.3)';
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(8,11,26,0.97)';
+Chart.defaults.plugins.tooltip.padding = 14;
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,0.45)';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 10;
-Chart.defaults.plugins.tooltip.titleFont = {family:'DM Sans',size:12,weight:'600'};
-Chart.defaults.plugins.tooltip.bodyFont = {family:'DM Mono',size:11};
-Chart.defaults.elements.bar.borderRadius = 8;
+Chart.defaults.plugins.tooltip.cornerRadius = 12;
+Chart.defaults.plugins.tooltip.titleFont = {family:'DM Sans',size:12,weight:'700'};
+Chart.defaults.plugins.tooltip.bodyFont  = {family:'DM Mono',size:11};
+Chart.defaults.plugins.tooltip.caretSize = 6;
+Chart.defaults.elements.bar.borderRadius = 6;
 Chart.defaults.elements.bar.borderSkipped = false;
+// Bar shadow via borderWidth top face
+Chart.defaults.elements.bar.borderWidth = 0;
 
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
-function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#ffffff'; }
-function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.04)'; }
+function chartTextColor() { return document.body.classList.contains('light-mode') ? '#334155' : '#e2e8f0'; }
+function chartGridColor() { return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'; }
+
+// ── 3D gradient bar background helper ─────────────────────────────────────
+function make3DBarColor(ctx, hex, alpha1, alpha2) {
+  const canvas = ctx.canvas;
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0,   hex + Math.round(alpha1*255).toString(16).padStart(2,'0'));
+  grad.addColorStop(0.5, hex + Math.round((alpha1+alpha2)/2*255).toString(16).padStart(2,'0'));
+  grad.addColorStop(1,   hex + Math.round(alpha2*255).toString(16).padStart(2,'0'));
+  return grad;
+}
+
+// ── Shared chart options factory ───────────────────────────────────────────
 function cOpts(legend) {
-  return { 
-    responsive:true, 
-    maintainAspectRatio:false,
-    plugins:{ 
-      legend:{ 
-        display:!!legend, 
-        labels:{ color:chartTextColor(), boxWidth:11, font:{ family:'DM Sans', size:11, weight:'600' }, padding:12 } 
-      }, 
-      tooltip:{ 
-        backgroundColor:'rgba(15,23,42,0.95)',
-        padding:12,
-        borderColor:'rgba(99,102,241,0.3)',
-        borderWidth:1,
-        titleFont:{family:'DM Sans',size:12,weight:'600'},
-        bodyFont:{family:'DM Mono',size:11},
-        callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } 
-      } 
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 800, easing: 'easeOutQuart' },
+    plugins: {
+      legend: {
+        display: !!legend,
+        labels: {
+          color: chartTextColor(),
+          boxWidth: 11,
+          font: { family:'DM Sans', size:11, weight:'600' },
+          padding: 14,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(8,11,26,0.97)',
+        padding: 14,
+        borderColor: 'rgba(99,102,241,0.45)',
+        borderWidth: 1,
+        titleFont: { family:'DM Sans', size:12, weight:'700' },
+        bodyFont:  { family:'DM Mono', size:11 },
+        callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+      }
     },
     scales: {
-      x: { 
-        grid:{ color:chartGridColor(), drawBorder:false },
-        ticks:{ color:chartTextColor(), font:{weight:'600',family:'DM Sans'} }
+      x: {
+        grid: { color: chartGridColor(), drawBorder: false },
+        ticks: { color: chartTextColor(), font: { weight:'600', family:'DM Sans' } }
       },
-      y: { 
-        grid:{ color:chartGridColor(), drawBorder:false },
-        ticks:{ color:chartTextColor(), font:{weight:'600',family:'DM Sans'} }
+      y: {
+        grid: { color: chartGridColor(), drawBorder: false },
+        ticks: { color: chartTextColor(), font: { weight:'600', family:'DM Sans' } }
       }
     }
   };
 }
 
+// ── 3D Donut/Pie factory ───────────────────────────────────────────────────
 function makeDonut(id, labels, data, colors) {
   const canvas = document.getElementById(id);
   const ctx = canvas.getContext('2d');
-  
-  // Create gradient backgrounds for donut
-  const gradientColors = colors.map((color, i) => {
-    const grad = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    grad.addColorStop(0, color + 'dd');
-    grad.addColorStop(1, color + '88');
-    return grad;
+  const w = canvas.offsetWidth || 300;
+
+  // Multi-stop gradient per slice for 3D depth
+  const gradColors = colors.map((hex, i) => {
+    const g = ctx.createLinearGradient(-w/2, -w/2, w/2, w/2);
+    g.addColorStop(0,   hex + 'ff');
+    g.addColorStop(0.4, hex + 'dd');
+    g.addColorStop(1,   hex + '88');
+    return g;
   });
-  
+
   return new Chart(ctx, {
     type: 'doughnut',
-    data: { 
-      labels, 
-      datasets:[{ 
-        data, 
-        backgroundColor:gradientColors.length ? gradientColors : colors,
-        borderWidth:3,
-        borderColor:'rgba(255,255,255,0.1)',
-        hoverOffset:8,
-        hoverBorderWidth:4,
-        hoverBorderColor:'rgba(255,255,255,0.3)'
-      }] 
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: gradColors,
+        borderWidth: 3,
+        borderColor: 'rgba(7,9,26,0.9)',
+        hoverOffset: 14,
+        hoverBorderWidth: 0,
+        hoverBorderColor: 'rgba(255,255,255,0.3)',
+        spacing: 2
+      }]
     },
-    options: { 
-      responsive:true, 
-      maintainAspectRatio:false, 
-      cutout:'68%',
-      plugins:{ 
-        legend:{ 
-          position:'right', 
-          labels:{ 
-            color:chartTextColor(), 
-            boxWidth:10, 
-            font:{ size:10, family:'DM Sans', weight:'600' },
-            padding:10,
-            usePointStyle:true,
-            pointStyle:'circle'
-          } 
-        }, 
-        tooltip:{ 
-          backgroundColor:'rgba(15,23,42,0.95)',
-          padding:12,
-          borderColor:'rgba(99,102,241,0.3)',
-          borderWidth:1,
-          titleFont:{family:'DM Sans',size:12,weight:'600'},
-          bodyFont:{family:'DM Mono',size:11},
-          callbacks:{ label: ctx => ' ₹'+Number(ctx.raw).toLocaleString('en-IN') } 
-        } 
-      } 
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      animation: { animateRotate: true, animateScale: true, duration: 900, easing: 'easeOutBack' },
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: chartTextColor(),
+            boxWidth: 10,
+            font: { size:10, family:'DM Sans', weight:'600' },
+            padding: 10,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(8,11,26,0.97)',
+          padding: 14,
+          borderColor: 'rgba(99,102,241,0.45)',
+          borderWidth: 1,
+          titleFont: { family:'DM Sans', size:12, weight:'700' },
+          bodyFont:  { family:'DM Mono', size:11 },
+          callbacks: { label: ctx => '  ₹' + Number(ctx.raw).toLocaleString('en-IN') }
+        }
+      }
     }
   });
 }
+
 function renderDonut(id, labels, data, colors, key) {
   destroyChart(key);
   charts[key] = makeDonut(id, labels, data, colors);
@@ -4823,75 +5074,34 @@ function renderWeeklyRadar() {
 
   const data = days.map(d => spendByDay[d]);
   destroyChart('radar-weekly');
-  charts['radar-weekly'] = new Chart(document.getElementById('radar-weekly').getContext('2d'), {
+  const rwCtx = document.getElementById('radar-weekly').getContext('2d');
+  const rwGrad = rwCtx.createLinearGradient(0,0,0,220);
+  rwGrad.addColorStop(0,'rgba(244,114,182,0.90)'); rwGrad.addColorStop(0.5,'rgba(244,114,182,0.55)'); rwGrad.addColorStop(1,'rgba(244,114,182,0.15)');
+  charts['radar-weekly'] = new Chart(rwCtx, {
     type: 'bar',
     data: {
       labels: days,
       datasets: [{
-        label: 'Spending',
-        data,
-        backgroundColor: 'rgba(244,114,182,0.7)',
-        borderColor: '#f472b6',
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false
+        label: 'Spending', data,
+        backgroundColor: rwGrad, borderColor: '#f472b6', borderWidth: 2, borderRadius: 9, borderSkipped: false
       }, {
-        label: 'Trend',
-        data,
-        type: 'line',
-        backgroundColor: 'transparent',
-        borderColor: '#a78bfa',
-        borderWidth: 3,
-        pointBackgroundColor: '#a78bfa',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        tension: 0.4
+        label: 'Trend', data, type: 'line',
+        backgroundColor: 'transparent', borderColor: '#a78bfa', borderWidth: 3,
+        pointBackgroundColor: '#a78bfa', pointBorderColor: '#fff', pointBorderWidth: 2,
+        pointRadius: 5, pointHoverRadius: 8, tension: 0.45
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       scales: {
-        y: {
-          beginAtZero: true,
-          grid: { color: chartGridColor(), drawBorder: false },
-          ticks: { 
-            color: chartTextColor(), 
-            font: { size: 10, family: 'DM Sans', weight: '600' },
-            callback: v => '₹' + (v/1000).toFixed(0) + 'k'
-          }
-        },
-        x: {
-          grid: { display: false, drawBorder: false },
-          ticks: { 
-            color: chartTextColor(), 
-            font: { size: 11, family: 'DM Sans', weight: '600' } 
-          }
-        }
+        y: { beginAtZero:true, grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{size:10,family:'DM Sans',weight:'600'},callback:v=>'₹'+(v/1000).toFixed(0)+'k'} },
+        x: { grid:{display:false,drawBorder:false}, ticks:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'}} }
       },
       plugins: {
-        legend: { 
-          display: true,
-          position: 'top',
-          labels: {
-            color: chartTextColor(),
-            font: { size: 11, family: 'DM Sans', weight: '600' },
-            usePointStyle: true,
-            padding: 15
-          }
-        },
-        tooltip: {
-          backgroundColor: 'rgba(15,23,42,0.95)',
-          padding: 12,
-          borderColor: 'rgba(244,114,182,0.3)',
-          borderWidth: 1,
-          titleFont: { family: 'DM Sans', size: 12, weight: '600' },
-          bodyFont: { family: 'DM Mono', size: 11 },
-          callbacks: { label: ctx => ' ₹' + Number(ctx.raw).toLocaleString('en-IN') }
-        }
-      }
+        legend:{ display:true, position:'top', labels:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'},usePointStyle:true,padding:15} },
+        tooltip:{ backgroundColor:'rgba(8,11,26,0.97)',padding:12,borderColor:'rgba(244,114,182,0.3)',borderWidth:1,titleFont:{family:'DM Sans',size:12,weight:'600'},bodyFont:{family:'DM Mono',size:11},callbacks:{label:ctx=>' ₹'+Number(ctx.raw).toLocaleString('en-IN')} }
+      },
+      animation:{ duration:800, easing:'easeOutQuart' }
     }
   });
 }
@@ -4924,77 +5134,34 @@ function renderHealthRadar() {
   const labels = ['Savings Rate', 'Debt-to-Income', 'Emergency Fund', 'Investment Diversity', 'Budget Adherence'];
 
   destroyChart('radar-health');
-  charts['radar-health'] = new Chart(document.getElementById('radar-health').getContext('2d'), {
+  const rhCtx = document.getElementById('radar-health').getContext('2d');
+  const rhGrad = rhCtx.createLinearGradient(0,0,0,220);
+  rhGrad.addColorStop(0,'rgba(52,211,153,0.90)'); rhGrad.addColorStop(0.5,'rgba(52,211,153,0.55)'); rhGrad.addColorStop(1,'rgba(52,211,153,0.15)');
+  charts['radar-health'] = new Chart(rhCtx, {
     type: 'bar',
     data: {
       labels,
       datasets: [{
-        label: 'Score',
-        data: scores,
-        backgroundColor: 'rgba(52,211,153,0.7)',
-        borderColor: '#34d399',
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false
+        label: 'Score', data: scores,
+        backgroundColor: rhGrad, borderColor: '#34d399', borderWidth: 2, borderRadius: 9, borderSkipped: false
       }, {
-        label: 'Trend',
-        data: scores,
-        type: 'line',
-        backgroundColor: 'transparent',
-        borderColor: '#60a5fa',
-        borderWidth: 3,
-        pointBackgroundColor: '#60a5fa',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        tension: 0.4
+        label: 'Trend', data: scores, type: 'line',
+        backgroundColor: 'transparent', borderColor: '#60a5fa', borderWidth: 3,
+        pointBackgroundColor: '#60a5fa', pointBorderColor: '#fff', pointBorderWidth: 2,
+        pointRadius: 5, pointHoverRadius: 8, tension: 0.45
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          grid: { color: chartGridColor(), drawBorder: false },
-          ticks: { 
-            color: chartTextColor(), 
-            stepSize: 20,
-            font: { size: 10, family: 'DM Sans', weight: '600' },
-            callback: v => v + '/100'
-          }
-        },
-        x: {
-          grid: { display: false, drawBorder: false },
-          ticks: { 
-            color: chartTextColor(), 
-            font: { size: 10, family: 'DM Sans', weight: '600' } 
-          }
-        }
+        y: { beginAtZero:true, max:100, grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),stepSize:20,font:{size:10,family:'DM Sans',weight:'600'},callback:v=>v+'/100'} },
+        x: { grid:{display:false,drawBorder:false}, ticks:{color:chartTextColor(),font:{size:10,family:'DM Sans',weight:'600'}} }
       },
       plugins: {
-        legend: { 
-          display: true,
-          position: 'top',
-          labels: {
-            color: chartTextColor(),
-            font: { size: 11, family: 'DM Sans', weight: '600' },
-            usePointStyle: true,
-            padding: 15
-          }
-        },
-        tooltip: {
-          backgroundColor: 'rgba(15,23,42,0.95)',
-          padding: 12,
-          borderColor: 'rgba(52,211,153,0.3)',
-          borderWidth: 1,
-          titleFont: { family: 'DM Sans', size: 12, weight: '600' },
-          bodyFont: { family: 'DM Mono', size: 11 },
-          callbacks: { label: ctx => ' ' + ctx.raw.toFixed(0) + '/100' }
-        }
-      }
+        legend:{ display:true, position:'top', labels:{color:chartTextColor(),font:{size:11,family:'DM Sans',weight:'600'},usePointStyle:true,padding:15} },
+        tooltip:{ backgroundColor:'rgba(8,11,26,0.97)',padding:12,borderColor:'rgba(52,211,153,0.3)',borderWidth:1,titleFont:{family:'DM Sans',size:12,weight:'600'},bodyFont:{family:'DM Mono',size:11},callbacks:{label:ctx=>' '+ctx.raw.toFixed(0)+'/100'} }
+      },
+      animation:{ duration:800, easing:'easeOutQuart' }
     }
   });
 }
