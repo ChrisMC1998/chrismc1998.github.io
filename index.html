@@ -26,10 +26,11 @@
   /* ── ASSET COLOURS — single source of truth ── */
   --c-gold:   #f59e0b;
   --c-silver: #94a3b8;
-  --c-land:   #34d399;
+  --c-realestate: #34d399;
   --c-mf:     #6366f1;
   --c-bonds:  #f472b6;
   --c-stocks: #38bdf8;
+  --c-crypto: #a78bfa;
   --c-other:  #a78bfa;
   --sidebar-w: 220px;
   --port-sidebar-w: 200px;
@@ -280,9 +281,11 @@ tr:last-child td { border-bottom:none; }
 /* Sidebar asset dot colours */
 .asset-gold   { color: var(--c-gold); }
 .asset-silver { color: var(--c-silver); }
-.asset-land   { color: var(--c-land); }
+.asset-realestate { color: var(--c-realestate); }
 .asset-mf     { color: var(--c-mf); }
 .asset-bonds  { color: var(--c-bonds); }
+.asset-stocks { color: var(--c-stocks); }
+.asset-crypto { color: var(--c-crypto); }
 .asset-other  { color: var(--text-mid); }
 
 .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--text-muted); }
@@ -353,7 +356,7 @@ tr:last-child td { border-bottom:none; }
 .progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
 .progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
 .confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
-.alert-rule-list { display:flex; flex-direction:column; gap:0; margin:0; }
+.alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
 .alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
 .alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
 .alert-rule-card.active { border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.05); }
@@ -370,60 +373,9 @@ tr:last-child td { border-bottom:none; }
 .alert-toggle input:checked + .alert-toggle-slider:before { transform:translateX(18px); }
 .alert-builder-row { display:grid; grid-template-columns:1fr auto 1fr auto; gap:8px; align-items:center; margin-bottom:10px; }
 .alert-builder-select, .alert-builder-input { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); padding:7px 10px; border-radius:8px; font-size:0.8rem; font-family:'DM Sans',monospace; cursor:pointer; outline:none; }
-.alert-builder-select option { background:#0f172a; color:var(--text-main); }
 body.light-mode .game-card { background:linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(167,139,250,0.04) 100%); }
 body.light-mode .alert-rule-card { background:rgba(0,0,0,0.02); }
 body.light-mode .alert-builder-select, body.light-mode .alert-builder-input { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
-body.light-mode .alert-builder-select option { background:#fff; color:#0f172a; }
-
-/* ── NOTIFICATION BELL ── */
-.notification-bell-btn {
-  position:relative; padding:8px 12px; border-radius:9px; border:1px solid var(--glass-border);
-  background:transparent; color:var(--text-mid); cursor:pointer; display:flex; align-items:center; gap:8px;
-  font-size:0.92rem; transition:all 0.16s; font-family:'DM Sans',sans-serif; font-weight:600;
-}
-.notification-bell-btn:hover { background:rgba(255,255,255,0.08); color:white; border-color:var(--accent); }
-.notification-bell-btn .bell-icon { font-size:1rem; }
-.notification-badge {
-  position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; border-radius:10px;
-  min-width:18px; height:18px; display:flex; align-items:center; justify-content:center;
-  font-size:0.65rem; font-weight:800; padding:0 5px; box-shadow:0 2px 8px rgba(239,68,68,0.4);
-}
-.notification-popup {
-  position:absolute; top:calc(100% + 8px); right:0; width:380px; max-height:500px; overflow-y:auto;
-  background:rgba(15,23,42,0.98); border:1px solid var(--glass-border); border-radius:12px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4); backdrop-filter:blur(12px); z-index:1000; display:none;
-}
-.notification-popup.show { display:block; animation:slideDown 0.2s ease; }
-@keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-.notification-header {
-  padding:14px 16px; border-bottom:1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between;
-}
-.notification-title { font-size:0.9rem; font-weight:700; color:var(--text-main); }
-.notification-clear { font-size:0.72rem; color:var(--accent); cursor:pointer; font-weight:600; }
-.notification-clear:hover { text-decoration:underline; }
-.notification-list { padding:8px; max-height:400px; overflow-y:auto; }
-.notification-item {
-  padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
-  border-radius:10px; margin-bottom:8px; cursor:pointer; transition:0.16s; position:relative;
-}
-.notification-item:hover { background:rgba(255,255,255,0.06); border-color:var(--accent); }
-.notification-item-icon {
-  width:36px; height:36px; border-radius:8px; background:rgba(99,102,241,0.15);
-  display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:0.9rem; margin-bottom:8px;
-}
-.notification-item-title { font-size:0.85rem; font-weight:600; color:var(--text-main); margin-bottom:4px; }
-.notification-item-desc { font-size:0.75rem; color:var(--text-muted); line-height:1.4; }
-.notification-item-time { font-size:0.68rem; color:var(--text-muted); margin-top:6px; }
-.notification-empty {
-  text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.82rem;
-}
-.notification-empty i { font-size:2rem; opacity:0.3; display:block; margin-bottom:12px; }
-body.light-mode .notification-popup { background:rgba(255,255,255,0.98); }
-body.light-mode .notification-item { background:rgba(0,0,0,0.02); }
-body.light-mode .notification-item:hover { background:rgba(0,0,0,0.04); }
-body.light-mode .notification-bell-btn { color:#475569; }
-body.light-mode .notification-bell-btn:hover { background:rgba(0,0,0,0.06); color:#0f172a; }
 
 /* responsive handled below in IMPROVED MOBILE section */
 
@@ -834,8 +786,11 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="drawer-section-label" style="color:#7c6eb3">By Asset</div>
   <div class="drawer-item" onclick="filterPortAsset('Gold');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-gold);font-size:0.55rem;width:16px;text-align:center"></i> Gold</div>
   <div class="drawer-item" onclick="filterPortAsset('Silver');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-silver);font-size:0.55rem;width:16px;text-align:center"></i> Silver</div>
-  <div class="drawer-item" onclick="filterPortAsset('Land');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-land);font-size:0.55rem;width:16px;text-align:center"></i> Land</div>
+  <div class="drawer-item" onclick="filterPortAsset('RealEstate');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-realestate);font-size:0.55rem;width:16px;text-align:center"></i> Real Estate</div>
   <div class="drawer-item" onclick="filterPortAsset('MutualFund');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-mf);font-size:0.55rem;width:16px;text-align:center"></i> Mutual Funds</div>
+  <div class="drawer-item" onclick="filterPortAsset('Bonds');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-bonds);font-size:0.55rem;width:16px;text-align:center"></i> Bonds</div>
+  <div class="drawer-item" onclick="filterPortAsset('Stocks');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-stocks);font-size:0.55rem;width:16px;text-align:center"></i> Stocks</div>
+  <div class="drawer-item" onclick="filterPortAsset('Crypto');closeMobileDrawer()"><i class="fas fa-circle" style="color:var(--c-crypto);font-size:0.55rem;width:16px;text-align:center"></i> Crypto</div>
   <div class="drawer-item" onclick="filterPortAsset('all');closeMobileDrawer()"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem;width:16px;text-align:center"></i> All Assets</div>
 
   <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--glass-border);display:flex;flex-direction:column;gap:8px">
@@ -931,14 +886,20 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   <div class="port-nav-item" id="port-nav-silver" onclick="filterPortAsset('Silver')">
     <div class="nav-icon"><i class="fas fa-circle asset-silver" style="font-size:0.55rem"></i></div>Silver
   </div>
-  <div class="port-nav-item" id="port-nav-land" onclick="filterPortAsset('Land')">
-    <div class="nav-icon"><i class="fas fa-circle asset-land" style="font-size:0.55rem"></i></div>Land
+  <div class="port-nav-item" id="port-nav-realestate" onclick="filterPortAsset('RealEstate')">
+    <div class="nav-icon"><i class="fas fa-circle asset-realestate" style="font-size:0.55rem"></i></div>Real Estate
   </div>
   <div class="port-nav-item" id="port-nav-mf" onclick="filterPortAsset('MutualFund')">
     <div class="nav-icon"><i class="fas fa-circle asset-mf" style="font-size:0.55rem"></i></div>Mutual Funds
   </div>
   <div class="port-nav-item" id="port-nav-bonds" onclick="filterPortAsset('Bonds')">
     <div class="nav-icon"><i class="fas fa-circle asset-bonds" style="font-size:0.55rem"></i></div>Bonds
+  </div>
+  <div class="port-nav-item" id="port-nav-stocks" onclick="filterPortAsset('Stocks')">
+    <div class="nav-icon"><i class="fas fa-circle asset-stocks" style="font-size:0.55rem"></i></div>Stocks
+  </div>
+  <div class="port-nav-item" id="port-nav-crypto" onclick="filterPortAsset('Crypto')">
+    <div class="nav-icon"><i class="fas fa-circle asset-crypto" style="font-size:0.55rem"></i></div>Crypto
   </div>
   <div class="port-nav-item" id="port-nav-all" onclick="filterPortAsset('all')">
     <div class="nav-icon"><i class="fas fa-asterisk" style="color:#a78bfa;font-size:0.55rem"></i></div>All Assets
@@ -960,10 +921,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <button class="btn-port-add" onclick="openPortModal()">
       <i class="fas fa-plus"></i> New Asset Entry
     </button>
-    <input type="file" id="excel-upload" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
-    <button class="btn-port-add" onclick="document.getElementById('excel-upload').click()">
-      <i class="fas fa-file-import"></i> Import Excel
-    </button>
   </div>
 </div>
 
@@ -979,19 +936,6 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
         <i class="fas fa-search" style="color:var(--accent)"></i>Search
         <span class="search-kbd">Ctrl K</span>
       </button>
-      <div style="position:relative">
-        <button class="notification-bell-btn" onclick="toggleNotificationPopup()" id="notification-bell">
-          <i class="fas fa-bell bell-icon"></i>
-          <span class="notification-badge" id="notification-badge" style="display:none">0</span>
-        </button>
-        <div class="notification-popup" id="notification-popup">
-          <div class="notification-header">
-            <div class="notification-title">Alerts & Notifications</div>
-            <div class="notification-clear" onclick="clearOldNotifications()">Clear Old</div>
-          </div>
-          <div class="notification-list" id="notification-list"></div>
-        </div>
-      </div>
       <div class="filter-mode-toggle">
         <button class="filter-mode-btn active" id="fin-mode-only" onclick="setFilterMode('only',this)">Only</button>
         <button class="filter-mode-btn" id="fin-mode-cumul" onclick="setFilterMode('cumulative',this)">Cumul.</button>
@@ -1604,7 +1548,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
     <div class="modal-row">
       <div class="input-group">
         <label>Asset Type</label>
-        <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Land / Bonds / MF…" oninput="updatePortUnit()">
+        <input type="text" id="p-assetType" class="input-field port-focus" placeholder="Gold / Silver / Real Estate / MF / Bonds / Stocks / Crypto" oninput="updatePortUnit()">
       </div>
       <div class="input-group">
         <label>Date of Purchase</label>
@@ -1855,16 +1799,16 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
 <!-- CUSTOM ALERTS MODAL -->
 <div class="modal-overlay" id="alerts-modal">
-  <div class="modal-box" style="max-width:620px;max-height:90vh;overflow:visible">
+  <div class="modal-box" style="max-width:580px">
     <div class="modal-title"><i class="fas fa-bell" style="color:#6366f1;margin-right:8px"></i>Custom Alert Rules</div>
-    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem">Get notified when specific conditions are met in your finances</p>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1.2rem">Get notified when specific conditions are met in your finances</p>
     
     <div class="alert-rule-list" id="active-alerts-list"></div>
 
-    <div style="border-top:1px solid var(--glass-border);padding-top:1rem;margin-top:0.5rem">
-      <div class="panel-title" style="font-size:0.7rem;margin-bottom:0.8rem">➕ CREATE NEW ALERT</div>
-      <div class="alert-builder-row" style="grid-template-columns:1fr auto 1fr;">
-        <select class="alert-builder-select" id="alert-field" onchange="toggleCategoryField()">
+    <div style="border-top:1px solid var(--glass-border);padding-top:1rem;margin-top:1rem">
+      <div class="panel-title" style="font-size:0.7rem;margin-bottom:0.8rem">➕ Create New Alert</div>
+      <div class="alert-builder-row">
+        <select class="alert-builder-select" id="alert-field">
           <option value="balance">Net Balance</option>
           <option value="category">Category Spend</option>
           <option value="networth">Net Worth</option>
@@ -1875,16 +1819,17 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
           <option value="lt">is less than</option>
           <option value="eq">equals</option>
         </select>
-        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount" onkeypress="if(event.key==='Enter')addCustomAlert()">
+        <input type="number" class="alert-builder-input" id="alert-value" placeholder="Amount">
+        <button onclick="addCustomAlert()" class="btn-add" style="padding:7px 12px;font-size:0.75rem;white-space:nowrap"><i class="fas fa-plus"></i> Add</button>
       </div>
       <div id="alert-category-row" style="display:none;margin-top:8px">
-        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0" onkeypress="if(event.key==='Enter')addCustomAlert()">
+        <input type="text" class="input-field" id="alert-category" placeholder="Category name (e.g. Food, Transport)" style="margin-top:0">
       </div>
     </div>
 
     <div style="display:flex;gap:8px;margin-top:1.4rem">
-      <button onclick="saveAlerts()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-save"></i> Save & Close</button>
-      <button onclick="document.getElementById('alerts-modal').style.display='none'" class="btn-secondary">Cancel</button>
+      <button onclick="saveAlerts()" class="btn-add" style="flex:1;justify-content:center"><i class="fas fa-save"></i> Save</button>
+      <button onclick="document.getElementById('alerts-modal').style.display='none'" class="btn-secondary">Close</button>
     </div>
   </div>
 </div>
@@ -1905,12 +1850,13 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 // ══════════════════════════════════════════════════════════════════════════════
 const ASSET_COLOR = {
   'Gold':       '#f59e0b',   // amber
-  'Silver':     '#94a3b8',   // slate-400  (previously clashed with land)
-  'Land':       '#34d399',   // emerald
+  'Silver':     '#94a3b8',   // slate-400
+  'RealEstate': '#34d399',   // emerald
   'MutualFund': '#6366f1',   // indigo
   'Bonds':      '#f472b6',   // pink
   'Stocks':     '#38bdf8',   // sky
-  'Other':      '#a78bfa',   // violet fallback
+  'Crypto':     '#a78bfa',   // violet
+  'Other':      '#64748b',   // slate fallback
 };
 // Alpha version for bar/area fills
 function assetColorA(type, alpha = 0.7) {
@@ -1928,7 +1874,7 @@ function assetColor(type) {
 // ─── ASSET TYPE DETECTION ───────────────────────────────────────────────────
 function isQtyBased(assetType) {
   const t = normalizeAssetType(assetType);
-  return t !== 'Land' && t !== 'MutualFund' && t !== 'Bonds';
+  return t !== 'RealEstate' && t !== 'MutualFund' && t !== 'Bonds' && t !== 'Stocks' && t !== 'Crypto';
 }
 
 let db = JSON.parse(localStorage.getItem('fos_db_v3')) || [
@@ -1978,9 +1924,9 @@ let creditDb = JSON.parse(localStorage.getItem('fos_credit_v1')) || [
   {id:206, lenderName:"IDFC Bank",      type:"Laon",    principalAmount:1,      outstandingBalance:104478, interestRate:15, monthlyEmi:4613.00, dueDate:"3rd",  tenureMonths:48, balanceTenure:28, startDate:"2024-08-03", endDate:"2028-07-03", status:"Active", remarks:"Expense"},
   {id:207, lenderName:"ICICI",          type:"Laon",    principalAmount:500000, outstandingBalance:152914, interestRate:14, monthlyEmi:13732.00,dueDate:"5th",  tenureMonths:60, balanceTenure:13, startDate:"2023-05-05", endDate:"2027-04-05", status:"Active", remarks:"Expense"},
   {id:208, lenderName:"Incred",         type:"Loan",    principalAmount:244224, outstandingBalance:217088, interestRate:18, monthlyEmi:6784.00, dueDate:"5th",  tenureMonths:36, balanceTenure:33, startDate:"2026-01-05", endDate:"2028-12-05", status:"Active", remarks:"PL"},
-  {id:209, lenderName:"Acharapakkam land", type:"Assets", principalAmount:171750, outstandingBalance:51750, interestRate:0, monthlyEmi:3000.00,dueDate:"1st",  tenureMonths:60, balanceTenure:0,  startDate:"2022-04-01", endDate:"2027-04-01", status:"Active", remarks:"Investment"},
-  {id:210, lenderName:"Ponneri land",   type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-01-01", status:"Active", remarks:"Investment"},
-  {id:211, lenderName:"Poneeri land 2", type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-08-01", status:"Active", remarks:"Investment"},
+  {id:209, lenderName:"Acharapakkam Real Estate", type:"Assets", principalAmount:171750, outstandingBalance:51750, interestRate:0, monthlyEmi:3000.00,dueDate:"1st",  tenureMonths:60, balanceTenure:0,  startDate:"2022-04-01", endDate:"2027-04-01", status:"Active", remarks:"Investment"},
+  {id:210, lenderName:"Ponneri Real Estate",   type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-01-01", status:"Active", remarks:"Investment"},
+  {id:211, lenderName:"Poneeri Real Estate 2", type:"Assets",  principalAmount:258750, outstandingBalance:172750, interestRate:0, monthlyEmi:5000.00, dueDate:"1st",  tenureMonths:41, balanceTenure:0,  startDate:"2024-08-01", endDate:"2028-08-01", status:"Active", remarks:"Investment"},
 ];
 
 let budgets = JSON.parse(localStorage.getItem('fos_budgets')) || {
@@ -2024,16 +1970,17 @@ function normalizeAssetType(type) {
   if (!t) return '';
   if (t.includes('gold')) return 'Gold';
   if (t.includes('silver')) return 'Silver';
-  if (t.includes('land') || t.includes('property') || t.includes('plot')) return 'Land';
+  if (t.includes('land') || t.includes('property') || t.includes('plot') || t.includes('real estate') || t.includes('realestate')) return 'RealEstate';
   if (t.includes('bond')) return 'Bonds';
   if (t.includes('mutual') || t === 'mf' || t.includes('mutual fund')) return 'MutualFund';
   if (t.includes('stock') || t.includes('equity')) return 'Stocks';
+  if (t.includes('crypto') || t.includes('bitcoin') || t.includes('btc') || t.includes('eth') || t.includes('ethereum')) return 'Crypto';
   return String(type).trim();
 }
 
 function assetTypeLabel(type) {
   const k = normalizeAssetType(type);
-  const map = { Gold:'Gold', Silver:'Silver', Land:'Land', MutualFund:'Mutual Funds', Bonds:'Bonds', Stocks:'Stocks' };
+  const map = { Gold:'Gold', Silver:'Silver', RealEstate:'Real Estate', MutualFund:'Mutual Funds', Bonds:'Bonds', Stocks:'Stocks', Crypto:'Crypto' };
   return map[k] || (String(type ?? '').trim() || 'Other');
 }
 
@@ -2321,7 +2268,7 @@ function applyPortFilters() {
 function filterPortAsset(type) {
   portAssetFilter = type;
   document.querySelectorAll('.port-nav-item').forEach(el => el.classList.remove('active'));
-  const idMap = { Gold:'port-nav-gold', Silver:'port-nav-silver', Land:'port-nav-land', MutualFund:'port-nav-mf', Bonds:'port-nav-bonds', all:'port-nav-all' };
+  const idMap = { Gold:'port-nav-gold', Silver:'port-nav-silver', RealEstate:'port-nav-realestate', MutualFund:'port-nav-mf', Bonds:'port-nav-bonds', Stocks:'port-nav-stocks', Crypto:'port-nav-crypto', all:'port-nav-all' };
   const navEl = document.getElementById(idMap[type]);
   if (navEl) navEl.classList.add('active');
   switchView('port-table', null, 'portfolio');
@@ -4540,50 +4487,6 @@ async function runPDFExport() {
 }
 
 // ── EXCEL IMPORT ───────────────────────────────────────────────────────────
-function importExcel(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type:'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json  = XLSX.utils.sheet_to_json(sheet);
-    const newEntries = json.map(row => ({
-      id: Date.now() + Math.random(),
-      assetType: normalizeAssetType(row["Investment Type"] || ''),
-      date: formatExcelDate(row["Date"]),
-      quantity: Number(row["Quantity gms"] || 0),
-      unit: "grams",
-      purchasePrice: Number(row["Purchase Price per/g"] || 0),
-      currentPrice:  Number(row["Current Price per/g"]  || 0),
-      notes: row["Buyer"] || ""
-    }));
-    portDb = [...portDb, ...newEntries];
-    scheduleSave();
-    buildPortDropdowns();
-    applyPortFilters();
-    alert("✅ Excel Imported Successfully");
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function formatExcelDate(value) {
-  if (!value) return new Date().toISOString().split('T')[0];
-  if (typeof value === "string") return convertTextDate(value);
-  const date = new Date((value - 25569) * 86400 * 1000);
-  return date.toISOString().split('T')[0];
-}
-
-function convertTextDate(text) {
-  const months = { Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12" };
-  const parts = text.split("-");
-  if (parts.length !== 2) return new Date().toISOString().split('T')[0];
-  const day   = parts[0].padStart(2,"0");
-  const month = months[parts[1]] || "01";
-  const year  = new Date().getFullYear();
-  return `${year}-${month}-${day}`;
-}
 
 // ── MOBILE DRAWER ──────────────────────────────────────────────────────────
 function openMobileDrawer() {
@@ -5089,119 +4992,62 @@ function openAlertsModal() {
 function renderAlertsList() {
   const container=document.getElementById('active-alerts-list');
   if(!customAlerts.length){
-    container.innerHTML='<div style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.82rem"><i class="fas fa-bell-slash" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:12px"></i>No active alerts yet</div>';
+    container.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.82rem"><i class="fas fa-bell-slash" style="font-size:1.6rem;opacity:0.3;display:block;margin-bottom:8px"></i>No active alerts yet</div>';
     return;
   }
-  
-  const labels={balance:'Net Balance',category:'Category Spend',networth:'Net Worth',emi:'EMI Due',gt:'is greater than',lt:'is less than',eq:'equals'};
-  
+  const labels={balance:'Net Balance',category:'Category Spend',networth:'Net Worth',emi:'EMI Due',gt:'>',lt:'<',eq:'='};
   container.innerHTML=customAlerts.map((alert,idx)=>{
-    const fieldLabel = alert.field==='category'?alert.category:labels[alert.field];
-    const condition = `${labels[alert.operator]} ₹${alert.value.toLocaleString('en-IN')}`;
-    
-    return `
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;margin-bottom:10px;transition:all 0.16s" onmouseover="this.style.background='rgba(99,102,241,0.12)';this.style.borderColor='rgba(99,102,241,0.35)'" onmouseout="this.style.background='rgba(99,102,241,0.08)';this.style.borderColor='rgba(99,102,241,0.2)'">
-        <div style="width:36px;height:36px;border-radius:8px;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fas fa-bell" style="color:var(--accent);font-size:0.9rem"></i>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:0.88rem;font-weight:700;color:var(--text-main);margin-bottom:3px">${fieldLabel}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted)">${condition}</div>
-        </div>
-        <i class="fas fa-trash" onclick="deleteAlert(${idx})" style="color:#ef4444;font-size:1.1rem;cursor:pointer;padding:8px;transition:all 0.2s" onmouseover="this.style.transform='scale(1.2)';this.style.color='#dc2626'" onmouseout="this.style.transform='scale(1)';this.style.color='#ef4444'" title="Delete this alert"></i>
+    const desc=alert.field==='category'?`${alert.category} ${labels[alert.operator]} ${fmt(alert.value)}`:`${labels[alert.field]} ${labels[alert.operator]} ${fmt(alert.value)}`;
+    return `<div class="alert-rule-card ${alert.active?'active':''}">
+      <div class="alert-rule-icon"><i class="fas fa-bell"></i></div>
+      <div class="alert-rule-info">
+        <div class="alert-rule-name">${labels[alert.field]}</div>
+        <div class="alert-rule-desc">${desc}</div>
       </div>
-    `;
+      <label class="alert-toggle">
+        <input type="checkbox" ${alert.active?'checked':''} onchange="toggleAlert(${idx},this.checked)">
+        <span class="alert-toggle-slider"></span>
+      </label>
+      <i class="fas fa-trash" style="cursor:pointer;color:#ef444460;font-size:0.85rem;margin-left:8px" onclick="deleteAlert(${idx})"></i>
+    </div>`;
   }).join('');
 }
 
-function toggleCategoryField() {
-  const field = document.getElementById('alert-field').value;
-  const categoryRow = document.getElementById('alert-category-row');
-  categoryRow.style.display = field === 'category' ? 'block' : 'none';
-}
-
 function addCustomAlert() {
-  const field=document.getElementById('alert-field').value;
-  const operator=document.getElementById('alert-operator').value;
-  const value=Number(document.getElementById('alert-value').value);
-  const category=document.getElementById('alert-category').value.trim();
-  
-  if(!value || value <= 0){
-    alert('Please enter a valid amount');
-    return;
-  }
-  
-  if(field==='category' && !category){
-    alert('Please enter a category name');
-    return;
-  }
-  
-  // Add the alert
-  customAlerts.push({
-    field,
-    operator,
-    value,
-    category,
-    active:true,
-    id:Date.now()
-  });
-  
-  // Clear the form
+  const field=document.getElementById('alert-field').value,operator=document.getElementById('alert-operator').value;
+  const value=Number(document.getElementById('alert-value').value),category=document.getElementById('alert-category').value.trim();
+  if(!value||(field==='category'&&!category)){alert('Please fill all fields');return;}
+  customAlerts.push({field,operator,value,category,active:true});
   document.getElementById('alert-value').value='';
   document.getElementById('alert-category').value='';
-  document.getElementById('alert-field').value='balance';
-  document.getElementById('alert-operator').value='gt';
-  toggleCategoryField();
-  
-  // Update the display immediately
   renderAlertsList();
-  saveAlerts();
 }
 
 function toggleAlert(idx,active) {
   customAlerts[idx].active=active;
-  saveAlerts(); // Auto-save when toggling
   renderAlertsList();
 }
 
 function deleteAlert(idx) {
   if(confirm('Delete this alert?')){
     customAlerts.splice(idx,1);
-    saveAlerts(); // Auto-save when deleting
     renderAlertsList();
   }
 }
 
 function saveAlerts() {
-  // If there's data in the form, add it first before saving
-  const value = Number(document.getElementById('alert-value').value);
-  if(value && value > 0) {
-    addCustomAlert();
-  }
-  
   localStorage.setItem('fos_alerts',JSON.stringify(customAlerts));
   checkAlerts();
   document.getElementById('alerts-modal').style.display='none';
 }
 
-// Notification storage with timestamps
-let triggeredNotifications = JSON.parse(localStorage.getItem('fos_notifications') || '[]');
-
-function saveNotifications() {
-  localStorage.setItem('fos_notifications', JSON.stringify(triggeredNotifications));
-}
-
 function checkAlerts() {
   if(!('Notification' in window))return;
   const activeAlerts=customAlerts.filter(a=>a.active);
-  if(!activeAlerts.length){
-    updateNotificationBadge();
-    return;
-  }
+  if(!activeAlerts.length)return;
 
-  const totalInc=sumType('Income',db),totalExp=sumType('Expense',db);
-  const totalInv=sumType('Investment',db),totalLoan=sumType('Loan',db);
-  const balance=totalInc-totalExp,networth=totalInc+totalInv-totalLoan;
+  const totalInc=sumType('Income',db),totalInv=sumType('Investment',db),totalLoan=sumType('Loan',db);
+  const balance=totalInc-totalInv-totalLoan,networth=totalInc+totalInv-totalLoan;
 
   activeAlerts.forEach(alert=>{
     let currentValue;
@@ -5216,119 +5062,23 @@ function checkAlerts() {
     if(alert.operator==='lt'&&currentValue<alert.value)triggered=true;
     if(alert.operator==='eq'&&currentValue===alert.value)triggered=true;
 
-    if(triggered){
-      const labels={balance:'Net Balance',category:'Category Spend',networth:'Net Worth',emi:'EMI Due',gt:'greater than',lt:'less than',eq:'equals'};
-      const title = alert.field==='category'?alert.category:labels[alert.field];
-      const message = `${title} is ${labels[alert.operator]} ₹${alert.value.toLocaleString('en-IN')}. Current: ₹${currentValue.toLocaleString('en-IN')}`;
-      
-      // Add to notifications array
-      const notificationId = `${alert.id}-${new Date().toDateString()}`;
-      const existing = triggeredNotifications.find(n => n.id === notificationId);
-      
-      if(!existing){
-        triggeredNotifications.push({
-          id: notificationId,
-          title: title,
-          message: message,
-          timestamp: Date.now(),
-          alertId: alert.id
-        });
-        saveNotifications();
-        
-        // Browser notification
-        if(Notification.permission==='granted'){
-          new Notification('FinanceOS Alert 🔔',{
-            body:message,
-            icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%236366f1\'/%3E%3Ctext x=\'50%25\' y=\'65%25\' font-size=\'50\' fill=\'white\'%3E₹%3C/text%3E%3C/svg%3E'
-          });
-        }
-      }
+    if(triggered&&Notification.permission==='granted'){
+      new Notification('FinanceOS Alert 🔔',{
+        body:`${alert.field==='category'?alert.category:alert.field}: ${fmt(currentValue)}`,
+        icon:'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%236366f1\'/%3E%3Ctext x=\'50%25\' y=\'65%25\' font-size=\'50\' fill=\'white\'%3E₹%3C/text%3E%3C/svg%3E'
+      });
     }
   });
 
-  updateNotificationBadge();
-  renderNotificationList();
-}
-
-function updateNotificationBadge() {
-  // Remove notifications older than 15 days
-  const fifteenDaysAgo = Date.now() - (15 * 24 * 60 * 60 * 1000);
-  triggeredNotifications = triggeredNotifications.filter(n => n.timestamp > fifteenDaysAgo);
-  saveNotifications();
-
-  const badge = document.getElementById('notification-badge');
-  if(triggeredNotifications.length > 0){
-    badge.textContent = triggeredNotifications.length;
-    badge.style.display = 'flex';
-  } else {
-    badge.style.display = 'none';
+  const badge=document.getElementById('alerts-sidebar-badge');
+  if(activeAlerts.length>0){
+    badge.textContent=activeAlerts.length;
+    badge.className='budget-badge warn';
+    badge.style.display='inline-flex';
+  }else{
+    badge.style.display='none';
   }
 }
-
-function renderNotificationList() {
-  const container = document.getElementById('notification-list');
-  if(triggeredNotifications.length === 0){
-    container.innerHTML = `
-      <div class="notification-empty">
-        <i class="fas fa-bell-slash"></i>
-        No active alerts
-      </div>
-    `;
-    return;
-  }
-
-  // Sort by timestamp, newest first
-  const sorted = [...triggeredNotifications].sort((a,b) => b.timestamp - a.timestamp);
-  
-  container.innerHTML = sorted.map(notif => {
-    const timeAgo = getTimeAgo(notif.timestamp);
-    return `
-      <div class="notification-item">
-        <div class="notification-item-icon"><i class="fas fa-bell"></i></div>
-        <div class="notification-item-title">${notif.title}</div>
-        <div class="notification-item-desc">${notif.message}</div>
-        <div class="notification-item-time">${timeAgo}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function getTimeAgo(timestamp) {
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  
-  if(days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-  if(hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  if(minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-  return 'Just now';
-}
-
-function toggleNotificationPopup() {
-  const popup = document.getElementById('notification-popup');
-  popup.classList.toggle('show');
-  renderNotificationList();
-}
-
-function clearOldNotifications() {
-  if(confirm('Clear all notifications?')){
-    triggeredNotifications = [];
-    saveNotifications();
-    updateNotificationBadge();
-    renderNotificationList();
-  }
-}
-
-// Close notification popup when clicking outside
-document.addEventListener('click', function(event) {
-  const popup = document.getElementById('notification-popup');
-  const bell = document.getElementById('notification-bell');
-  if(popup && bell && !popup.contains(event.target) && !bell.contains(event.target)){
-    popup.classList.remove('show');
-  }
-});
-
 
 if('Notification' in window && Notification.permission==='default'){
   setTimeout(()=>{if(customAlerts.length>0)Notification.requestPermission();},3000);
@@ -5503,8 +5253,6 @@ window.onload = () => {
   buildPortDropdowns();
   renderDashboard();
   applyStoredTheme();
-  updateNotificationBadge(); // Initialize notification badge
-  renderNotificationList(); // Render notifications
 
   // Ctrl+K / Cmd+K to open search
   document.addEventListener('keydown', e => {
