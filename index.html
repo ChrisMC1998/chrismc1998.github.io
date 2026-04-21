@@ -3306,8 +3306,8 @@ function renderAnalytics() {
   analyticsUpdateKPIs(data, trendData);
 
   // ── Income vs Outflow Trend ────────────────────────────────────────────────
-  const tI = trendData.map(m => data.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b)=>a+b.amount,0));
-  const tE = trendData.map(m => data.filter(d => (d.type==='Expense'||d.type==='Loan') && matchMonth(d,m)).reduce((a,b)=>a+b.amount,0));
+  const tI = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
+  const tE = trendData.map(m => db.filter(d => (d.type==='Expense'||d.type==='Loan') && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
   const tS = tI.map((v,i) => v - tE[i]);
 
   destroyChart('trend');
@@ -3450,8 +3450,8 @@ function renderAnalytics() {
 }
 
 function analyticsUpdateKPIs(data, trendData) {
-  const incomes = trendData.map(m => data.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b)=>a+b.amount,0));
-  const outflows = trendData.map(m => data.filter(d => (d.type==='Expense'||d.type==='Loan'||d.type==='Investment') && matchMonth(d,m)).reduce((a,b)=>a+b.amount,0));
+  const incomes  = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
+  const outflows = trendData.map(m => db.filter(d => (d.type==='Expense'||d.type==='Loan'||d.type==='Investment') && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
   const savings  = incomes.map((v,i) => v - outflows[i]);
   const avgSav   = savings.reduce((a,b) => a+b,0) / (savings.length||1);
   const avgInc   = incomes.reduce((a,b) => a+b,0) / (incomes.length||1);
@@ -3765,16 +3765,9 @@ function fmt(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
 function avg(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0; }
 function sumType(type, data) { return (data||db).filter(x => x.type===type).reduce((a,b) => a+Number(b.amount), 0); }
 function groupData(type, data) {
-  console.log('Grouping:', type, data); // ✅ ADD THIS LINE
-
-  const buckets = {};
-
-  data.forEach(d => {
-    if (d.type !== type) return;
-    buckets[d.sub] = (buckets[d.sub] || 0) + d.amount;
-  });
-
-  return buckets;
+  const g = {};
+  (data||db).filter(x => x.type===type).forEach(i => { const k = i.sub||'General'; g[k] = (g[k]||0) + Number(i.amount); });
+  return g;
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -4063,25 +4056,9 @@ function makeDonut(id, labels, data, colors) {
   // Check if data is empty or all zeros
   const hasData = data && data.length > 0 && data.some(v => v > 0);
   if (!hasData) {
-    console.log(`❌ Chart ${id} has no data`);
-    console.log('Labels:', labels);
-    console.log('Data:', data);
-    console.log('DB Snapshot:', db);
-  return new Chart(ctx, {
-  type: 'doughnut',
-  data: {
-    labels: ['No Data'],
-    datasets: [{
-      data: [1],
-      backgroundColor: ['#444']
-    }]
-  },
-  options: {
-    plugins: {
-      legend: { display: false }
-    }
+    console.log(`No data for chart ${id} - skipping render`);
+    return null;
   }
-});
   
   const ctx = canvas.getContext('2d');
   const w = canvas.offsetWidth || canvas.clientWidth || 300;
@@ -4174,18 +4151,8 @@ function closeModal() { document.getElementById('modal').style.display = 'none';
 function saveEntry() {
   const name = document.getElementById('inp-name').value.trim();
   const amt  = document.getElementById('inp-amt').value;
-  let type = document.getElementById('inp-cat').value;
-  let sub = document.getElementById('inp-sub').value.trim();
-
-  type = type.toLowerCase(); // make everything uniform
-
-  if (type === 'income') type = 'Income';
-  else if (type === 'expense') type = 'Expense';
-  else if (type === 'loan') type = 'Loan';
-  else if (type === 'investment') type = 'Investment';
-
-  if (!sub) sub = 'Other';
-
+  const type = document.getElementById('inp-cat').value;
+  const sub  = document.getElementById('inp-sub').value.trim();
   const date = document.getElementById('inp-date').value;
   const notes     = document.getElementById('inp-notes').value.trim();
   const recurring = document.getElementById('inp-recurring').checked;
