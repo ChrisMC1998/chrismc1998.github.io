@@ -469,7 +469,6 @@ tr:last-child td { border-bottom:none; }
 .progress-ring-bg { fill:none; stroke:rgba(99,102,241,0.15); stroke-width:6; }
 .progress-ring-fill { fill:none; stroke:#6366f1; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; transform:rotate(-90deg); transform-origin:50% 50%; }
 .progress-ring-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:1.1rem; font-weight:700; font-family:'DM Mono',monospace; color:var(--text-main); }
-.confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
 .alert-rule-list { display:flex; flex-direction:column; gap:8px; margin:1rem 0; }
 .alert-rule-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:11px; padding:10px 14px; display:flex; align-items:center; gap:12px; transition:all 0.16s; }
 .alert-rule-card:hover { border-color:rgba(99,102,241,0.3); background:rgba(99,102,241,0.05); }
@@ -1971,7 +1970,7 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
   </div>
 </div>
 
-<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -2362,7 +2361,23 @@ function switchView(viewName, btn, group) {
 }
 
 // ── DASHBOARD ──────────────────────────────────────────────────────────────
+// Debounce dashboard rendering to prevent multiple rapid calls
+let dashboardRenderTimeout = null;
 function renderDashboard() {
+  // Clear any pending renders
+  if (dashboardRenderTimeout) {
+    clearTimeout(dashboardRenderTimeout);
+  }
+  
+  // Schedule render for next animation frame
+  dashboardRenderTimeout = setTimeout(() => {
+    requestAnimationFrame(() => {
+      renderDashboardImmediate();
+    });
+  }, 50);
+}
+
+function renderDashboardImmediate() {
   const data = getFilteredData();
   const totalInc  = sumType('Income', data);
   const totalExp  = sumType('Expense', data);
@@ -2392,41 +2407,52 @@ function renderDashboard() {
 
   renderBudgetAlerts(data);
 
-  // Cash flow bar — 3D gradient fills
-  destroyChart('dash');
-  const dashCtx = document.getElementById('dashChart').getContext('2d');
-  const dashColors   = ['#34d399','#fbbf24','#f472b6','#60a5fa'];
-  const dashGrads = dashColors.map(hex => {
-    const g = dashCtx.createLinearGradient(0, 0, 0, 260);
-    g.addColorStop(0,   hex + 'ee'); g.addColorStop(0.5, hex + 'bb'); g.addColorStop(1, hex + '55');
-    return g;
-  });
-  charts['dash'] = new Chart(dashCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Income','Investments','Expenses','Loans'],
-      datasets: [{
-        data: [totalInc, totalInv, totalExp, totalLoan],
-        backgroundColor: dashGrads,
-        borderColor: dashColors,
-        borderWidth: 1, borderRadius: 8, barThickness: 44
-      }]
-    },
-    options: {
-      ...cOpts(false),
-      scales: {
-        x: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'}} },
-        y: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}
+  // Cash flow bar — 3D gradient fills (only if chart doesn't exist)
+  if (!charts['dash']) {
+    const dashCtx = document.getElementById('dashChart').getContext('2d');
+    const dashColors   = ['#34d399','#fbbf24','#f472b6','#60a5fa'];
+    const dashGrads = dashColors.map(hex => {
+      const g = dashCtx.createLinearGradient(0, 0, 0, 260);
+      g.addColorStop(0,   hex + 'ee'); g.addColorStop(0.5, hex + 'bb'); g.addColorStop(1, hex + '55');
+      return g;
+    });
+    charts['dash'] = new Chart(dashCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Income','Investments','Expenses','Loans'],
+        datasets: [{
+          data: [totalInc, totalInv, totalExp, totalLoan],
+          backgroundColor: dashGrads,
+          borderColor: dashColors,
+          borderWidth: 1, borderRadius: 8, barThickness: 44
+        }]
+      },
+      options: {
+        ...cOpts(false),
+        scales: {
+          x: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'700',family:'DM Sans'}} },
+          y: { grid:{color:chartGridColor(),drawBorder:false}, ticks:{color:chartTextColor(),font:{weight:'600',family:'DM Sans'},callback:v=>'₹'+Number(v).toLocaleString('en-IN')}}
+        }
       }
-    }
-  });
+    });
+  } else {
+    // Update existing chart data
+    charts['dash'].data.datasets[0].data = [totalInc, totalInv, totalExp, totalLoan];
+    charts['dash'].update('none'); // 'none' mode = no animation for faster update
+  }
 
   // Spending donut
   const expData = groupData('Expense', data);
-  destroyChart('dashDonut');
-  if (Object.keys(expData).length > 0) {
+  const hasExpData = Object.keys(expData).length > 0;
+  if (hasExpData && !charts['dashDonut']) {
     charts['dashDonut'] = makeDonut('dashDonut', Object.keys(expData), Object.values(expData),
       ['#f472b6','#ec4899','#db2777','#be185d','#9d174d']);
+  } else if (hasExpData && charts['dashDonut']) {
+    charts['dashDonut'].data.labels = Object.keys(expData);
+    charts['dashDonut'].data.datasets[0].data = Object.values(expData);
+    charts['dashDonut'].update('none');
+  } else if (!hasExpData && charts['dashDonut']) {
+    destroyChart('dashDonut');
   }
 
   // Portfolio by asset type donut — colours keyed by asset type
@@ -2438,14 +2464,21 @@ function renderDashboard() {
   });
   const typeKeys   = Object.keys(byType);
   const typeLabels = typeKeys.map(k => assetTypeLabel(k));
-  destroyChart('dash-port-donut');
-  if (typeKeys.length > 0) {
+  const hasPortData = typeKeys.length > 0;
+  
+  if (hasPortData && !charts['dash-port-donut']) {
     charts['dash-port-donut'] = makeDonut(
       'dash-port-donut',
       typeLabels,
       typeKeys.map(k => byType[k]),
       typeKeys.map(k => assetColor(k))
     );
+  } else if (hasPortData && charts['dash-port-donut']) {
+    charts['dash-port-donut'].data.labels = typeLabels;
+    charts['dash-port-donut'].data.datasets[0].data = typeKeys.map(k => byType[k]);
+    charts['dash-port-donut'].update('none');
+  } else if (!hasPortData && charts['dash-port-donut']) {
+    destroyChart('dash-port-donut');
   }
 
   // ROI by asset bar — colours keyed by asset type
@@ -2459,8 +2492,9 @@ function renderDashboard() {
   const avgRoiKeys   = Object.keys(roiByType);
   const avgRoiLabels = avgRoiKeys.map(k => assetTypeLabel(k));
   const avgRoiVals   = avgRoiKeys.map(k => +(roiByType[k] / cntByType[k]).toFixed(1));
-  destroyChart('dash-roi-bar');
-  if (avgRoiKeys.length > 0) {
+  const hasRoiData = avgRoiKeys.length > 0;
+  
+  if (hasRoiData && !charts['dash-roi-bar']) {
     const roiCtx = document.getElementById('dash-roi-bar').getContext('2d');
     charts['dash-roi-bar'] = new Chart(roiCtx, {
       type: 'bar',
@@ -2478,6 +2512,12 @@ function renderDashboard() {
       },
       options: { ...cOpts(false), scales: { y: { grid:{color:chartGridColor()}, ticks:{color:chartTextColor(), callback:v=>v+'%'} }, x:{ticks:{color:chartTextColor()}} } }
     });
+  } else if (hasRoiData && charts['dash-roi-bar']) {
+    charts['dash-roi-bar'].data.labels = avgRoiLabels;
+    charts['dash-roi-bar'].data.datasets[0].data = avgRoiVals;
+    charts['dash-roi-bar'].update('none');
+  } else if (!hasRoiData && charts['dash-roi-bar']) {
+    destroyChart('dash-roi-bar');
   }
 
   // Top 3
@@ -3749,6 +3789,14 @@ function makeDonut(id, labels, data, colors) {
     console.warn(`Canvas ${id} not found`);
     return null;
   }
+  
+  // Check if data is empty or all zeros
+  const hasData = data && data.length > 0 && data.some(v => v > 0);
+  if (!hasData) {
+    console.log(`No data for chart ${id} - skipping render`);
+    return null;
+  }
+  
   const ctx = canvas.getContext('2d');
   const w = canvas.offsetWidth || canvas.clientWidth || 300;
 
@@ -5142,12 +5190,26 @@ function updateGameStats() {
     }
   }
 
+  // RE-VALIDATE ALL BADGES - Remove badges that no longer meet conditions
+  const validBadges = [];
   BADGES.forEach(badge=>{
-    if(!gameStats.badges.includes(badge.id)&&badge.condition()){
-      gameStats.badges.push(badge.id);
-      showBadgeUnlock(badge);
+    if(badge.condition()){
+      validBadges.push(badge.id);
+      // Only show unlock notification for NEW badges
+      if(!gameStats.badges.includes(badge.id)){
+        showBadgeUnlock(badge);
+      }
     }
   });
+  gameStats.badges = validBadges;
+
+  // Reset streak and tracking days if no data
+  if(db.length === 0) {
+    gameStats.streak = 0;
+    gameStats.trackingDays = 0;
+    gameStats.lastCheck = null;
+    gameStats.lastActivity = null;
+  }
 
   localStorage.setItem('fos_game_stats',JSON.stringify(gameStats));
   renderGameStats();
@@ -5177,24 +5239,7 @@ function renderBadgeCollection() {
 }
 
 function showBadgeUnlock(badge) {
-  fireConfetti();
-}
-
-function fireConfetti() {
-  const canvas=document.getElementById('confetti-canvas'),ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-  const particles=[],colors=['#6366f1','#a78bfa','#34d399','#fbbf24','#f472b6'];
-  for(let i=0;i<80;i++){
-    particles.push({x:Math.random()*canvas.width,y:-10,vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,
-      color:colors[Math.floor(Math.random()*colors.length)],size:Math.random()*8+4});
-  }
-  const animate=()=>{
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{p.y+=p.vy;p.x+=p.vx;p.vy+=0.1;ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size);});
-    if(particles.some(p=>p.y<canvas.height))requestAnimationFrame(animate);
-    else ctx.clearRect(0,0,canvas.width,canvas.height);
-  };
-  animate();
+  // Badge unlocked silently - no confetti
 }
 
 
