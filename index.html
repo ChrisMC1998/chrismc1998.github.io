@@ -358,86 +358,14 @@ tr:last-child td { border-bottom:none; }
 .charts-row   { display:grid; grid-template-columns:2fr 1fr; gap:1.3rem; margin-bottom:1.3rem; }
 .charts-3col  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.3rem; margin-bottom:1.3rem; }
 .analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
-
-/* Insight Cards */
-.insight-card { 
-  background:rgba(255,255,255,0.03); 
-  border:1px solid var(--glass-border); 
-  border-radius:12px; 
-  padding:1.1rem; 
-  display:flex; 
-  flex-direction:column; 
-  gap:8px;
-  transition:all 0.2s;
-}
-.insight-card:hover {
-  background:rgba(255,255,255,0.05);
-  border-color:rgba(255,255,255,0.12);
-  transform:translateY(-2px);
-}
-.insight-icon { 
-  width:40px; 
-  height:40px; 
-  border-radius:10px; 
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
-  font-size:1.1rem; 
-  margin-bottom:4px;
-}
-.insight-label { 
-  font-size:0.7rem; 
-  color:var(--text-muted); 
-  text-transform:uppercase; 
-  letter-spacing:1px; 
-  font-weight:600;
-}
-.insight-value { 
-  font-family:'DM Mono',monospace; 
-  font-size:1.4rem; 
-  font-weight:700; 
-  color:var(--text-main);
-}
-.insight-sub { 
-  font-size:0.72rem; 
-  color:var(--text-mid);
-}
-
-/* Insight Recommendations */
-.insight-item {
-  background:rgba(255,255,255,0.02);
-  border:1px solid var(--glass-border);
-  border-radius:10px;
-  padding:1rem;
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-}
-.insight-item-icon {
-  width:36px;
-  height:36px;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:0.95rem;
-  flex-shrink:0;
-}
-.insight-item-content {
-  flex:1;
-}
-.insight-item-title {
-  font-weight:600;
-  font-size:0.88rem;
-  margin-bottom:4px;
-  color:var(--text-main);
-}
-.insight-item-desc {
-  font-size:0.75rem;
-  color:var(--text-mid);
-  line-height:1.5;
-}
-
+.insight-kpi-card { background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:12px; padding:1.1rem; display:flex; flex-direction:column; gap:7px; transition:all 0.18s; }
+.insight-kpi-card:hover { background:rgba(255,255,255,0.055); border-color:rgba(255,255,255,0.12); transform:translateY(-2px); }
+.insight-kpi-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; margin-bottom:2px; }
+.empty-chart-msg { text-align:center; padding:3rem 0; font-size:0.8rem; color:var(--text-muted); }
+.insight-rec-card { background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); border-radius:10px; padding:1rem; display:flex; align-items:flex-start; gap:12px; }
+.insight-rec-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.insight-rec-title { font-weight:600; font-size:0.86rem; margin-bottom:4px; }
+.insight-rec-desc { font-size:0.74rem; color:var(--text-mid); line-height:1.55; }
 .span-full { grid-column:1/-1; }
 
 .nw-row { display:flex; gap:1.3rem; margin-bottom:1.3rem; }
@@ -1377,12 +1305,13 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
 
     <!-- ANALYTICS -->
     <div id="view-analytics" class="view-section">
-      <!-- Analytics Header with Filters -->
-      <div class="glass-panel span-full" style="margin-bottom:1.2rem">
+
+      <!-- Header + Filters -->
+      <div class="glass-panel span-full" style="padding:1rem 1.3rem;margin-bottom:1.2rem">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div class="panel-title" style="margin-bottom:4px">Advanced Analytics</div>
-            <div style="font-size:0.75rem;color:var(--text-muted)">Deep insights into your financial patterns</div>
+            <div class="panel-title" style="margin-bottom:3px">Advanced Analytics</div>
+            <div style="font-size:0.74rem;color:var(--text-muted)">Deep insights into your financial patterns</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <select class="filter-select" id="trend-range" onchange="renderAnalytics()" style="font-size:0.73rem">
@@ -1400,83 +1329,88 @@ body.light-mode .backup-stat { background:rgba(0,0,0,0.03); }
         </div>
       </div>
 
-      <!-- Key Insights Cards -->
+      <!-- 4 Insight Summary Cards -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.3rem">
-        <div class="insight-card">
-          <div class="insight-icon" style="background:rgba(52,211,153,0.1);color:#34d399"><i class="fas fa-piggy-bank"></i></div>
-          <div class="insight-label">Avg Monthly Savings</div>
-          <div class="insight-value" id="insight-savings">₹0</div>
-          <div class="insight-sub" id="insight-savings-sub">—</div>
+        <div class="insight-kpi-card">
+          <div class="insight-kpi-icon" style="background:rgba(52,211,153,0.12);color:#34d399"><i class="fas fa-piggy-bank"></i></div>
+          <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Avg Monthly Savings</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:700" id="insight-savings">₹0</div>
+          <div style="font-size:0.71rem;color:var(--text-mid)" id="insight-savings-sub">—</div>
         </div>
-        <div class="insight-card">
-          <div class="insight-icon" style="background:rgba(244,114,182,0.1);color:#f472b6"><i class="fas fa-chart-line"></i></div>
-          <div class="insight-label">Spending Trend</div>
-          <div class="insight-value" id="insight-trend">—</div>
-          <div class="insight-sub" id="insight-trend-sub">vs last period</div>
+        <div class="insight-kpi-card">
+          <div class="insight-kpi-icon" style="background:rgba(244,114,182,0.12);color:#f472b6"><i class="fas fa-chart-line"></i></div>
+          <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Spending Trend</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:700" id="insight-trend">—</div>
+          <div style="font-size:0.71rem;color:var(--text-mid)" id="insight-trend-sub">vs last period</div>
         </div>
-        <div class="insight-card">
-          <div class="insight-icon" style="background:rgba(251,191,36,0.1);color:#fbbf24"><i class="fas fa-receipt"></i></div>
-          <div class="insight-label">Top Expense Category</div>
-          <div class="insight-value" id="insight-top-cat" style="font-size:0.95rem">—</div>
-          <div class="insight-sub" id="insight-top-cat-amt">₹0 spent</div>
+        <div class="insight-kpi-card">
+          <div class="insight-kpi-icon" style="background:rgba(251,191,36,0.12);color:#fbbf24"><i class="fas fa-receipt"></i></div>
+          <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Top Expense Category</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:700" id="insight-top-cat">—</div>
+          <div style="font-size:0.71rem;color:var(--text-mid)" id="insight-top-cat-amt">₹0 spent</div>
         </div>
-        <div class="insight-card">
-          <div class="insight-icon" style="background:rgba(96,165,250,0.1);color:#60a5fa"><i class="fas fa-calendar-check"></i></div>
-          <div class="insight-label">Busiest Spending Day</div>
-          <div class="insight-value" id="insight-day" style="font-size:1rem">—</div>
-          <div class="insight-sub" id="insight-day-sub">of the month</div>
+        <div class="insight-kpi-card">
+          <div class="insight-kpi-icon" style="background:rgba(96,165,250,0.12);color:#60a5fa"><i class="fas fa-calendar-check"></i></div>
+          <div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Busiest Spending Day</div>
+          <div style="font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:700" id="insight-day">—</div>
+          <div style="font-size:0.71rem;color:var(--text-mid)" id="insight-day-sub">of the month</div>
         </div>
       </div>
 
-      <!-- Spending Trend Chart -->
-      <div class="glass-panel span-full">
+      <!-- Income vs Outflow Trend (full width) -->
+      <div class="glass-panel span-full" style="margin-bottom:1.3rem">
         <div class="panel-title">Income vs Outflow Trend</div>
         <div style="height:280px"><canvas id="chart-trend"></canvas></div>
       </div>
 
-      <!-- Two Column Charts Row -->
+      <!-- Daily + Weekday -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.3rem">
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Daily Spending Pattern</div>
-          <div style="height:240px"><canvas id="chart-scatter"></canvas></div>
+          <div style="height:230px"><canvas id="chart-scatter"></canvas></div>
         </div>
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Spending by Day of Week</div>
-          <div style="height:240px"><canvas id="chart-weekday"></canvas></div>
+          <div style="height:230px"><canvas id="chart-weekday"></canvas></div>
         </div>
       </div>
 
-      <!-- Category Breakdown -->
+      <!-- Category Charts Row -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.3rem">
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Expense Categories</div>
-          <div style="height:240px"><canvas id="chart-exp-bif"></canvas></div>
+          <div class="empty-chart-msg" id="empty-exp-bif" style="display:none">No expense data</div>
+          <div style="height:230px"><canvas id="chart-exp-bif"></canvas></div>
         </div>
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Investment Portfolio</div>
-          <div style="height:240px"><canvas id="chart-invest"></canvas></div>
+          <div class="empty-chart-msg" id="empty-invest" style="display:none">No investment data</div>
+          <div style="height:230px"><canvas id="chart-invest"></canvas></div>
         </div>
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Loan Distribution</div>
-          <div style="height:240px"><canvas id="chart-loan-bif"></canvas></div>
+          <div class="empty-chart-msg" id="empty-loanbif" style="display:none">No loan data</div>
+          <div style="height:230px"><canvas id="chart-loan-bif"></canvas></div>
         </div>
       </div>
 
-      <!-- Deep Insights Panel -->
-      <div class="glass-panel span-full">
-        <div class="panel-title" style="margin-bottom:1rem">Financial Insights & Recommendations</div>
+      <!-- Financial Insights -->
+      <div class="glass-panel span-full" style="margin-bottom:1.3rem">
+        <div class="panel-title" style="margin-bottom:1rem">Financial Insights &amp; Recommendations</div>
         <div id="insights-container" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"></div>
       </div>
 
-      <!-- Additional Analysis -->
+      <!-- Debt vs Assets + Expense Composition -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Debt vs Assets</div>
-          <div style="height:240px"><canvas id="chart-debt"></canvas></div>
+          <div class="empty-chart-msg" id="empty-debt" style="display:none">No data available</div>
+          <div style="height:230px"><canvas id="chart-debt"></canvas></div>
         </div>
         <div class="glass-panel" style="margin-bottom:0">
           <div class="panel-title">Expense Composition</div>
-          <div style="height:240px"><canvas id="chart-cats"></canvas></div>
+          <div class="empty-chart-msg" id="empty-cats" style="display:none">No expense data</div>
+          <div style="height:230px"><canvas id="chart-cats"></canvas></div>
         </div>
       </div>
     </div>
@@ -3342,18 +3276,17 @@ function renderPortAnalytics() {
 
 // ── ANALYTICS (Finance) ────────────────────────────────────────────────────
 function renderAnalytics() {
-  console.log('=== renderAnalytics called ===');
   buildFilterDropdowns();
   const fM = document.getElementById('trend-month').value;
   const fY = document.getElementById('trend-year').value;
-  console.log('Filter values - Month:', fM, 'Year:', fY);
-  
   const range = parseInt(document.getElementById('trend-range').value);
   const today = new Date();
+
+  // Build trend months array
   let months = [];
   for (let i = range-1; i >= 0; i--) {
     const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
-    months.push({ label:MONTHS[d.getMonth()]+' '+d.getFullYear().toString().slice(2), year:d.getFullYear(), month:d.getMonth()+1 });
+    months.push({ label: MONTHS[d.getMonth()]+' '+d.getFullYear().toString().slice(2), year: d.getFullYear(), month: d.getMonth()+1 });
   }
   let trendData = months;
   if (fM !== 'all' || fY !== 'all') {
@@ -3362,215 +3295,234 @@ function renderAnalytics() {
       const [y,m] = ym.split('-').map(Number);
       if (fY !== 'all' && y !== parseInt(fY)) return null;
       if (fM !== 'all' && m !== parseInt(fM)) return null;
-      return { label:MONTHS[m-1]+' '+String(y).slice(2), year:y, month:m };
+      return { label: MONTHS[m-1]+' '+String(y).slice(2), year: y, month: m };
     }).filter(Boolean);
     if (filtered.length) trendData = filtered;
   }
 
   const data = getFilteredData();
-  
-  // Calculate insights
-  calculateInsights(data, trendData);
 
+  // ── Summary KPI Cards ──────────────────────────────────────────────────────
+  analyticsUpdateKPIs(data, trendData);
+
+  // ── Income vs Outflow Trend ────────────────────────────────────────────────
   const tI = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
   const tE = trendData.map(m => db.filter(d => (d.type==='Expense'||d.type==='Loan') && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
   const tS = tI.map((v,i) => v - tE[i]);
 
   destroyChart('trend');
-  const trendCtx = document.getElementById('chart-trend').getContext('2d');
-  const trendGradOut = trendCtx.createLinearGradient(0,0,0,280);
-  trendGradOut.addColorStop(0,'rgba(99,102,241,0.85)'); trendGradOut.addColorStop(1,'rgba(99,102,241,0.25)');
-  const trendGradInc = trendCtx.createLinearGradient(0,0,0,280);
-  trendGradInc.addColorStop(0,'rgba(52,211,153,0.55)'); trendGradInc.addColorStop(1,'rgba(52,211,153,0.10)');
-  charts['trend'] = new Chart(trendCtx, {
-    type: 'bar',
-    data: {
-      labels: trendData.map(m => m.label),
-      datasets: [
-        { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.10)', borderWidth:2.5, tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#34d399', pointBorderColor:'rgba(52,211,153,0.3)', pointBorderWidth:3 },
-        { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:trendGradOut, borderColor:'#6366f1', borderWidth:1, borderRadius:6 },
-        { type:'bar',  label:'Income',        data:tI, backgroundColor:trendGradInc, borderColor:'#34d399', borderWidth:1, borderRadius:6 }
-      ]
-    },
-    options: { ...cOpts(true), scales: { y:{stacked:false,grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
-  });
+  const trendCanvas = document.getElementById('chart-trend');
+  if (trendCanvas) {
+    const trendCtx = trendCanvas.getContext('2d');
+    const gOut = trendCtx.createLinearGradient(0,0,0,280);
+    gOut.addColorStop(0,'rgba(99,102,241,0.85)'); gOut.addColorStop(1,'rgba(99,102,241,0.20)');
+    const gInc = trendCtx.createLinearGradient(0,0,0,280);
+    gInc.addColorStop(0,'rgba(52,211,153,0.55)'); gInc.addColorStop(1,'rgba(52,211,153,0.08)');
+    charts['trend'] = new Chart(trendCtx, {
+      type: 'bar',
+      data: {
+        labels: trendData.map(m => m.label),
+        datasets: [
+          { type:'line', label:'Net Savings',   data:tS, borderColor:'#34d399', backgroundColor:'rgba(52,211,153,0.08)', borderWidth:2.5, tension:0.4, fill:true, pointRadius:4, pointBackgroundColor:'#34d399', pointBorderColor:'rgba(52,211,153,0.3)', pointBorderWidth:3 },
+          { type:'bar',  label:'Total Outflow', data:tE, backgroundColor:gOut, borderColor:'#6366f1', borderWidth:1, borderRadius:6 },
+          { type:'bar',  label:'Income',        data:tI, backgroundColor:gInc, borderColor:'#34d399', borderWidth:1, borderRadius:6 }
+        ]
+      },
+      options: { ...cOpts(true), scales: { y:{stacked:false,grid:{color:chartGridColor()},ticks:{color:chartTextColor()}}, x:{ticks:{color:chartTextColor()}} } }
+    });
+  }
 
-  console.log('Filtered data count:', data.length);
-  
+  // ── Daily Spend Scatter ────────────────────────────────────────────────────
   const sp = data.filter(d => d.type==='Expense'||d.type==='Loan').map(d => ({ x:new Date(d.date).getDate(), y:d.amount, t:d.type }));
   destroyChart('scatter');
-  charts['scatter'] = new Chart(document.getElementById('chart-scatter').getContext('2d'), {
-    type: 'scatter',
-    data: { datasets: [
-      { label:'Expense',  pointBackgroundColor:'#f472b6', pointRadius:5, data:sp.filter(p=>p.t==='Expense').map(p=>({x:p.x,y:p.y})) },
-      { label:'Loan/EMI', pointBackgroundColor:'#60a5fa', pointRadius:5, data:sp.filter(p=>p.t==='Loan').map(p=>({x:p.x,y:p.y})) }
-    ]},
-    options: { 
-      ...cOpts(true), 
-      plugins: {
-        ...cOpts(true).plugins,
-        tooltip: {
-          ...cOpts(true).plugins.tooltip,
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: Day ${ctx.parsed.x}, ₹${ctx.parsed.y.toLocaleString('en-IN')}`
-          }
+  const scatterCanvas = document.getElementById('chart-scatter');
+  if (scatterCanvas) {
+    charts['scatter'] = new Chart(scatterCanvas.getContext('2d'), {
+      type: 'scatter',
+      data: { datasets: [
+        { label:'Expense',  pointBackgroundColor:'#f472b6', pointBorderColor:'rgba(244,114,182,0.3)', pointRadius:5, data:sp.filter(p=>p.t==='Expense').map(p=>({x:p.x,y:p.y})) },
+        { label:'Loan/EMI', pointBackgroundColor:'#60a5fa', pointBorderColor:'rgba(96,165,250,0.3)',  pointRadius:5, data:sp.filter(p=>p.t==='Loan').map(p=>({x:p.x,y:p.y})) }
+      ]},
+      options: {
+        ...cOpts(true),
+        plugins: { ...cOpts(true).plugins, tooltip: { ...cOpts(true).plugins.tooltip, callbacks: { label: ctx => ` ${ctx.dataset.label}: Day ${ctx.parsed.x}, ₹${ctx.parsed.y.toLocaleString('en-IN')}` } } },
+        scales: {
+          x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
+          y: { title:{display:true,text:'Amount (₹)',color:'#64748b'}, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} }
         }
-      },
-      scales: {
-        x: { title:{display:true,text:'Day of Month',color:'#64748b'}, ticks:{color:'#64748b'}, grid:{color:'rgba(255,255,255,0.04)'} },
-        y: { title:{display:true,text:'Amount (₹)',color:'#64748b'}, ticks:{color:'#64748b', callback:v=>'₹'+v.toLocaleString('en-IN')}, grid:{color:'rgba(255,255,255,0.04)'} }
       }
-    }
-  });
+    });
+  }
 
-  // Weekday spending pattern
-  renderWeekdayChart(data);
+  // ── Weekday spending ───────────────────────────────────────────────────────
+  analyticsWeekdayChart(data);
 
-  const hBar = (canvasId, type, hexColors, chartKey) => {
-    const g = groupData(type, data);
-    destroyChart(chartKey);
-    if (Object.keys(g).length > 0) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) {
-        console.warn(`Canvas ${canvasId} not found`);
-        return;
-      }
-      const hCtx = canvas.getContext('2d');
-      const canvasWidth = canvas.offsetWidth || canvas.clientWidth || 400;
-      
-      const dataCount = Object.keys(g).length;
-      const hGrads = [];
-      const borderColors = [];
-      
-      for (let i = 0; i < dataCount; i++) {
-        const colorIndex = i % hexColors.length;
-        const hex = hexColors[colorIndex];
-        const gr = hCtx.createLinearGradient(0,0,canvasWidth,0);
-        gr.addColorStop(0, hex);
-        gr.addColorStop(1, hex.replace('0.7','0.25'));
-        hGrads.push(gr);
-        borderColors.push(hex.replace('0.7','1'));
-      }
-      
-      charts[chartKey] = new Chart(hCtx, {
-        type: 'bar',
-        data: { 
-          labels: Object.keys(g), 
-          datasets: [{ 
-            data: Object.values(g), 
-            backgroundColor: hGrads, 
-            borderColor: borderColors, 
-            borderWidth: 1, 
-            borderRadius: 5, 
-            borderSkipped: false 
-          }] 
-        },
-        options: { 
-          ...cOpts(false), 
-          indexAxis: 'y', 
-          scales: { 
-            x: {ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, 
-            y: {ticks:{color:chartTextColor(),autoSkip:false}} 
-          } 
-        }
-      });
-    } else {
-      console.log(`No data for ${type} chart (${chartKey})`);
-    }
+  // ── Horizontal bar helper — FIXED colour strings ───────────────────────────
+  // Colors are defined as full valid rgba strings; use solid border via opacity swap
+  const SOLID = { 
+    'rgba(251,191,36,0.7)':  'rgba(251,191,36,1)',
+    'rgba(245,158,11,0.7)':  'rgba(245,158,11,1)',
+    'rgba(217,119,6,0.7)':   'rgba(217,119,6,1)',
+    'rgba(244,114,182,0.7)': 'rgba(244,114,182,1)',
+    'rgba(236,72,153,0.7)':  'rgba(236,72,153,1)',
+    'rgba(219,39,119,0.7)':  'rgba(219,39,119,1)',
+    'rgba(96,165,250,0.7)':  'rgba(96,165,250,1)',
+    'rgba(59,130,246,0.7)':  'rgba(59,130,246,1)',
+    'rgba(37,99,235,0.7)':   'rgba(37,99,235,1)'
+  };
+  const FADE = {
+    'rgba(251,191,36,0.7)':  'rgba(251,191,36,0.2)',
+    'rgba(245,158,11,0.7)':  'rgba(245,158,11,0.2)',
+    'rgba(217,119,6,0.7)':   'rgba(217,119,6,0.2)',
+    'rgba(244,114,182,0.7)': 'rgba(244,114,182,0.2)',
+    'rgba(236,72,153,0.7)':  'rgba(236,72,153,0.2)',
+    'rgba(219,39,119,0.7)':  'rgba(219,39,119,0.2)',
+    'rgba(96,165,250,0.7)':  'rgba(96,165,250,0.2)',
+    'rgba(59,130,246,0.7)':  'rgba(59,130,246,0.2)',
+    'rgba(37,99,235,0.7)':   'rgba(37,99,235,0.2)'
   };
 
-  hBar('chart-invest',  'Investment', ['rgba(251,191,36,0.7)','rgba(245,158,11,0.7)','rgba(217,119,6,0.7)'], 'invest');
-  hBar('chart-exp-bif', 'Expense',    ['rgba(244,114,182,0.7)','rgba(236,72,153,0.7)','rgba(219,39,119,0.7)'], 'expbif');
-  hBar('chart-loan-bif','Loan',       ['rgba(96,165,250,0.7)','rgba(59,130,246,0.7)','rgba(37,99,235,0.7)'], 'loanbif');
+  const hBar = (canvasId, emptyId, type, colors, chartKey) => {
+    const g = groupData(type, data);
+    destroyChart(chartKey);
+    const canvas = document.getElementById(canvasId);
+    const emptyEl = document.getElementById(emptyId);
+    if (!canvas) return;
+    if (Object.keys(g).length === 0) {
+      canvas.style.display = 'none';
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+    canvas.style.display = '';
+    if (emptyEl) emptyEl.style.display = 'none';
 
-  renderDonut('chart-debt', ['Debt','Assets'], [sumType('Loan',data), sumType('Investment',data)], ['#60a5fa','#34d399'], 'debt');
+    const hCtx = canvas.getContext('2d');
+    const w = canvas.offsetWidth || 400;
+    const hGrads = Object.keys(g).map((_, i) => {
+      const c = colors[i % colors.length];
+      const gr = hCtx.createLinearGradient(0,0,w,0);
+      gr.addColorStop(0, c);
+      gr.addColorStop(1, FADE[c] || 'rgba(99,102,241,0.15)');
+      return gr;
+    });
+    const borders = Object.keys(g).map((_, i) => SOLID[colors[i % colors.length]] || colors[i % colors.length]);
+
+    charts[chartKey] = new Chart(hCtx, {
+      type: 'bar',
+      data: { labels: Object.keys(g), datasets: [{ data: Object.values(g), backgroundColor: hGrads, borderColor: borders, borderWidth: 1, borderRadius: 5, borderSkipped: false }] },
+      options: { ...cOpts(false), indexAxis: 'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
+    });
+  };
+
+  hBar('chart-exp-bif',  'empty-exp-bif',  'Expense',    ['rgba(244,114,182,0.7)','rgba(236,72,153,0.7)','rgba(219,39,119,0.7)'], 'expbif');
+  hBar('chart-invest',   'empty-invest',   'Investment', ['rgba(251,191,36,0.7)','rgba(245,158,11,0.7)','rgba(217,119,6,0.7)'],   'invest');
+  hBar('chart-loan-bif', 'empty-loanbif',  'Loan',       ['rgba(96,165,250,0.7)','rgba(59,130,246,0.7)','rgba(37,99,235,0.7)'],  'loanbif');
+
+  // ── Debt vs Assets donut ───────────────────────────────────────────────────
+  const debtVal   = sumType('Loan', data);
+  const assetsVal = sumType('Investment', data);
+  const debtEmpty = document.getElementById('empty-debt');
+  const debtCanvas = document.getElementById('chart-debt');
+  if (debtVal > 0 || assetsVal > 0) {
+    if (debtCanvas) debtCanvas.style.display = '';
+    if (debtEmpty) debtEmpty.style.display = 'none';
+    renderDonut('chart-debt', ['Debt','Assets'], [debtVal, assetsVal], ['#60a5fa','#34d399'], 'debt');
+  } else {
+    if (debtCanvas) debtCanvas.style.display = 'none';
+    if (debtEmpty) { debtEmpty.style.display = 'block'; }
+  }
+
+  // ── Expense composition donut ──────────────────────────────────────────────
   const ed = groupData('Expense', data);
-  if (Object.keys(ed).length > 0) renderDonut('chart-cats', Object.keys(ed), Object.values(ed), ['#f472b6','#ec4899','#db2777','#be185d','#9d174d'], 'cats');
-  
-  // Generate insights
-  generateInsights(data);
+  const catsEmpty = document.getElementById('empty-cats');
+  const catsCanvas = document.getElementById('chart-cats');
+  if (Object.keys(ed).length > 0) {
+    if (catsCanvas) catsCanvas.style.display = '';
+    if (catsEmpty) catsEmpty.style.display = 'none';
+    renderDonut('chart-cats', Object.keys(ed), Object.values(ed), ['#f472b6','#ec4899','#db2777','#be185d','#9d174d'], 'cats');
+  } else {
+    if (catsCanvas) catsCanvas.style.display = 'none';
+    if (catsEmpty) catsEmpty.style.display = 'block';
+  }
+
+  // ── AI-style Insights ─────────────────────────────────────────────────────
+  analyticsGenerateInsights(data);
 }
 
-function calculateInsights(data, trendData) {
-  // Calculate average monthly savings
-  const incomes = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
+function analyticsUpdateKPIs(data, trendData) {
+  const incomes  = trendData.map(m => db.filter(d => d.type==='Income' && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
   const outflows = trendData.map(m => db.filter(d => (d.type==='Expense'||d.type==='Loan'||d.type==='Investment') && matchMonth(d,m)).reduce((a,b) => a+b.amount, 0));
-  const savings = incomes.map((v,i) => v - outflows[i]);
-  const avgSavings = savings.reduce((a,b) => a+b, 0) / (savings.length || 1);
-  const savingsRate = incomes.reduce((a,b) => a+b, 0) > 0 ? (avgSavings / (incomes.reduce((a,b) => a+b, 0) / incomes.length)) * 100 : 0;
-  
-  document.getElementById('insight-savings').textContent = fmt(Math.round(avgSavings));
-  document.getElementById('insight-savings-sub').textContent = savingsRate.toFixed(0) + '% savings rate';
-  
-  // Spending trend
-  const recentSpend = outflows.slice(-2);
-  if (recentSpend.length >= 2) {
-    const change = ((recentSpend[1] - recentSpend[0]) / (recentSpend[0] || 1)) * 100;
-    const trendEl = document.getElementById('insight-trend');
-    const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
-    trendEl.textContent = arrow + ' ' + Math.abs(change).toFixed(1) + '%';
-    trendEl.style.color = change > 0 ? 'var(--danger)' : change < 0 ? 'var(--c-inc)' : 'var(--text-mid)';
-  } else {
-    document.getElementById('insight-trend').textContent = '—';
+  const savings  = incomes.map((v,i) => v - outflows[i]);
+  const avgSav   = savings.reduce((a,b) => a+b,0) / (savings.length||1);
+  const avgInc   = incomes.reduce((a,b) => a+b,0) / (incomes.length||1);
+  const savePct  = avgInc > 0 ? (avgSav/avgInc)*100 : 0;
+
+  const el = id => document.getElementById(id);
+  if (el('insight-savings')) el('insight-savings').textContent = fmt(Math.round(avgSav));
+  if (el('insight-savings-sub')) el('insight-savings-sub').textContent = savePct.toFixed(0)+'% savings rate';
+
+  // Trend: compare last 2 months
+  const lastOut = outflows.slice(-2);
+  const trendEl = el('insight-trend');
+  if (trendEl) {
+    if (lastOut.length >= 2 && lastOut[0] > 0) {
+      const chg = ((lastOut[1]-lastOut[0])/lastOut[0])*100;
+      const arrow = chg > 0 ? '↑' : chg < 0 ? '↓' : '→';
+      trendEl.textContent = arrow+' '+Math.abs(chg).toFixed(1)+'%';
+      trendEl.style.color = chg > 0 ? 'var(--danger)' : chg < 0 ? 'var(--c-inc)' : 'var(--text-mid)';
+    } else { trendEl.textContent = '—'; trendEl.style.color = ''; }
   }
-  
+
   // Top expense category
   const expData = groupData('Expense', data);
   if (Object.keys(expData).length > 0) {
-    const topCat = Object.entries(expData).sort((a,b) => b[1] - a[1])[0];
-    document.getElementById('insight-top-cat').textContent = topCat[0];
-    document.getElementById('insight-top-cat-amt').textContent = fmt(topCat[1]) + ' spent';
+    const top = Object.entries(expData).sort((a,b) => b[1]-a[1])[0];
+    if (el('insight-top-cat')) el('insight-top-cat').textContent = top[0];
+    if (el('insight-top-cat-amt')) el('insight-top-cat-amt').textContent = fmt(top[1])+' spent';
   } else {
-    document.getElementById('insight-top-cat').textContent = '—';
-    document.getElementById('insight-top-cat-amt').textContent = 'No data';
+    if (el('insight-top-cat')) el('insight-top-cat').textContent = '—';
+    if (el('insight-top-cat-amt')) el('insight-top-cat-amt').textContent = 'No data';
   }
-  
-  // Busiest spending day
-  const daySpending = {};
-  data.filter(d => d.type==='Expense').forEach(d => {
-    const day = new Date(d.date).getDate();
-    daySpending[day] = (daySpending[day] || 0) + d.amount;
-  });
-  if (Object.keys(daySpending).length > 0) {
-    const busiestDay = Object.entries(daySpending).sort((a,b) => b[1] - a[1])[0];
-    document.getElementById('insight-day').textContent = 'Day ' + busiestDay[0];
-    document.getElementById('insight-day-sub').textContent = fmt(busiestDay[1]) + ' spent';
+
+  // Busiest day
+  const dayMap = {};
+  data.filter(d => d.type==='Expense').forEach(d => { const day = new Date(d.date).getDate(); dayMap[day] = (dayMap[day]||0)+d.amount; });
+  if (Object.keys(dayMap).length > 0) {
+    const best = Object.entries(dayMap).sort((a,b) => b[1]-a[1])[0];
+    if (el('insight-day')) el('insight-day').textContent = 'Day '+best[0];
+    if (el('insight-day-sub')) el('insight-day-sub').textContent = fmt(best[1])+' spent';
   } else {
-    document.getElementById('insight-day').textContent = '—';
-    document.getElementById('insight-day-sub').textContent = 'No data';
+    if (el('insight-day')) el('insight-day').textContent = '—';
+    if (el('insight-day-sub')) el('insight-day-sub').textContent = 'No data';
   }
 }
 
-function renderWeekdayChart(data) {
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const weekdaySpend = [0,0,0,0,0,0,0];
-  
-  data.filter(d => d.type==='Expense').forEach(d => {
-    const day = new Date(d.date).getDay();
-    weekdaySpend[day] += d.amount;
-  });
-  
+function analyticsWeekdayChart(data) {
+  const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const spend  = [0,0,0,0,0,0,0];
+  data.filter(d => d.type==='Expense').forEach(d => { spend[new Date(d.date).getDay()] += d.amount; });
+
   destroyChart('weekday');
-  const ctx = document.getElementById('chart-weekday');
-  if (!ctx) return;
-  
-  charts['weekday'] = new Chart(ctx.getContext('2d'), {
+  const canvas = document.getElementById('chart-weekday');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Pre-build gradients (no color string manipulation)
+  const weekdayColor = '#6366f1';
+  const weekendColor = '#f472b6';
+  const bgs = labels.map((_, i) => {
+    const g = ctx.createLinearGradient(0,0,0,200);
+    const c = i >= 5 ? weekendColor : weekdayColor;
+    g.addColorStop(0, c+'dd');
+    g.addColorStop(1, c+'33');
+    return g;
+  });
+
+  charts['weekday'] = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: weekdays,
-      datasets: [{
-        data: weekdaySpend,
-        backgroundColor: weekdays.map((d,i) => {
-          const g = ctx.getContext('2d').createLinearGradient(0,0,0,200);
-          const color = i >= 5 ? '#f472b6' : '#6366f1'; // Weekend vs weekday
-          g.addColorStop(0, color + 'ee');
-          g.addColorStop(1, color + '44');
-          return g;
-        }),
-        borderColor: weekdays.map((d,i) => i >= 5 ? '#f472b6' : '#6366f1'),
-        borderWidth: 1,
-        borderRadius: 6
-      }]
+      labels,
+      datasets: [{ data: spend, backgroundColor: bgs, borderColor: labels.map((_,i) => i>=5 ? weekendColor : weekdayColor), borderWidth:1, borderRadius:6 }]
     },
     options: {
       ...cOpts(false),
@@ -3582,129 +3534,81 @@ function renderWeekdayChart(data) {
   });
 }
 
-function generateInsights(data) {
+function analyticsGenerateInsights(data) {
   const container = document.getElementById('insights-container');
   if (!container) return;
-  
-  const insights = [];
-  
-  // Insight 1: Savings rate
-  const totalInc = sumType('Income', data);
-  const totalOut = sumType('Expense', data) + sumType('Loan', data) + sumType('Investment', data);
-  const savingsRate = totalInc > 0 ? ((totalInc - totalOut) / totalInc) * 100 : 0;
-  
-  if (savingsRate < 20 && totalInc > 0) {
-    insights.push({
-      icon: '💡',
-      color: '#f59e0b',
-      title: 'Low Savings Rate',
-      desc: `Your savings rate is ${savingsRate.toFixed(1)}%. Financial experts recommend saving at least 20% of your income. Consider reviewing your expenses to increase savings.`
-    });
-  } else if (savingsRate >= 20) {
-    insights.push({
-      icon: '🎉',
-      color: '#34d399',
-      title: 'Great Savings Rate!',
-      desc: `You're saving ${savingsRate.toFixed(1)}% of your income. Keep up the excellent work! Consider investing surplus for long-term growth.`
-    });
-  }
-  
-  // Insight 2: Budget adherence
-  const expData = groupData('Expense', data);
-  let overBudget = 0;
+  const totalInc  = sumType('Income', data);
+  const totalExp  = sumType('Expense', data);
+  const totalLoan = sumType('Loan', data);
+  const totalInv  = sumType('Investment', data);
+  const totalOut  = totalExp + totalLoan + totalInv;
+  const savingsRate = totalInc > 0 ? ((totalInc-totalOut)/totalInc)*100 : 0;
+  const debtRatio   = totalInc > 0 ? (totalLoan/totalInc)*100 : 0;
+  const invRatio    = (totalInc+totalInv) > 0 ? (totalInv/(totalInc+totalInv))*100 : 0;
+  const expData     = groupData('Expense', data);
+  const topExp      = Object.entries(expData).sort((a,b) => b[1]-a[1])[0];
+
+  let overBudgetCount = 0;
   Object.entries(budgets).forEach(([cat, limit]) => {
-    const spent = data.filter(x => x.sub === cat || x.name === cat).reduce((a,b) => a + b.amount, 0);
-    if (spent > limit) overBudget++;
+    const spent = data.filter(x => x.sub===cat||x.name===cat).reduce((a,b) => a+b.amount, 0);
+    if (spent > limit) overBudgetCount++;
   });
-  
-  if (overBudget > 0) {
-    insights.push({
-      icon: '⚠️',
-      color: '#ef4444',
-      title: 'Budget Overspend Alert',
-      desc: `You've exceeded budget in ${overBudget} ${overBudget === 1 ? 'category' : 'categories'}. Review your spending limits or adjust your budget to match actual needs.`
-    });
-  }
-  
-  // Insight 3: Investment advice
-  const totalInv = sumType('Investment', data);
-  const netWorth = totalInc + totalInv - sumType('Loan', data);
-  const invRatio = netWorth > 0 ? (totalInv / netWorth) * 100 : 0;
-  
-  if (invRatio < 30 && netWorth > 0) {
-    insights.push({
-      icon: '📈',
-      color: '#fbbf24',
-      title: 'Low Investment Allocation',
-      desc: `Only ${invRatio.toFixed(1)}% of your net worth is invested. Consider increasing investments to 30-40% for better wealth growth and financial security.`
-    });
-  }
-  
-  // Insight 4: Debt management
-  const totalDebt = sumType('Loan', data);
-  const debtRatio = totalInc > 0 ? (totalDebt / totalInc) * 100 : 0;
-  
-  if (debtRatio > 40) {
-    insights.push({
-      icon: '🎯',
-      color: '#60a5fa',
-      title: 'High Debt Load',
-      desc: `Your debt is ${debtRatio.toFixed(0)}% of your income. Aim to keep debt below 40%. Focus on paying off high-interest loans first.`
-    });
-  } else if (totalDebt === 0 && totalInc > 0) {
-    insights.push({
-      icon: '✨',
-      color: '#a78bfa',
-      title: 'Debt Free!',
-      desc: `Congratulations! You have no outstanding debt. This is an excellent financial position. Consider channeling freed-up cash into investments.`
-    });
-  }
-  
-  // Insight 5: Spending pattern
-  const topExp = Object.entries(expData).sort((a,b) => b[1] - a[1])[0];
-  if (topExp) {
-    const topExpPct = (topExp[1] / totalOut) * 100;
-    if (topExpPct > 40) {
-      insights.push({
-        icon: '🔍',
-        color: '#f472b6',
-        title: 'Spending Concentration',
-        desc: `${topExpPct.toFixed(0)}% of your spending is on ${topExp[0]}. High concentration in one category may indicate opportunity for optimization or negotiation.`
-      });
+
+  const all = [];
+
+  if (totalInc === 0) {
+    all.push({ icon:'💡', color:'#64748b', title:'No Data Yet', desc:'Start adding your income and expense entries to get personalised financial insights and recommendations.' });
+  } else {
+    // Savings rate
+    if (savingsRate < 0) {
+      all.push({ icon:'🚨', color:'#ef4444', title:'Spending More Than You Earn', desc:`You're overspending by ₹${fmt(Math.abs(totalInc-totalOut))}. Review and cut non-essential expenses immediately to avoid debt accumulation.` });
+    } else if (savingsRate < 20) {
+      all.push({ icon:'💡', color:'#f59e0b', title:'Low Savings Rate ('+savingsRate.toFixed(0)+'%)', desc:`Financial experts recommend saving at least 20% of income. Try the 50/30/20 rule: 50% needs, 30% wants, 20% savings.` });
+    } else {
+      all.push({ icon:'🎉', color:'#34d399', title:'Excellent Savings Rate ('+savingsRate.toFixed(0)+'%)', desc:`You're saving more than 20% of your income. Consider investing the surplus in diversified assets for long-term wealth building.` });
+    }
+    // Budget
+    if (overBudgetCount > 0) {
+      all.push({ icon:'⚠️', color:'#ef4444', title:`Over Budget in ${overBudgetCount} ${overBudgetCount===1?'Category':'Categories'}`, desc:`You've exceeded your set limits. Review those categories and either reduce spending or adjust budget limits to reflect your actual lifestyle.` });
+    } else if (Object.keys(budgets).length > 0) {
+      all.push({ icon:'✅', color:'#34d399', title:'All Budgets On Track', desc:'Every expense category is within your set limit this period. Great discipline! Keep monitoring to stay consistent.' });
+    }
+    // Investment
+    if (invRatio < 10) {
+      all.push({ icon:'📈', color:'#fbbf24', title:'Very Low Investment Allocation', desc:`Only ${invRatio.toFixed(1)}% of your money is invested. Even small, regular investments compound significantly over time. Consider starting with mutual funds or SIPs.` });
+    } else if (invRatio >= 30) {
+      all.push({ icon:'💰', color:'#a78bfa', title:'Strong Investment Habit', desc:`${invRatio.toFixed(1)}% of your portfolio is invested — well above the 30% benchmark. Ensure you're diversified across asset classes for lower risk.` });
+    }
+    // Debt
+    if (debtRatio > 60) {
+      all.push({ icon:'🎯', color:'#ef4444', title:`High Debt Load (${debtRatio.toFixed(0)}% of income)`, desc:'Your EMI and loan payments are high relative to your income. Focus on paying off the highest-interest loans first using the avalanche method.' });
+    } else if (debtRatio > 0 && debtRatio <= 30) {
+      all.push({ icon:'🛡️', color:'#60a5fa', title:'Manageable Debt Level', desc:`Your debt is ${debtRatio.toFixed(0)}% of income — within healthy range. Keep up timely repayments to build a strong credit profile.` });
+    } else if (debtRatio === 0) {
+      all.push({ icon:'✨', color:'#34d399', title:'Debt Free!', desc:'You have no outstanding loans. This is a strong financial position. Channel this surplus towards investments and building your emergency fund.' });
+    }
+    // Top spend concentration
+    if (topExp) {
+      const pct = totalExp > 0 ? (topExp[1]/totalExp)*100 : 0;
+      if (pct > 50) {
+        all.push({ icon:'🔍', color:'#f472b6', title:`${topExp[0]} Dominates Spending (${pct.toFixed(0)}%)`, desc:`More than half your expenses go to "${topExp[0]}". Analyse whether this is essential or if there are ways to reduce or negotiate this cost.` });
+      }
+    }
+    // Emergency fund
+    const monthlyExp = totalOut / 6;
+    if (monthlyExp > 0 && totalInc < monthlyExp * 3) {
+      all.push({ icon:'🛡️', color:'#f59e0b', title:'Build Your Emergency Fund', desc:`Aim for 3–6 months of expenses (₹${fmt(monthlyExp*3)}) in a liquid savings account. This protects you from unexpected job loss or medical emergencies.` });
     }
   }
-  
-  // Insight 6: Emergency fund
-  const monthlyExp = totalOut / 6; // Average over 6 months
-  const liquidAssets = totalInc; // Simplified - could be more sophisticated
-  const emergencyMonths = monthlyExp > 0 ? liquidAssets / monthlyExp : 0;
-  
-  if (emergencyMonths < 3) {
-    insights.push({
-      icon: '🛡️',
-      color: '#f59e0b',
-      title: 'Build Emergency Fund',
-      desc: `Your liquid assets cover only ${emergencyMonths.toFixed(1)} months of expenses. Aim for 3-6 months. Start by saving ₹${fmt(monthlyExp * 3 - liquidAssets)}.`
-    });
-  }
-  
-  // Render insights
-  container.innerHTML = insights.slice(0, 6).map(ins => `
-    <div class="insight-item">
-      <div class="insight-item-icon" style="background:rgba(${hexToRgb(ins.color)},0.1);color:${ins.color}">
-        ${ins.icon}
-      </div>
-      <div class="insight-item-content">
-        <div class="insight-item-title">${ins.title}</div>
-        <div class="insight-item-desc">${ins.desc}</div>
-      </div>
-    </div>
-  `).join('');
-}
 
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : '0,0,0';
+  container.innerHTML = all.slice(0,6).map(ins => `
+    <div class="insight-rec-card">
+      <div class="insight-rec-icon" style="background:${ins.color}22;color:${ins.color};font-size:1.15rem">${ins.icon}</div>
+      <div>
+        <div class="insight-rec-title">${ins.title}</div>
+        <div class="insight-rec-desc">${ins.desc}</div>
+      </div>
+    </div>`).join('');
 }
 
 function matchMonth(item, m) {
