@@ -3458,6 +3458,27 @@ if (debtVal > 0 || assetsVal > 0) {
   destroyChart('debt');
 }
 
+  // ── Expense Composition donut ──────────────────────────────────────────────
+  const catsData = groupData('Expense', data);
+  const catsEmpty = document.getElementById('empty-cats');
+  const catsCanvas = document.getElementById('chart-cats');
+  
+  if (Object.keys(catsData).length > 0) {
+    if (catsCanvas) catsCanvas.style.display = '';
+    if (catsEmpty) catsEmpty.style.display = 'none';
+    destroyChart('cats');
+    const catsChart = makeDonut('chart-cats', Object.keys(catsData), Object.values(catsData), 
+      ['#f472b6','#ec4899','#db2777','#be185d','#9d174d','#881337']);
+    if (catsChart) charts['cats'] = catsChart;
+  } else {
+    if (catsCanvas) catsCanvas.style.display = 'none';
+    if (catsEmpty) {
+      catsEmpty.style.display = 'flex';
+      catsEmpty.innerHTML = '<i class="fas fa-chart-pie"></i>No expense data';
+    }
+    destroyChart('cats');
+  }
+
   // ── AI-style Insights ─────────────────────────────────────────────────────
   analyticsGenerateInsights(data);
 }
