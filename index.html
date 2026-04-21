@@ -3357,92 +3357,82 @@ function renderAnalytics() {
   // ── Weekday spending ───────────────────────────────────────────────────────
   analyticsWeekdayChart(data);
 
-  // ── Horizontal bar helper — FIXED colour strings ───────────────────────────
-  // Colors are defined as full valid rgba strings; use solid border via opacity swap
-  const SOLID = { 
-    'rgba(251,191,36,0.7)':  'rgba(251,191,36,1)',
-    'rgba(245,158,11,0.7)':  'rgba(245,158,11,1)',
-    'rgba(217,119,6,0.7)':   'rgba(217,119,6,1)',
-    'rgba(244,114,182,0.7)': 'rgba(244,114,182,1)',
-    'rgba(236,72,153,0.7)':  'rgba(236,72,153,1)',
-    'rgba(219,39,119,0.7)':  'rgba(219,39,119,1)',
-    'rgba(96,165,250,0.7)':  'rgba(96,165,250,1)',
-    'rgba(59,130,246,0.7)':  'rgba(59,130,246,1)',
-    'rgba(37,99,235,0.7)':   'rgba(37,99,235,1)'
-  };
-  const FADE = {
-    'rgba(251,191,36,0.7)':  'rgba(251,191,36,0.2)',
-    'rgba(245,158,11,0.7)':  'rgba(245,158,11,0.2)',
-    'rgba(217,119,6,0.7)':   'rgba(217,119,6,0.2)',
-    'rgba(244,114,182,0.7)': 'rgba(244,114,182,0.2)',
-    'rgba(236,72,153,0.7)':  'rgba(236,72,153,0.2)',
-    'rgba(219,39,119,0.7)':  'rgba(219,39,119,0.2)',
-    'rgba(96,165,250,0.7)':  'rgba(96,165,250,0.2)',
-    'rgba(59,130,246,0.7)':  'rgba(59,130,246,0.2)',
-    'rgba(37,99,235,0.7)':   'rgba(37,99,235,0.2)'
-  };
-
-  const hBar = (canvasId, emptyId, type, colors, chartKey) => {
+  // ── Horizontal bar helper — Simple hex colors ──────────────────────────────
+  const hBar = (canvasId, emptyId, type, baseColors, chartKey) => {
     const g = groupData(type, data);
     destroyChart(chartKey);
     const canvas = document.getElementById(canvasId);
     const emptyEl = document.getElementById(emptyId);
     if (!canvas) return;
+    
     if (Object.keys(g).length === 0) {
       canvas.style.display = 'none';
       if (emptyEl) emptyEl.style.display = 'block';
       return;
     }
+    
     canvas.style.display = '';
     if (emptyEl) emptyEl.style.display = 'none';
 
     const hCtx = canvas.getContext('2d');
     const w = canvas.offsetWidth || 400;
+    
+    // Build gradients from base hex colors
     const hGrads = Object.keys(g).map((_, i) => {
-      const c = colors[i % colors.length];
+      const baseHex = baseColors[i % baseColors.length];
       const gr = hCtx.createLinearGradient(0,0,w,0);
-      gr.addColorStop(0, c);
-      gr.addColorStop(1, FADE[c] || 'rgba(99,102,241,0.15)');
+      gr.addColorStop(0, baseHex + 'dd');
+      gr.addColorStop(1, baseHex + '33');
       return gr;
     });
-    const borders = Object.keys(g).map((_, i) => SOLID[colors[i % colors.length]] || colors[i % colors.length]);
+    
+    const borders = Object.keys(g).map((_, i) => baseColors[i % baseColors.length]);
 
     charts[chartKey] = new Chart(hCtx, {
       type: 'bar',
-      data: { labels: Object.keys(g), datasets: [{ data: Object.values(g), backgroundColor: hGrads, borderColor: borders, borderWidth: 1, borderRadius: 5, borderSkipped: false }] },
-      options: { ...cOpts(false), indexAxis: 'y', scales: { x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, y:{ticks:{color:chartTextColor(),autoSkip:false}} } }
+      data: { 
+        labels: Object.keys(g), 
+        datasets: [{ 
+          data: Object.values(g), 
+          backgroundColor: hGrads, 
+          borderColor: borders, 
+          borderWidth: 1, 
+          borderRadius: 5, 
+          borderSkipped: false 
+        }] 
+      },
+      options: { 
+        ...cOpts(false), 
+        indexAxis: 'y', 
+        scales: { 
+          x:{ticks:{color:chartTextColor()},grid:{color:chartGridColor()}}, 
+          y:{ticks:{color:chartTextColor(),autoSkip:false}} 
+        } 
+      }
     });
   };
 
-  hBar('chart-exp-bif',  'empty-exp-bif',  'Expense',    ['rgba(244,114,182,0.7)','rgba(236,72,153,0.7)','rgba(219,39,119,0.7)'], 'expbif');
-  hBar('chart-invest',   'empty-invest',   'Investment', ['rgba(251,191,36,0.7)','rgba(245,158,11,0.7)','rgba(217,119,6,0.7)'],   'invest');
-  hBar('chart-loan-bif', 'empty-loanbif',  'Loan',       ['rgba(96,165,250,0.7)','rgba(59,130,246,0.7)','rgba(37,99,235,0.7)'],  'loanbif');
+  // Use simple hex colors
+  hBar('chart-exp-bif',  'empty-exp-bif',  'Expense',    ['#f472b6','#ec4899','#db2777'], 'expbif');
+  hBar('chart-invest',   'empty-invest',   'Investment', ['#fbbf24','#f59e0b','#d97706'], 'invest');
+  hBar('chart-loan-bif', 'empty-loanbif',  'Loan',       ['#60a5fa','#3b82f6','#2563eb'], 'loanbif');
 
   // ── Debt vs Assets donut ───────────────────────────────────────────────────
   const debtVal   = sumType('Loan', data);
   const assetsVal = sumType('Investment', data);
   const debtEmpty = document.getElementById('empty-debt');
   const debtCanvas = document.getElementById('chart-debt');
+  
   if (debtVal > 0 || assetsVal > 0) {
     if (debtCanvas) debtCanvas.style.display = '';
     if (debtEmpty) debtEmpty.style.display = 'none';
-    renderDonut('chart-debt', ['Debt','Assets'], [debtVal, assetsVal], ['#60a5fa','#34d399'], 'debt');
+    destroyChart('debt');
+    const chart = makeDonut('chart-debt', ['Debt','Assets'], [debtVal, assetsVal], ['#60a5fa','#34d399']);
+    if (chart) charts['debt'] = chart;
   } else {
     if (debtCanvas) debtCanvas.style.display = 'none';
-    if (debtEmpty) { debtEmpty.style.display = 'block'; }
-  }
-
-  // ── Expense composition donut ──────────────────────────────────────────────
-  const ed = groupData('Expense', data);
-  const catsEmpty = document.getElementById('empty-cats');
-  const catsCanvas = document.getElementById('chart-cats');
-  if (Object.keys(ed).length > 0) {
-    if (catsCanvas) catsCanvas.style.display = '';
-    if (catsEmpty) catsEmpty.style.display = 'none';
-    renderDonut('chart-cats', Object.keys(ed), Object.values(ed), ['#f472b6','#ec4899','#db2777','#be185d','#9d174d'], 'cats');
-  } else {
-    if (catsCanvas) catsCanvas.style.display = 'none';
-    if (catsEmpty) catsEmpty.style.display = 'block';
+    if (debtEmpty) debtEmpty.style.display = 'block';
+    destroyChart('debt');
   }
 
   // ── AI-style Insights ─────────────────────────────────────────────────────
@@ -3505,16 +3495,25 @@ function analyticsWeekdayChart(data) {
   destroyChart('weekday');
   const canvas = document.getElementById('chart-weekday');
   if (!canvas) return;
+  
+  // Check if we have data
+  const hasData = spend.some(v => v > 0);
+  if (!hasData) {
+    canvas.style.display = 'none';
+    return;
+  }
+  
+  canvas.style.display = '';
   const ctx = canvas.getContext('2d');
 
-  // Pre-build gradients (no color string manipulation)
+  // Build clean gradients
   const weekdayColor = '#6366f1';
   const weekendColor = '#f472b6';
   const bgs = labels.map((_, i) => {
     const g = ctx.createLinearGradient(0,0,0,200);
-    const c = i >= 5 ? weekendColor : weekdayColor;
-    g.addColorStop(0, c+'dd');
-    g.addColorStop(1, c+'33');
+    const baseColor = i >= 5 ? weekendColor : weekdayColor;
+    g.addColorStop(0, baseColor + 'dd');
+    g.addColorStop(1, baseColor + '33');
     return g;
   });
 
@@ -3522,12 +3521,22 @@ function analyticsWeekdayChart(data) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ data: spend, backgroundColor: bgs, borderColor: labels.map((_,i) => i>=5 ? weekendColor : weekdayColor), borderWidth:1, borderRadius:6 }]
+      datasets: [{ 
+        data: spend, 
+        backgroundColor: bgs, 
+        borderColor: labels.map((_,i) => i>=5 ? weekendColor : weekdayColor), 
+        borderWidth:1, 
+        borderRadius:6 
+      }]
     },
     options: {
       ...cOpts(false),
       scales: {
-        y: { grid:{color:chartGridColor()}, ticks:{color:chartTextColor(), callback:v=>'₹'+v.toLocaleString('en-IN')} },
+        y: { 
+          beginAtZero: true,
+          grid:{color:chartGridColor()}, 
+          ticks:{color:chartTextColor(), callback:v=>'₹'+v.toLocaleString('en-IN')} 
+        },
         x: { ticks:{color:chartTextColor()} }
       }
     }
@@ -4126,11 +4135,7 @@ function makeDonut(id, labels, data, colors) {
   });
 }
 
-function renderDonut(id, labels, data, colors, key) {
-  destroyChart(key);
-  const chart = makeDonut(id, labels, data, colors);
-  if (chart) charts[key] = chart;
-}
+// Removed - use makeDonut directly
 
 // ── FINANCE ENTRY MODAL ────────────────────────────────────────────────────
 function openModal() {
