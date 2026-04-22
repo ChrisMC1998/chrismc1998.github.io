@@ -3878,34 +3878,6 @@ const plugin3DBar = {
           sideGrad.addColorStop(1, solidColor + '33');
           ctx.fillStyle = sideGrad;
           ctx.fill();
-        } else {
-          // Horizontal bars — right face on top, bottom face below
-          const bx = val >= 0 ? x : base;
-          const bw = Math.abs(x - base);
-          // TOP face
-          ctx.beginPath();
-          ctx.moveTo(bx,      y - height/2);
-          ctx.lineTo(bx,      y - height/2 - depthY);
-          ctx.lineTo(bx + bw, y - height/2 - depthY);
-          ctx.lineTo(bx + bw, y - height/2);
-          ctx.closePath();
-          const topGrad2 = ctx.createLinearGradient(bx, y - height/2 - depthY, bx + bw, y - height/2);
-          topGrad2.addColorStop(0, solidColor + 'cc');
-          topGrad2.addColorStop(1, solidColor + '77');
-          ctx.fillStyle = topGrad2;
-          ctx.fill();
-          // RIGHT face
-          ctx.beginPath();
-          ctx.moveTo(bx + bw, y - height/2);
-          ctx.lineTo(bx + bw, y - height/2 - depthY);
-          ctx.lineTo(bx + bw + depth, y - height/2 - depthY);
-          ctx.lineTo(bx + bw + depth, y - height/2);
-          ctx.closePath();
-          const sideGrad2 = ctx.createLinearGradient(bx + bw, 0, bx + bw + depth, 0);
-          sideGrad2.addColorStop(0, solidColor + '88');
-          sideGrad2.addColorStop(1, solidColor + '22');
-          ctx.fillStyle = sideGrad2;
-          ctx.fill();
         }
 
         ctx.restore();
